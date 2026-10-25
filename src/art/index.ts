@@ -1,5 +1,5 @@
-import { Canvas, toDataUri } from "./canvas";
 import { sceneFor } from "./scenes";
+import { toDataUri } from "./util";
 
 const cache = new Map<string, string>();
 
@@ -16,9 +16,7 @@ export function artMarkdown(
   const key = `${taskId ?? "camp"}:${f}`;
   let uri = cache.get(key);
   if (!uri) {
-    const canvas = new Canvas();
-    scene.draw?.(canvas, f);
-    uri = toDataUri(scene.svg ? scene.svg(f) : canvas.toSvg());
+    uri = toDataUri(scene.svg(f));
     cache.set(key, uri);
   }
   return `![](${uri})`;
