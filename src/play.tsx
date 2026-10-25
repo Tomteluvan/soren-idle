@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { artMarkdown, FRAME_MS, preloadMarkdown } from "./art";
+import { artMarkdown, buildingMarkdown, FRAME_MS, preloadMarkdown } from "./art";
 import {
   BUILDING_BY_ID,
   BUILDINGS,
@@ -475,6 +475,7 @@ function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
             detail={
               <List.Item.Detail
                 markdown={[
+                  buildingMarkdown(def.id, level),
                   `# ${def.name}`,
                   def.description,
                   "",

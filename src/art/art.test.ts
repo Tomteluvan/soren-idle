@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { TASKS } from "../engine/data";
+import { BUILDINGS, TASKS } from "../engine/data";
+import { BUILDING_ART_IDS, buildingSvg } from "./buildings";
 import { SCENE_IDS, sceneFor } from "./scenes";
 
 describe("terminal art", () => {
@@ -29,5 +30,17 @@ describe("terminal art", () => {
   it("animates", () => {
     const scene = sceneFor("mine_ferrite");
     expect(scene.svg(0)).not.toBe(scene.svg(2));
+  });
+
+  it("has static art for every building, built or not", () => {
+    expect([...BUILDING_ART_IDS].sort()).toEqual(BUILDINGS.map((b) => b.id).sort());
+    for (const def of BUILDINGS) {
+      for (const level of [0, 1, def.maxLevel]) {
+        const svg = buildingSvg(def.id, level);
+        expect(svg.startsWith("<svg"), def.id).toBe(true);
+        expect(svg).not.toMatch(/NaN|undefined|Infinity/);
+        expect(svg.length).toBeLessThan(60_000);
+      }
+    }
   });
 });
