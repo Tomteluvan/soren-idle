@@ -21,7 +21,10 @@ import { GameState, ItemId } from "./types";
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
-function withItems(items: Partial<Record<ItemId, number>>, patch: Partial<GameState> = {}): GameState {
+function withItems(
+  items: Partial<Record<ItemId, number>>,
+  patch: Partial<GameState> = {},
+): GameState {
   return { ...newGame(0), inventory: { ...items }, ...patch };
 }
 
@@ -105,7 +108,10 @@ describe("advance: crafting", () => {
   });
 
   it("one-off crafts stop after a single cycle", () => {
-    const state = withItems({ alloy_plate: 10, circuit_scrap: 10 }, { xp: { ...newGame().xp, engineering: xpForLevel(5) } });
+    const state = withItems(
+      { alloy_plate: 10, circuit_scrap: 10 },
+      { xp: { ...newGame().xp, engineering: xpForLevel(5) } },
+    );
     const { state: after } = run(state, "craft_torch", 10 * MINUTE);
     expect(count(after, "cutting_torch")).toBe(1);
     expect(count(after, "alloy_plate")).toBe(8);
@@ -115,8 +121,12 @@ describe("advance: crafting", () => {
   it("tools shorten matching tasks only", () => {
     const base = newGame(0);
     const withTorch = withItems({ cutting_torch: 1 });
-    expect(taskDurationMs(withTorch, TASK_BY_ID.salvage_hull)).toBeLessThan(taskDurationMs(base, TASK_BY_ID.salvage_hull));
-    expect(taskDurationMs(withTorch, TASK_BY_ID.mine_ferrite)).toBe(taskDurationMs(base, TASK_BY_ID.mine_ferrite));
+    expect(taskDurationMs(withTorch, TASK_BY_ID.salvage_hull)).toBeLessThan(
+      taskDurationMs(base, TASK_BY_ID.salvage_hull),
+    );
+    expect(taskDurationMs(withTorch, TASK_BY_ID.mine_ferrite)).toBe(
+      taskDurationMs(base, TASK_BY_ID.mine_ferrite),
+    );
   });
 });
 
@@ -124,7 +134,10 @@ describe("startTask", () => {
   it("rejects locked, unaffordable and already owned tasks", () => {
     expect(startTask(newGame(0), "mine_lumina").error).toMatch(/level/);
     expect(startTask(newGame(0), "craft_ration").error).toMatch(/materials/);
-    const owner = withItems({ cutting_torch: 1, alloy_plate: 9, circuit_scrap: 9 }, { xp: { ...newGame().xp, engineering: xpForLevel(5) } });
+    const owner = withItems(
+      { cutting_torch: 1, alloy_plate: 9, circuit_scrap: 9 },
+      { xp: { ...newGame().xp, engineering: xpForLevel(5) } },
+    );
     expect(startTask(owner, "craft_torch").error).toMatch(/already own/);
   });
 
@@ -227,7 +240,11 @@ describe("base", () => {
   it("workshop speeds up engineering only", () => {
     const s = engineer({ alloy_plate: 100, circuit_scrap: 100 });
     const built = build(s, "workshop").state;
-    expect(taskDurationMs(built, TASK_BY_ID.craft_ration)).toBeLessThan(taskDurationMs(s, TASK_BY_ID.craft_ration));
-    expect(taskDurationMs(built, TASK_BY_ID.mine_ferrite)).toBe(taskDurationMs(s, TASK_BY_ID.mine_ferrite));
+    expect(taskDurationMs(built, TASK_BY_ID.craft_ration)).toBeLessThan(
+      taskDurationMs(s, TASK_BY_ID.craft_ration),
+    );
+    expect(taskDurationMs(built, TASK_BY_ID.mine_ferrite)).toBe(
+      taskDurationMs(s, TASK_BY_ID.mine_ferrite),
+    );
   });
 });

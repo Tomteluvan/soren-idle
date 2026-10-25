@@ -377,11 +377,11 @@ export const BUILDINGS: BuildingDef[] = [
   {
     id: "beacon",
     name: "Signal Beacon",
-    description: "Calls for rescue. Your way off this planet.",
+    description: "Broadcasts a signal across the planet. Someone might be listening.",
     maxLevel: 1,
-    baseCost: { alloy_plate: 40, circuit_scrap: 30, lumina_crystal: 20, xeno_core: 3 },
+    baseCost: { alloy_plate: 15, circuit_scrap: 12, lumina_crystal: 5 },
     costGrowth: 1,
-    requires: { skill: "engineering", level: 25 },
+    requires: { skill: "engineering", level: 12 },
   },
 ];
 
@@ -395,5 +395,7 @@ export const SKILL_BY_ID: Record<SkillId, SkillDef> = Object.fromEntries(
 ) as Record<SkillId, SkillDef>;
 
 export const MAX_LEVEL = 50;
+/** How long the locals take to answer once the Signal Beacon is built. */
+export const CONTACT_DELAY_MS = 10 * 60 * 1000;
 /** Offline progress is capped so a forgotten laptop does not trivialise the game. */
 export const MAX_OFFLINE_MS = 12 * 60 * 60 * 1000;

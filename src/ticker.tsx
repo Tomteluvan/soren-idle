@@ -1,8 +1,8 @@
 import { Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
-import { count, levelOf, maxHp, stopTask } from "./engine/engine";
-import { formatCredits, formatReport } from "./engine/format";
+import { contactRemainingMs, count, levelOf, maxHp, stopTask } from "./engine/engine";
+import { formatCredits, formatDuration, formatReport } from "./engine/format";
 import { update } from "./engine/storage";
 
 export default function Command() {
@@ -17,7 +17,12 @@ export default function Command() {
     : undefined;
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon="extension-icon.png" title={title} tooltip="Braven Idle">
+    <MenuBarExtra
+      isLoading={isLoading}
+      icon="extension-icon.png"
+      title={title}
+      tooltip="Braven Idle"
+    >
       {state && (
         <>
           <MenuBarExtra.Section>
@@ -25,8 +30,13 @@ export default function Command() {
             <MenuBarExtra.Item title={`HP ${Math.floor(state.hp)}/${maxHp(state)}`} />
             <MenuBarExtra.Item title={`Rations ${count(state, "ration")}`} />
             <MenuBarExtra.Item title={`Credits ${formatCredits(state.credits)}`} />
+            {contactRemainingMs(state) !== null && (
+              <MenuBarExtra.Item
+                title={`Locals arrive in ${formatDuration(contactRemainingMs(state) ?? 0)}`}
+              />
+            )}
           </MenuBarExtra.Section>
-          {data.report.stoppedReason && (
+          {(data.report.stoppedReason || data.report.notices.length > 0) && (
             <MenuBarExtra.Section>
               <MenuBarExtra.Item title={formatReport(data.report)} />
             </MenuBarExtra.Section>

@@ -6,8 +6,10 @@ import {
   build,
   buildingCost,
   buildingLevel,
+  contactRemainingMs,
   count,
   eat,
+  firstContact,
   fightDamage,
   levelOf,
   maxHp,
@@ -23,7 +25,15 @@ import {
 import { bar, formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
 import { resetState, update } from "./engine/storage";
 import { sellPrice } from "./engine/trade";
-import { BuildingDef, BuildingId, GameState, ItemId, Report, SkillId, TaskDef } from "./engine/types";
+import {
+  BuildingDef,
+  BuildingId,
+  GameState,
+  ItemId,
+  Report,
+  SkillId,
+  TaskDef,
+} from "./engine/types";
 
 type View = "overview" | SkillId | "base" | "inventory";
 
@@ -103,7 +113,15 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {view === "overview" && <Overview state={state} frame={frame} onStop={() => sync(stopTask)} onOpen={setView} onReset={reset} />}
+      {view === "overview" && (
+        <Overview
+          state={state}
+          frame={frame}
+          onStop={() => sync(stopTask)}
+          onOpen={setView}
+          onReset={reset}
+        />
+      )}
       {view === "base" && <Base state={state} onBuild={(id) => act((s) => build(s, id))} />}
       {view === "inventory" && <Inventory state={state} onEat={() => act((s) => eat(s))} />}
       {SKILLS.some((s) => s.id === view) && (
@@ -126,7 +144,9 @@ export default function Command() {
 }
 
 function notify(report: Report) {
-  if (report.levelUps.length || report.stoppedReason) {
+  if (report.notices.length) {
+    showToast({ style: Toast.Style.Success, title: "Contact", message: report.notices.join(" ") });
+  } else if (report.levelUps.length || report.stoppedReason) {
     showToast({
       style: report.stoppedReason ? Toast.Style.Failure : Toast.Style.Success,
       title: report.levelUps.length ? "Level up!" : "Task stopped",
@@ -166,7 +186,9 @@ function Overview(props: {
               markdown={[
                 artMarkdown(state.activeTask, props.frame, true),
                 `# ${task ? task.name : "Idle"}`,
-                task ? taskProgress(state, task) : "_You are stranded. Choose a skill from the dropdown._",
+                task
+                  ? taskProgress(state, task)
+                  : "_You are stranded. Choose a skill from the dropdown._",
                 "",
                 "```",
                 `HP  ${bar(hpFraction)} ${Math.floor(state.hp)}/${maxHp(state)}`,
@@ -214,7 +236,11 @@ function Overview(props: {
               }
               actions={
                 <ActionPanel>
-                  <Action title="Show Tasks" icon={Icon.ArrowRight} onAction={() => props.onOpen(skill.id)} />
+                  <Action
+                    title="Show Tasks"
+                    icon={Icon.ArrowRight}
+                    onAction={() => props.onOpen(skill.id)}
+                  />
                 </ActionPanel>
               }
             />
@@ -229,7 +255,11 @@ function Overview(props: {
 
 function taskProgress(state: GameState, task: TaskDef): string {
   const duration = taskDurationMs(state, task);
-  return ["```", `${bar(state.taskProgressMs / duration)} ${formatDuration(duration - state.taskProgressMs)} left`, "```"].join("\n");
+  return [
+    "```",
+    `${bar(state.taskProgressMs / duration)} ${formatDuration(duration - state.taskProgressMs)} left`,
+    "```",
+  ].join("\n");
 }
 
 function Tasks(props: {
@@ -248,12 +278,16 @@ function Tasks(props: {
         const locked = level < task.levelReq;
         const active = state.activeTask === task.id;
         const owned =
-          task.once && task.outputs && (Object.keys(task.outputs) as ItemId[]).every((id) => count(state, id) > 0);
+          task.once &&
+          task.outputs &&
+          (Object.keys(task.outputs) as ItemId[]).every((id) => count(state, id) > 0);
         return (
           <List.Item
             key={task.id}
             title={task.name}
-            icon={locked ? { source: Icon.Lock, tintColor: Color.SecondaryText } : SKILL_ICON[skill]}
+            icon={
+              locked ? { source: Icon.Lock, tintColor: Color.SecondaryText } : SKILL_ICON[skill]
+            }
             accessories={[
               ...(active ? [{ icon: { source: Icon.Play, tintColor: Color.Green } }] : []),
               ...(locked ? [{ tag: `Lv ${task.levelReq}` }] : []),
@@ -265,7 +299,11 @@ function Tasks(props: {
                 {active ? (
                   <Action title="Stop Task" icon={Icon.Stop} onAction={props.onStop} />
                 ) : (
-                  <Action title="Start Task" icon={Icon.Play} onAction={() => props.onStart(task.id)} />
+                  <Action
+                    title="Start Task"
+                    icon={Icon.Play}
+                    onAction={() => props.onStart(task.id)}
+                  />
                 )}
               </ActionPanel>
             }
@@ -299,7 +337,13 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
 function Inventory(props: { state: GameState; onEat: () => void }) {
   const owned = (Object.keys(ITEMS) as ItemId[]).filter((id) => count(props.state, id) > 0);
   if (!owned.length) {
-    return <List.EmptyView title="Nothing yet" description="Salvage something from the wreck." icon={Icon.Box} />;
+    return (
+      <List.EmptyView
+        title="Nothing yet"
+        description="Salvage something from the wreck."
+        icon={Icon.Box}
+      />
+    );
   }
   return (
     <List.Section title="Inventory">
@@ -318,7 +362,13 @@ function Inventory(props: { state: GameState; onEat: () => void }) {
             }
             actions={
               <ActionPanel>
-                {item.heal && <Action title={`Eat (+${item.heal} HP)`} icon={Icon.Heart} onAction={props.onEat} />}
+                {item.heal && (
+                  <Action
+                    title={`Eat (+${item.heal} HP)`}
+                    icon={Icon.Heart}
+                    onAction={props.onEat}
+                  />
+                )}
               </ActionPanel>
             }
           />
@@ -330,17 +380,25 @@ function Inventory(props: { state: GameState; onEat: () => void }) {
 
 // --- base -------------------------------------------------------------------
 
-function effectLine(def: BuildingDef, level: number): string {
+function effectLine(def: BuildingDef, level: number, state: GameState): string {
+  if (def.id === "beacon") {
+    if (!level) return "Not built";
+    const wait = contactRemainingMs(state);
+    return wait === null
+      ? "The locals have answered"
+      : `Signal sent, answer expected in ${formatDuration(wait)}`;
+  }
   if (def.id === "shelter") return `+${10 * level} max HP, +${(0.15 * level).toFixed(2)} HP/s`;
   if (def.id === "workshop") return `Engineering ${8 * level}% faster`;
   if (def.powerProvided) return `${def.powerProvided * level} power`;
-  if (def.produces) return `${level} × ${ITEMS[def.produces.item].name} per ${def.produces.everyMs / 1000}s`;
-  return level ? "Rescue signal sent" : "Not built";
+  if (def.produces)
+    return `${level} × ${ITEMS[def.produces.item].name} per ${def.produces.everyMs / 1000}s`;
+  return level ? "Built" : "Not built";
 }
 
 function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
   const { state } = props;
-  const rescued = buildingLevel(state, "beacon") > 0;
+  const contact = firstContact(state);
   return (
     <List.Section title="Base" subtitle={`Power ${powerUsed(state)}/${powerCapacity(state)}`}>
       {BUILDINGS.map((def) => {
@@ -358,8 +416,15 @@ function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
             title={def.name}
             icon={locked ? { source: Icon.Lock, tintColor: Color.SecondaryText } : Icon.House}
             accessories={[
-              ...(locked && def.requires ? [{ tag: `${SKILL_BY_ID[def.requires.skill].name} ${def.requires.level}` }] : []),
-              { tag: { value: `Lv ${level}/${def.maxLevel}`, color: level ? Color.Green : Color.SecondaryText } },
+              ...(locked && def.requires
+                ? [{ tag: `${SKILL_BY_ID[def.requires.skill].name} ${def.requires.level}` }]
+                : []),
+              {
+                tag: {
+                  value: `Lv ${level}/${def.maxLevel}`,
+                  color: level ? Color.Green : Color.SecondaryText,
+                },
+              },
             ]}
             detail={
               <List.Item.Detail
@@ -367,9 +432,11 @@ function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
                   `# ${def.name}`,
                   def.description,
                   "",
-                  `**Now:** ${effectLine(def, level)}`,
+                  `**Now:** ${effectLine(def, level, state)}`,
                   ...(maxed ? ["", "_Fully built._"] : ["", `**Next level costs:**`, ...costLines]),
-                  ...(def.id === "beacon" && rescued ? ["", "🚀 **A ship is on its way. You made it off Braven.**"] : []),
+                  ...(def.id === "beacon" && contact
+                    ? ["", "📡 **The locals have arrived. They are curious, and not hostile.**"]
+                    : []),
                 ].join("\n")}
               />
             }

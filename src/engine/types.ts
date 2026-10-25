@@ -100,6 +100,8 @@ export interface GameState {
   inventory: Bundle;
   /** Currency earned by trading with the locals. */
   credits: number;
+  /** When the locals answer the beacon, or null while no beacon has been built. */
+  contactAt: number | null;
   buildings: Partial<Record<BuildingId, number>>;
   /** Fractional output of passive buildings, carried between ticks. */
   passive: Partial<Record<BuildingId, number>>;
@@ -113,5 +115,7 @@ export interface Report {
   items: Bundle;
   xp: Partial<Record<SkillId, number>>;
   levelUps: { skill: SkillId; level: number }[];
+  /** Story beats that happened while time passed. */
+  notices: string[];
   stoppedReason?: string;
 }

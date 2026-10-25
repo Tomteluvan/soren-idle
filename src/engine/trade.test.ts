@@ -4,7 +4,10 @@ import { count, newGame } from "./engine";
 import { sell, sellableCount, sellPrice, spendCredits } from "./trade";
 import { GameState, ItemId } from "./types";
 
-const withItems = (inventory: Partial<Record<ItemId, number>>): GameState => ({ ...newGame(0), inventory });
+const withItems = (inventory: Partial<Record<ItemId, number>>): GameState => ({
+  ...newGame(0),
+  inventory,
+});
 
 describe("item values", () => {
   it("every item is worth something", () => {

@@ -1,4 +1,13 @@
-import { BUILDING_BY_ID, BUILDINGS, ITEMS, MAX_LEVEL, MAX_OFFLINE_MS, SKILLS, TASK_BY_ID } from "./data";
+import {
+  BUILDING_BY_ID,
+  BUILDINGS,
+  CONTACT_DELAY_MS,
+  ITEMS,
+  MAX_LEVEL,
+  MAX_OFFLINE_MS,
+  SKILLS,
+  TASK_BY_ID,
+} from "./data";
 import { BuildingId, Bundle, GameState, ItemId, Report, SkillId, TaskDef } from "./types";
 
 const FOOD_HEAL_THRESHOLD = 0.5;
@@ -16,6 +25,7 @@ export function newGame(now = Date.now()): GameState {
     xp: Object.fromEntries(SKILLS.map((s) => [s.id, 0])) as Record<SkillId, number>,
     inventory: {},
     credits: 0,
+    contactAt: null,
     buildings: {},
     passive: {},
     stats: { cycles: 0, kills: 0, deaths: 0 },
@@ -73,6 +83,16 @@ export function buildingCost(s: GameState, id: BuildingId): Bundle {
   );
 }
 
+/** True once the locals have answered the beacon. */
+export function firstContact(s: GameState): boolean {
+  return s.contactAt !== null && s.lastTick >= s.contactAt;
+}
+
+/** Milliseconds until the locals arrive, or null if there is no pending signal. */
+export function contactRemainingMs(s: GameState): number | null {
+  return s.contactAt !== null && !firstContact(s) ? s.contactAt - s.lastTick : null;
+}
+
 export function powerCapacity(s: GameState): number {
   return BUILDINGS.reduce((sum, b) => sum + (b.powerProvided ?? 0) * buildingLevel(s, b.id), 0);
 }
@@ -96,6 +116,7 @@ export function build(s: GameState, id: BuildingId): { state: GameState; error?:
   const next = structuredClone(s);
   addItems(next, cost, -1);
   next.buildings[id] = level + 1;
+  if (id === "beacon") next.contactAt = s.lastTick + CONTACT_DELAY_MS;
   return { state: next };
 }
 
@@ -104,19 +125,26 @@ export function build(s: GameState, id: BuildingId): { state: GameState; error?:
 export function taskDurationMs(s: GameState, task: TaskDef): number {
   let mult = 1;
   for (const item of Object.values(ITEMS)) {
-    if (item.tool?.skill === task.skill && count(s, item.id) > 0) mult = Math.min(mult, item.tool.speed);
+    if (item.tool?.skill === task.skill && count(s, item.id) > 0)
+      mult = Math.min(mult, item.tool.speed);
   }
   if (task.skill === "engineering") mult *= 1 - 0.08 * buildingLevel(s, "workshop");
   return Math.max(1000, Math.round(task.durationMs * mult));
 }
 
 export function playerDamage(s: GameState): number {
-  const bonus = Object.values(ITEMS).reduce((sum, i) => sum + (count(s, i.id) > 0 ? (i.weaponDamage ?? 0) : 0), 0);
+  const bonus = Object.values(ITEMS).reduce(
+    (sum, i) => sum + (count(s, i.id) > 0 ? (i.weaponDamage ?? 0) : 0),
+    0,
+  );
   return 3 + levelOf(s, "combat") + bonus;
 }
 
 export function playerArmor(s: GameState): number {
-  return Object.values(ITEMS).reduce((sum, i) => sum + (count(s, i.id) > 0 ? (i.armor ?? 0) : 0), 0);
+  return Object.values(ITEMS).reduce(
+    (sum, i) => sum + (count(s, i.id) > 0 ? (i.armor ?? 0) : 0),
+    0,
+  );
 }
 
 /** Expected damage taken in a fight against this task's monster. */
@@ -132,8 +160,13 @@ export function fightDamage(s: GameState, task: TaskDef): number {
 export function startTask(s: GameState, taskId: string): { state: GameState; error?: string } {
   const task = TASK_BY_ID[taskId];
   if (!task) return { state: s, error: "Unknown task" };
-  if (levelOf(s, task.skill) < task.levelReq) return { state: s, error: `Requires level ${task.levelReq}` };
-  if (task.once && task.outputs && (Object.keys(task.outputs) as ItemId[]).every((id) => count(s, id) > 0)) {
+  if (levelOf(s, task.skill) < task.levelReq)
+    return { state: s, error: `Requires level ${task.levelReq}` };
+  if (
+    task.once &&
+    task.outputs &&
+    (Object.keys(task.outputs) as ItemId[]).every((id) => count(s, id) > 0)
+  ) {
     return { state: s, error: "You already own this" };
   }
   if (!canAfford(s, task.inputs)) return { state: s, error: "Missing materials" };
@@ -168,11 +201,16 @@ function gainXp(s: GameState, skill: SkillId, amount: number, report: Report) {
 function runCycle(s: GameState, task: TaskDef, report: Report): string | undefined {
   if (task.monster) {
     const damage = fightDamage(s, task);
-    while (s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) && count(s, "ration") > 0 && s.hp < maxHp(s)) {
+    while (
+      s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) &&
+      count(s, "ration") > 0 &&
+      s.hp < maxHp(s)
+    ) {
       s.inventory.ration = count(s, "ration") - 1;
       s.hp = Math.min(maxHp(s), s.hp + (ITEMS.ration.heal ?? 0));
     }
-    if (s.hp <= damage) return `Retreated from ${task.monster.name}: too wounded and out of rations`;
+    if (s.hp <= damage)
+      return `Retreated from ${task.monster.name}: too wounded and out of rations`;
     s.hp -= damage;
     s.stats.kills++;
     addItems(s, task.monster.drops, 1, report);
@@ -188,7 +226,7 @@ function runCycle(s: GameState, task: TaskDef, report: Report): string | undefin
 }
 
 export function emptyReport(): Report {
-  return { elapsedMs: 0, cycles: 0, items: {}, xp: {}, levelUps: [] };
+  return { elapsedMs: 0, cycles: 0, items: {}, xp: {}, levelUps: [], notices: [] };
 }
 
 /** Advances the game to `now`, running as many task cycles as the elapsed time allows. */
@@ -198,6 +236,9 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
   const elapsed = Math.min(Math.max(0, now - s.lastTick), MAX_OFFLINE_MS);
   s.lastTick = now;
   report.elapsedMs = elapsed;
+  if (!firstContact(prev) && firstContact(s)) {
+    report.notices.push("Strangers are approaching your camp. The locals answered your signal.");
+  }
 
   // Drones work whatever the survivor is doing, and their haul can feed the active task.
   for (const def of BUILDINGS) {
@@ -210,7 +251,9 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
   }
 
   const task = s.activeTask ? TASK_BY_ID[s.activeTask] : undefined;
-  const regen = (task?.skill === "combat" ? 0 : REGEN_HP_PER_MS) + SHELTER_REGEN_HP_PER_MS * buildingLevel(s, "shelter");
+  const regen =
+    (task?.skill === "combat" ? 0 : REGEN_HP_PER_MS) +
+    SHELTER_REGEN_HP_PER_MS * buildingLevel(s, "shelter");
   s.hp = Math.min(maxHp(s), s.hp + elapsed * regen);
   if (!task) return { state: s, report };
 

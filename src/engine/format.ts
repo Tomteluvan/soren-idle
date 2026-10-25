@@ -15,7 +15,9 @@ export function bar(fraction: number, width = 20): string {
 }
 
 export function formatBundle(bundle: Bundle = {}): string {
-  const parts = (Object.entries(bundle) as [ItemId, number][]).map(([id, n]) => `${n}× ${ITEMS[id].name}`);
+  const parts = (Object.entries(bundle) as [ItemId, number][]).map(
+    ([id, n]) => `${n}× ${ITEMS[id].name}`,
+  );
   return parts.length ? parts.join(", ") : "nothing";
 }
 
@@ -23,6 +25,7 @@ export function formatReport(r: Report): string {
   const parts: string[] = [];
   if (Object.keys(r.items).length) parts.push(`+${formatBundle(r.items)}`);
   for (const up of r.levelUps) parts.push(`${SKILL_BY_ID[up.skill].name} level ${up.level}!`);
+  parts.push(...r.notices);
   if (r.stoppedReason) parts.push(r.stoppedReason);
   return parts.join(" · ");
 }

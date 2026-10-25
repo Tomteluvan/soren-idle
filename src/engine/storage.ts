@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { advance, newGame } from "./engine";
+import { migrateSave } from "./migrate";
 import { GameState, Report } from "./types";
 
 const KEY = "braven-idle-save";
@@ -8,9 +9,7 @@ export async function loadState(): Promise<GameState> {
   const raw = await LocalStorage.getItem<string>(KEY);
   if (!raw) return newGame();
   try {
-    const saved = JSON.parse(raw) as GameState;
-    // Fill in anything added after the save was written.
-    return { ...newGame(saved.lastTick), ...saved, xp: { ...newGame().xp, ...saved.xp } };
+    return migrateSave(JSON.parse(raw) as Partial<GameState>);
   } catch {
     return newGame();
   }

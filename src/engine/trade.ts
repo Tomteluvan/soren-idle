@@ -23,7 +23,11 @@ export function sell(
 ): { state: GameState; error?: string; credits?: number } {
   const available = sellableCount(s, id);
   const amount = qty === "all" ? available : Math.min(qty, available);
-  if (amount < 1) return { state: s, error: isGear(id) && count(s, id) > 0 ? "Keeping your only one" : "Nothing to sell" };
+  if (amount < 1)
+    return {
+      state: s,
+      error: isGear(id) && count(s, id) > 0 ? "Keeping your only one" : "Nothing to sell",
+    };
   const credits = amount * sellPrice(s, id);
   const next = structuredClone(s);
   next.inventory[id] = count(s, id) - amount;
