@@ -14,12 +14,29 @@ export function artMarkdown(
   const scene = sceneFor(taskId);
   const f = animate ? frame % scene.frames : scene.poster;
   const key = `${taskId ?? "camp"}:${f}`;
+  return `![](${uriFor(scene, key, f)})`;
+}
+
+/**
+ * Every frame of a scene as full-size images. Put this at the very end of the markdown, below
+ * the fold: Raycast flashes the pane the first time it shows an image it has not loaded yet, so
+ * having all frames present from the first render means the swaps are already cached.
+ */
+export function preloadMarkdown(taskId: string | null | undefined): string {
+  const scene = sceneFor(taskId);
+  return Array.from(
+    { length: scene.frames },
+    (_, i) => `![](${uriFor(scene, `${taskId ?? "camp"}:${i}`, i)})`,
+  ).join("\n\n");
+}
+
+function uriFor(scene: ReturnType<typeof sceneFor>, key: string, f: number): string {
   let uri = cache.get(key);
   if (!uri) {
     uri = toDataUri(scene.svg(f));
     cache.set(key, uri);
   }
-  return `![](${uri})`;
+  return uri;
 }
 
 export { sceneFor };
