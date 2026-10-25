@@ -1,4 +1,4 @@
-export type SkillId = "salvaging" | "mining" | "foraging" | "engineering" | "combat";
+export type SkillId = "salvaging" | "mining" | "foraging" | "cooking" | "engineering" | "combat";
 
 export type ItemId =
   | "scrap_metal"

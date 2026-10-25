@@ -22,9 +22,14 @@ export const SKILLS: SkillDef[] = [
     blurb: "Find out which local plants are food and which are lethal.",
   },
   {
+    id: "cooking",
+    name: "Cooking",
+    blurb: "Turn whatever you foraged into something you can keep down.",
+  },
+  {
     id: "engineering",
     name: "Engineering",
-    blurb: "Turn raw materials into rations, tools and gear.",
+    blurb: "Turn raw materials into tools and gear.",
   },
   {
     id: "combat",
@@ -256,10 +261,10 @@ export const TASKS: TaskDef[] = [
     xp: 22,
     outputs: { sweetroot: 1 },
   },
-  // Engineering
+  // Cooking
   {
     id: "craft_ration",
-    skill: "engineering",
+    skill: "cooking",
     name: "Cook Glowcap Ration",
     description: "Two glowcaps, one improvised stove.",
     levelReq: 1,
@@ -268,6 +273,18 @@ export const TASKS: TaskDef[] = [
     inputs: { glowcap: 2 },
     outputs: { ration: 1 },
   },
+  {
+    id: "craft_honey_ration",
+    skill: "cooking",
+    name: "Cook Honey Ration",
+    description: "Star Honey from the locals makes this the best meal on the planet.",
+    levelReq: 5,
+    durationMs: 4000,
+    xp: 28,
+    inputs: { star_honey: 1, glowcap: 2 },
+    outputs: { honey_ration: 1 },
+  },
+  // Engineering
   {
     id: "craft_alloy",
     skill: "engineering",
@@ -338,17 +355,6 @@ export const TASKS: TaskDef[] = [
     inputs: { alloy_plate: 4, chitin_shard: 6 },
     outputs: { composite_armor: 1 },
     once: true,
-  },
-  {
-    id: "craft_honey_ration",
-    skill: "engineering",
-    name: "Cook Honey Ration",
-    description: "Star Honey from the locals makes this the best meal on the planet.",
-    levelReq: 10,
-    durationMs: 4000,
-    xp: 28,
-    inputs: { star_honey: 1, glowcap: 2 },
-    outputs: { honey_ration: 1 },
   },
   {
     id: "craft_skyweave",

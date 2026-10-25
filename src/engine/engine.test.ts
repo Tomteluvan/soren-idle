@@ -240,7 +240,10 @@ describe("base", () => {
   it("workshop speeds up engineering only", () => {
     const s = engineer({ alloy_plate: 100, circuit_scrap: 100 });
     const built = build(s, "workshop").state;
-    expect(taskDurationMs(built, TASK_BY_ID.craft_ration)).toBeLessThan(
+    expect(taskDurationMs(built, TASK_BY_ID.craft_alloy)).toBeLessThan(
+      taskDurationMs(s, TASK_BY_ID.craft_alloy),
+    );
+    expect(taskDurationMs(built, TASK_BY_ID.craft_ration)).toBe(
       taskDurationMs(s, TASK_BY_ID.craft_ration),
     );
     expect(taskDurationMs(built, TASK_BY_ID.mine_ferrite)).toBe(

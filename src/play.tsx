@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { artMarkdown, FRAME_MS } from "./art";
+import { artMarkdown, FRAME_MS, preloadMarkdown } from "./art";
 import {
   BUILDING_BY_ID,
   BUILDINGS,
@@ -50,6 +50,7 @@ const SKILL_ICON: Record<SkillId, Icon> = {
   salvaging: Icon.Hammer,
   mining: Icon.Mountain,
   foraging: Icon.Leaf,
+  cooking: Icon.MugSteam,
   engineering: Icon.Gear,
   combat: Icon.Shield,
 };
@@ -225,6 +226,7 @@ function Overview(props: {
                 `HP  ${bar(hpFraction)} ${Math.floor(state.hp)}/${maxHp(state)}`,
                 "```",
                 `Rations: **${count(state, "ration")}** · Credits: **${formatCredits(state.credits)}**`,
+                ...(task ? ["", preloadMarkdown(state.activeTask)] : []),
               ].join("\n")}
             />
           }
@@ -360,6 +362,7 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
       `- **Drops:** ${formatBundle(m.drops)}`,
     );
   }
+  if (active) lines.push("", preloadMarkdown(task.id));
   return lines.join("\n");
 }
 
