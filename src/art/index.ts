@@ -17,8 +17,8 @@ export function artMarkdown(
   let uri = cache.get(key);
   if (!uri) {
     const canvas = new Canvas();
-    scene.draw(canvas, f);
-    uri = toDataUri(canvas.toSvg());
+    scene.draw?.(canvas, f);
+    uri = toDataUri(scene.svg ? scene.svg(f) : canvas.toSvg());
     cache.set(key, uri);
   }
   return `![](${uri})`;

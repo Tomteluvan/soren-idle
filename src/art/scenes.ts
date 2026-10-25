@@ -1,10 +1,14 @@
 import { Canvas, GROUND_Y, H, hash, Shade, W } from "./canvas";
+import { ferriteTerminal } from "./terminal";
 
 export interface Scene {
   frames: number;
   /** Frame shown when the task is not running. */
   poster: number;
-  draw(c: Canvas, frame: number): void;
+  /** Pixel-grid scenes draw onto a canvas. */
+  draw?(c: Canvas, frame: number): void;
+  /** Vector scenes return an SVG document for the frame instead. */
+  svg?(frame: number): string;
 }
 
 // --- palettes ---------------------------------------------------------------
@@ -280,14 +284,6 @@ function cube(c: Canvas, x: number, y: number, w: number, h: number, shade: Shad
   for (let j = 1; j < h - 1; j++)
     for (let i = 1; i < w - 1; i++) if (hash(x + i, y + j) > 0.86) c.set(x + i, y + j, vein);
 }
-
-const miningFerrite = swingScene("canyon", "pick", (c, _f, hit) => {
-  const o = hit ? 1 : 0;
-  cube(c, 35 + o, 22, 11, 8, FERRITE, "#e0743c");
-  cube(c, 46 + o, 24, 8, 6, FERRITE, "#e0743c");
-  cube(c, 38 + o, 15, 8, 7, FERRITE, "#e0743c");
-  cube(c, 54 + o, 26, 5, 4, FERRITE, "#e0743c");
-});
 
 const miningLumina = swingScene("canyon", "pick", (c, f, hit) => {
   const o = hit ? 1 : 0;
@@ -597,7 +593,7 @@ const camp: Scene = {
 // --- lookup -----------------------------------------------------------------
 
 const SCENES: Record<string, Scene> = {
-  mine_ferrite: miningFerrite,
+  mine_ferrite: { frames: 4, poster: 2, svg: ferriteTerminal },
   mine_lumina: miningLumina,
   salvage_hull: salvageHull,
   salvage_wiring: salvageWiring,
