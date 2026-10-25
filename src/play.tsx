@@ -1,7 +1,15 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { artMarkdown, FRAME_MS } from "./art";
-import { BUILDINGS, ITEMS, SKILLS, SKILL_BY_ID, TASK_BY_ID, TASKS } from "./engine/data";
+import {
+  BUILDING_BY_ID,
+  BUILDINGS,
+  ITEMS,
+  SKILLS,
+  SKILL_BY_ID,
+  TASK_BY_ID,
+  TASKS,
+} from "./engine/data";
 import {
   build,
   buildingCost,
@@ -24,7 +32,8 @@ import {
 } from "./engine/engine";
 import { bar, formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
 import { resetState, update } from "./engine/storage";
-import { sellPrice } from "./engine/trade";
+import { buy, sell, sellPrice } from "./engine/trade";
+import { Trade } from "./trade-view";
 import {
   BuildingDef,
   BuildingId,
@@ -35,7 +44,7 @@ import {
   TaskDef,
 } from "./engine/types";
 
-type View = "overview" | SkillId | "base" | "inventory";
+type View = "overview" | SkillId | "base" | "trade" | "inventory";
 
 const SKILL_ICON: Record<SkillId, Icon> = {
   salvaging: Icon.Hammer,
@@ -56,14 +65,18 @@ export default function Command() {
     notify(report);
   }
 
-  async function act(change: (s: GameState) => { state: GameState; error?: string }) {
-    let error: string | undefined;
+  async function act<R extends { state: GameState; error?: string }>(
+    change: (s: GameState) => R,
+    success?: (result: R) => string,
+  ) {
+    let result = undefined as R | undefined;
     await sync((s) => {
-      const result = change(s);
-      error = result.error;
+      result = change(s);
       return result.state;
     });
-    if (error) await showToast({ style: Toast.Style.Failure, title: error });
+    if (result?.error) await showToast({ style: Toast.Style.Failure, title: result.error });
+    else if (result && success)
+      await showToast({ style: Toast.Style.Success, title: success(result) });
   }
 
   useEffect(() => {
@@ -109,6 +122,7 @@ export default function Command() {
             ))}
           </List.Dropdown.Section>
           <List.Dropdown.Item title="Base" value="base" icon={Icon.House} />
+          <List.Dropdown.Item title="Trade" value="trade" icon={Icon.Coins} />
           <List.Dropdown.Item title="Inventory" value="inventory" icon={Icon.Box} />
         </List.Dropdown>
       }
@@ -123,7 +137,24 @@ export default function Command() {
         />
       )}
       {view === "base" && <Base state={state} onBuild={(id) => act((s) => build(s, id))} />}
-      {view === "inventory" && <Inventory state={state} onEat={() => act((s) => eat(s))} />}
+      {view === "trade" && (
+        <Trade
+          state={state}
+          onSell={(id, qty) =>
+            act(
+              (s) => sell(s, id, qty),
+              (r) => `Sold ${r.amount}× ${ITEMS[id].name} for ${formatCredits(r.credits ?? 0)}`,
+            )
+          }
+          onBuy={(id, qty) =>
+            act(
+              (s) => buy(s, id, qty),
+              (r) => `Bought ${qty}× ${ITEMS[id].name} for ${formatCredits(r.cost ?? 0)}`,
+            )
+          }
+        />
+      )}
+      {view === "inventory" && <Inventory state={state} onEat={(id) => act((s) => eat(s, id))} />}
       {SKILLS.some((s) => s.id === view) && (
         <Tasks
           state={state}
@@ -334,7 +365,7 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
 
 // --- inventory --------------------------------------------------------------
 
-function Inventory(props: { state: GameState; onEat: () => void }) {
+function Inventory(props: { state: GameState; onEat: (id: ItemId) => void }) {
   const owned = (Object.keys(ITEMS) as ItemId[]).filter((id) => count(props.state, id) > 0);
   if (!owned.length) {
     return (
@@ -366,7 +397,7 @@ function Inventory(props: { state: GameState; onEat: () => void }) {
                   <Action
                     title={`Eat (+${item.heal} HP)`}
                     icon={Icon.Heart}
-                    onAction={props.onEat}
+                    onAction={() => props.onEat(id)}
                   />
                 )}
               </ActionPanel>
@@ -405,7 +436,20 @@ function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
       {BUILDINGS.map((def) => {
         const level = buildingLevel(state, def.id);
         const maxed = level >= def.maxLevel;
-        const locked = !!def.requires && levelOf(state, def.requires.skill) < def.requires.level;
+        const skillLocked =
+          !!def.requires && levelOf(state, def.requires.skill) < def.requires.level;
+        const needsContact = !!def.requiresContact && !contact;
+        const needed = def.requiresBuilding;
+        const needsBuilding = !!needed && buildingLevel(state, needed.id) < needed.level;
+        const locked = skillLocked || needsContact || needsBuilding;
+        const lockTag =
+          skillLocked && def.requires
+            ? `${SKILL_BY_ID[def.requires.skill].name} ${def.requires.level}`
+            : needsContact
+              ? "Needs contact"
+              : needsBuilding && needed
+                ? `${BUILDING_BY_ID[needed.id].name} ${needed.level}`
+                : undefined;
         const cost = buildingCost(state, def.id);
         const costLines = (Object.entries(cost) as [ItemId, number][]).map(([id, n]) => {
           const have = Math.floor(count(state, id));
@@ -417,9 +461,7 @@ function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
             title={def.name}
             icon={locked ? { source: Icon.Lock, tintColor: Color.SecondaryText } : Icon.House}
             accessories={[
-              ...(locked && def.requires
-                ? [{ tag: `${SKILL_BY_ID[def.requires.skill].name} ${def.requires.level}` }]
-                : []),
+              ...(lockTag ? [{ tag: lockTag }] : []),
               {
                 tag: {
                   value: `Lv ${level}/${def.maxLevel}`,

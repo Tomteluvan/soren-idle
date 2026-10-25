@@ -1,6 +1,17 @@
-import { ITEMS } from "./data";
-import { count } from "./engine";
-import { GameState, ItemId } from "./types";
+import { GREETINGS, HUB_SELL_RATES, ITEMS, STOCK, TRANSLATOR_DISCOUNTS } from "./data";
+import { buildingLevel, count } from "./engine";
+import { GameState, ItemId, StockItem } from "./types";
+
+export const hubLevel = (s: GameState) => buildingLevel(s, "hub");
+export const translatorLevel = (s: GameState) => buildingLevel(s, "translator");
+
+/** Trading only happens at the Hub. */
+export const canTrade = (s: GameState) => hubLevel(s) > 0;
+
+/** A line from the locals matching how well you can talk to them. */
+export const greeting = (s: GameState) => GREETINGS[translatorLevel(s)];
+
+// --- selling ----------------------------------------------------------------
 
 /** Equipment keeps one copy: selling your only torch would silently slow you down. */
 export function isGear(id: ItemId): boolean {
@@ -8,8 +19,13 @@ export function isGear(id: ItemId): boolean {
   return !!(item.tool || item.weaponDamage || item.armor);
 }
 
-export function sellPrice(_s: GameState, id: ItemId): number {
-  return Math.max(1, ITEMS[id].value);
+/** Share of an item's value the locals pay. Before a Hub exists this shows the first level's rate. */
+export function sellRate(s: GameState): number {
+  return HUB_SELL_RATES[Math.max(1, hubLevel(s)) - 1];
+}
+
+export function sellPrice(s: GameState, id: ItemId): number {
+  return Math.max(1, Math.floor(ITEMS[id].value * sellRate(s)));
 }
 
 export function sellableCount(s: GameState, id: ItemId): number {
@@ -20,22 +36,59 @@ export function sell(
   s: GameState,
   id: ItemId,
   qty: number | "all",
-): { state: GameState; error?: string; credits?: number } {
+): { state: GameState; error?: string; credits?: number; amount?: number } {
+  if (!canTrade(s)) return { state: s, error: "Build a Trading Hub first" };
   const available = sellableCount(s, id);
   const amount = qty === "all" ? available : Math.min(qty, available);
-  if (amount < 1)
+  if (amount < 1) {
     return {
       state: s,
       error: isGear(id) && count(s, id) > 0 ? "Keeping your only one" : "Nothing to sell",
     };
+  }
   const credits = amount * sellPrice(s, id);
   const next = structuredClone(s);
   next.inventory[id] = count(s, id) - amount;
   next.credits += credits;
-  return { state: next, credits };
+  return { state: next, credits, amount };
+}
+
+// --- buying -----------------------------------------------------------------
+
+export function buyDiscount(s: GameState): number {
+  return TRANSLATOR_DISCOUNTS[Math.max(1, translatorLevel(s)) - 1];
+}
+
+export function buyPrice(s: GameState, stock: StockItem): number {
+  return Math.ceil(stock.price * (1 - buyDiscount(s)));
+}
+
+/** What the locals offer you at your current Translation Device level. */
+export function stockFor(s: GameState): StockItem[] {
+  return STOCK.filter((x) => x.tier <= translatorLevel(s));
 }
 
 export function spendCredits(s: GameState, amount: number): { state: GameState; error?: string } {
   if (s.credits < amount) return { state: s, error: "Not enough Credits" };
   return { state: { ...s, credits: s.credits - amount } };
 }
+
+export function buy(
+  s: GameState,
+  id: ItemId,
+  qty: number,
+): { state: GameState; error?: string; cost?: number } {
+  if (!canTrade(s)) return { state: s, error: "Build a Trading Hub first" };
+  const stock = stockFor(s).find((x) => x.item === id);
+  if (!stock) return { state: s, error: "The locals do not offer that yet" };
+  const cost = qty * buyPrice(s, stock);
+  const paid = spendCredits(s, cost);
+  if (paid.error) return { state: s, error: paid.error };
+  const next = structuredClone(paid.state);
+  next.inventory[id] = count(next, id) + qty;
+  return { state: next, cost };
+}
+
+/** The most of an item the player can currently afford, at least 1 so the UI can show the price. */
+export const affordable = (s: GameState, stock: StockItem) =>
+  Math.floor(s.credits / buyPrice(s, stock));

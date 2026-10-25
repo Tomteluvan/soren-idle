@@ -21,7 +21,9 @@ export type ItemId =
   | "void_lens"
   | "star_honey"
   | "skyweave_thread"
-  | "aether_cell";
+  | "aether_cell"
+  | "honey_ration"
+  | "skyweave_suit";
 
 export type Bundle = Partial<Record<ItemId, number>>;
 
@@ -77,7 +79,8 @@ export type BuildingId =
   | "mining_drone"
   | "forager_drone"
   | "beacon"
-  | "translator";
+  | "translator"
+  | "hub";
 
 export interface BuildingDef {
   id: BuildingId;
@@ -100,6 +103,14 @@ export interface BuildingDef {
   powerUse?: number;
   /** Per level, produces one `item` every `everyMs` while powered. */
   produces?: { item: ItemId; everyMs: number };
+}
+
+export interface StockItem {
+  item: ItemId;
+  /** Price per unit in Credits before discounts. */
+  price: number;
+  /** Translation Device level needed before the locals offer it. */
+  tier: number;
 }
 
 export interface GameState {

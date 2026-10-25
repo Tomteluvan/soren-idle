@@ -187,12 +187,22 @@ export function stopTask(s: GameState): GameState {
   return { ...s, activeTask: null, taskProgressMs: 0 };
 }
 
-export function eat(s: GameState): { state: GameState; error?: string } {
-  if (count(s, "ration") < 1) return { state: s, error: "No rations" };
+/** The weakest food the survivor owns, so strong food is not wasted on small wounds. */
+export function foodOwned(s: GameState): ItemId | undefined {
+  return Object.values(ITEMS)
+    .filter((i) => i.heal && count(s, i.id) > 0)
+    .sort((a, b) => (a.heal ?? 0) - (b.heal ?? 0))[0]?.id;
+}
+
+export function eat(
+  s: GameState,
+  id: ItemId | undefined = foodOwned(s),
+): { state: GameState; error?: string } {
+  if (!id || count(s, id) < 1 || !ITEMS[id].heal) return { state: s, error: "No rations" };
   if (s.hp >= maxHp(s)) return { state: s, error: "Already at full health" };
   const next = structuredClone(s);
-  next.inventory.ration = count(s, "ration") - 1;
-  next.hp = Math.min(maxHp(s), s.hp + (ITEMS.ration.heal ?? 0));
+  next.inventory[id] = count(s, id) - 1;
+  next.hp = Math.min(maxHp(s), s.hp + (ITEMS[id].heal ?? 0));
   return { state: next };
 }
 
@@ -211,13 +221,13 @@ function gainXp(s: GameState, skill: SkillId, amount: number, report: Report) {
 function runCycle(s: GameState, task: TaskDef, report: Report): string | undefined {
   if (task.monster) {
     const damage = fightDamage(s, task);
-    while (
-      s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) &&
-      count(s, "ration") > 0 &&
-      s.hp < maxHp(s)
+    for (
+      let food = foodOwned(s);
+      food && s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) && s.hp < maxHp(s);
+      food = foodOwned(s)
     ) {
-      s.inventory.ration = count(s, "ration") - 1;
-      s.hp = Math.min(maxHp(s), s.hp + (ITEMS.ration.heal ?? 0));
+      s.inventory[food] = count(s, food) - 1;
+      s.hp = Math.min(maxHp(s), s.hp + (ITEMS[food].heal ?? 0));
     }
     if (s.hp <= damage)
       return `Retreated from ${task.monster.name}: too wounded and out of rations`;
