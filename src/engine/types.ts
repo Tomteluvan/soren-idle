@@ -15,7 +15,13 @@ export type ItemId =
   | "pulse_blade"
   | "composite_armor"
   | "chitin_shard"
-  | "xeno_core";
+  | "xeno_core"
+  | "glyph_tablet"
+  | "resonance_coil"
+  | "void_lens"
+  | "star_honey"
+  | "skyweave_thread"
+  | "aether_cell";
 
 export type Bundle = Partial<Record<ItemId, number>>;
 
@@ -70,7 +76,8 @@ export type BuildingId =
   | "salvage_drone"
   | "mining_drone"
   | "forager_drone"
-  | "beacon";
+  | "beacon"
+  | "translator";
 
 export interface BuildingDef {
   id: BuildingId;
@@ -80,7 +87,14 @@ export interface BuildingDef {
   /** Cost of level 1. Each further level multiplies it by `costGrowth`. */
   baseCost: Bundle;
   costGrowth: number;
+  /** Explicit cost per level (index 0 is level 1). Overrides baseCost and costGrowth. */
+  levelCosts?: Bundle[];
+  /** One line per level describing what that level gives you. */
+  levelNotes?: string[];
   requires?: { skill: SkillId; level: number };
+  /** The locals must have answered the beacon first. */
+  requiresContact?: boolean;
+  requiresBuilding?: { id: BuildingId; level: number };
   /** Power the building adds / draws per level. */
   powerProvided?: number;
   powerUse?: number;

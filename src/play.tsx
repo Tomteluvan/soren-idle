@@ -389,6 +389,7 @@ function effectLine(def: BuildingDef, level: number, state: GameState): string {
       : `Signal sent, answer expected in ${formatDuration(wait)}`;
   }
   if (def.id === "shelter") return `+${10 * level} max HP, +${(0.15 * level).toFixed(2)} HP/s`;
+  if (def.levelNotes) return level ? `Level ${level}: ${def.levelNotes[level - 1]}` : "Not built";
   if (def.id === "workshop") return `Engineering ${8 * level}% faster`;
   if (def.powerProvided) return `${def.powerProvided * level} power`;
   if (def.produces)
@@ -433,6 +434,15 @@ function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
                   def.description,
                   "",
                   `**Now:** ${effectLine(def, level, state)}`,
+                  ...(def.levelNotes
+                    ? [
+                        "",
+                        ...def.levelNotes.map(
+                          (note, i) =>
+                            `${i + 1 === level ? "**▶" : "-"} Level ${i + 1}: ${note}${i + 1 === level ? "**" : ""}`,
+                        ),
+                      ]
+                    : []),
                   ...(maxed ? ["", "_Fully built._"] : ["", `**Next level costs:**`, ...costLines]),
                   ...(def.id === "beacon" && contact
                     ? ["", "📡 **The locals have arrived. They are curious, and not hostile.**"]

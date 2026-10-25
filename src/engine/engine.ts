@@ -75,6 +75,7 @@ export const buildingLevel = (s: GameState, id: BuildingId) => s.buildings[id] ?
 export function buildingCost(s: GameState, id: BuildingId): Bundle {
   const def = BUILDING_BY_ID[id];
   const level = buildingLevel(s, id);
+  if (def.levelCosts) return def.levelCosts[Math.min(level, def.levelCosts.length - 1)];
   return Object.fromEntries(
     (Object.entries(def.baseCost) as [ItemId, number][]).map(([item, n]) => [
       item,
@@ -107,6 +108,15 @@ export function build(s: GameState, id: BuildingId): { state: GameState; error?:
   if (level >= def.maxLevel) return { state: s, error: "Already at max level" };
   if (def.requires && levelOf(s, def.requires.skill) < def.requires.level) {
     return { state: s, error: `Requires ${def.requires.skill} level ${def.requires.level}` };
+  }
+  if (def.requiresContact && !firstContact(s))
+    return { state: s, error: "There is nobody to talk to yet" };
+  if (
+    def.requiresBuilding &&
+    buildingLevel(s, def.requiresBuilding.id) < def.requiresBuilding.level
+  ) {
+    const needed = BUILDING_BY_ID[def.requiresBuilding.id].name;
+    return { state: s, error: `Requires ${needed} level ${def.requiresBuilding.level}` };
   }
   if (def.powerUse && powerCapacity(s) - powerUsed(s) < def.powerUse) {
     return { state: s, error: "Not enough power. Upgrade the Solar Generator" };

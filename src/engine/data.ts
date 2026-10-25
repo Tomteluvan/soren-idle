@@ -121,6 +121,42 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     description: "A dense organ that pulses with strange energy.",
     value: 150,
   },
+  glyph_tablet: {
+    id: "glyph_tablet",
+    name: "Glyph Tablet",
+    description: "A clay tablet covered in the locals' writing. Needed to learn their language.",
+    value: 20,
+  },
+  resonance_coil: {
+    id: "resonance_coil",
+    name: "Resonance Coil",
+    description: "A coil of local make that hums at frequencies your electronics cannot produce.",
+    value: 60,
+  },
+  void_lens: {
+    id: "void_lens",
+    name: "Void Lens",
+    description: "A lens ground from something that is not quite glass.",
+    value: 150,
+  },
+  star_honey: {
+    id: "star_honey",
+    name: "Star Honey",
+    description: "Thick, sweet, faintly glowing. The locals cook with it.",
+    value: 12,
+  },
+  skyweave_thread: {
+    id: "skyweave_thread",
+    name: "Skyweave Thread",
+    description: "Light, strong thread spun by something that lives in the canopy.",
+    value: 30,
+  },
+  aether_cell: {
+    id: "aether_cell",
+    name: "Aether Cell",
+    description: "A sealed cell of stored energy. The locals do not explain how it works.",
+    value: 250,
+  },
 };
 
 export const TASKS: TaskDef[] = [
@@ -373,6 +409,31 @@ export const BUILDINGS: BuildingDef[] = [
     requires: { skill: "engineering", level: 7 },
     powerUse: 1,
     produces: { item: "glowcap", everyMs: 20_000 },
+  },
+  {
+    id: "translator",
+    name: "Translation Device",
+    description:
+      "Turns the locals' speech into something you can understand. Each level teaches it more.",
+    maxLevel: 5,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { alloy_plate: 10, circuit_scrap: 8, lumina_crystal: 3 },
+      { alloy_plate: 15, circuit_scrap: 12, glyph_tablet: 3 },
+      { alloy_plate: 20, lumina_crystal: 8, glyph_tablet: 6, resonance_coil: 1 },
+      { alloy_plate: 30, glyph_tablet: 10, resonance_coil: 3, void_lens: 1 },
+      { glyph_tablet: 15, resonance_coil: 6, void_lens: 3, aether_cell: 1 },
+    ],
+    levelNotes: [
+      "Basic phrases. The locals will trade with you and sell their first goods.",
+      "Simple conversation. More goods are offered.",
+      "Bargaining. 5% off everything you buy, and rarer goods appear.",
+      "Cultural exchange. 10% off, and the locals bring valuable things.",
+      "Fluent. 15% off, and nothing is held back.",
+    ],
+    requires: { skill: "engineering", level: 14 },
+    requiresContact: true,
   },
   {
     id: "beacon",
