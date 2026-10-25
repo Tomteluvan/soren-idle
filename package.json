@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "braven-idle",
+  "title": "Braven Idle",
+  "description": "A sci-fi idle game. You crashed on an alien world. Gather, build, fight, survive.",
+  "icon": "extension-icon.png",
+  "author": "mikaelbro",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play",
+      "title": "Play Braven Idle",
+      "subtitle": "Braven Idle",
+      "description": "Manage your survivor: pick tasks, craft gear, check your inventory.",
+      "mode": "view"
+    },
+    {
+      "name": "ticker",
+      "title": "Braven Idle Ticker",
+      "subtitle": "Braven Idle",
+      "description": "Menu bar status that keeps your survivor working in the background.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
