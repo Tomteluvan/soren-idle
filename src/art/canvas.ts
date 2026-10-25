@@ -11,7 +11,10 @@ export interface Shade {
 
 /** Deterministic noise in [0, 1) so scenery is stable between frames. */
 export function hash(x: number, y = 0, seed = 0): number {
-  let h = Math.imul(x + 374761393, 668265263) ^ Math.imul(y + 1274126177, 2246822519) ^ Math.imul(seed + 97, 3266489917);
+  let h =
+    Math.imul(x + 374761393, 668265263) ^
+    Math.imul(y + 1274126177, 2246822519) ^
+    Math.imul(seed + 97, 3266489917);
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
@@ -56,7 +59,9 @@ export class Canvas {
   }
 
   disc(cx: number, cy: number, r: number, color: string) {
-    for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r + r * 0.5) this.set(cx + x, cy + y, color);
+    for (let y = -r; y <= r; y++)
+      for (let x = -r; x <= r; x++)
+        if (x * x + y * y <= r * r + r * 0.5) this.set(cx + x, cy + y, color);
   }
 
   /** A lit voxel face: light on top and left, dark on bottom and right. */
@@ -111,7 +116,9 @@ export class Canvas {
       open = next;
     }
     done.push(...open.values());
-    const rects = done.map((r) => `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${r.c}"/>`).join("");
+    const rects = done
+      .map((r) => `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${r.c}"/>`)
+      .join("");
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W * SCALE}" height="${H * SCALE}" viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges">${rects}</svg>`;
   }
 }

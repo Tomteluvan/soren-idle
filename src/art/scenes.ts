@@ -23,7 +23,14 @@ const IRON: Shade = { light: "#9aa3b5", mid: "#5d6578", dark: "#2f3544" };
 const WOOD = "#8a5a32";
 const SPARK = "#ffe27a";
 
-const SKIN_SUIT = { H: "#dfe6ee", V: "#35d0e8", S: "#f08a3c", D: "#c0652a", B: "#3a3f4f", K: "#5b6272" };
+const SKIN_SUIT = {
+  H: "#dfe6ee",
+  V: "#35d0e8",
+  S: "#f08a3c",
+  D: "#c0652a",
+  B: "#3a3f4f",
+  K: "#5b6272",
+};
 const SURVIVOR = [
   "..HHHHHH..",
   ".HHHHVVVH.",
@@ -44,23 +51,81 @@ const SURVIVOR_H = SURVIVOR.length;
 
 type Biome = "crash" | "canyon" | "jungle" | "base" | "badlands";
 
-const BIOMES: Record<Biome, { top: string; bottom: string; ground: string; ground2: string; mountain: string; planet: string; ring: string }> = {
-  crash: { top: "#0c0a22", bottom: "#4a2d63", ground: "#6b4a44", ground2: "#573a37", mountain: "#2a1d44", planet: "#e8a65c", ring: "#ffd9a0" },
-  canyon: { top: "#080e24", bottom: "#27406a", ground: "#5d5a6a", ground2: "#484655", mountain: "#1b2848", planet: "#8fb8ff", ring: "#d0e4ff" },
-  jungle: { top: "#06201f", bottom: "#1f6a5a", ground: "#2d5a3a", ground2: "#234830", mountain: "#0f3a37", planet: "#c0f06a", ring: "#e8ffb0" },
-  base: { top: "#141a2a", bottom: "#141a2a", ground: "#2e374c", ground2: "#242c3e", mountain: "#1a2132", planet: "#8fb8ff", ring: "#d0e4ff" },
-  badlands: { top: "#240a14", bottom: "#7a2f3a", ground: "#7a4a3a", ground2: "#623a30", mountain: "#3e1a26", planet: "#ffcf6a", ring: "#fff0b0" },
+const BIOMES: Record<
+  Biome,
+  {
+    top: string;
+    bottom: string;
+    ground: string;
+    ground2: string;
+    mountain: string;
+    planet: string;
+    ring: string;
+  }
+> = {
+  crash: {
+    top: "#0c0a22",
+    bottom: "#4a2d63",
+    ground: "#6b4a44",
+    ground2: "#573a37",
+    mountain: "#2a1d44",
+    planet: "#e8a65c",
+    ring: "#ffd9a0",
+  },
+  canyon: {
+    top: "#080e24",
+    bottom: "#27406a",
+    ground: "#5d5a6a",
+    ground2: "#484655",
+    mountain: "#1b2848",
+    planet: "#8fb8ff",
+    ring: "#d0e4ff",
+  },
+  jungle: {
+    top: "#06201f",
+    bottom: "#1f6a5a",
+    ground: "#2d5a3a",
+    ground2: "#234830",
+    mountain: "#0f3a37",
+    planet: "#c0f06a",
+    ring: "#e8ffb0",
+  },
+  base: {
+    top: "#141a2a",
+    bottom: "#141a2a",
+    ground: "#2e374c",
+    ground2: "#242c3e",
+    mountain: "#1a2132",
+    planet: "#8fb8ff",
+    ring: "#d0e4ff",
+  },
+  badlands: {
+    top: "#240a14",
+    bottom: "#7a2f3a",
+    ground: "#7a4a3a",
+    ground2: "#623a30",
+    mountain: "#3e1a26",
+    planet: "#ffcf6a",
+    ring: "#fff0b0",
+  },
 };
 
 function mix(a: string, b: string, t: number): string {
   const p = (s: string, i: number) => parseInt(s.slice(1 + i * 2, 3 + i * 2), 16);
-  const ch = (i: number) => Math.round(p(a, i) + (p(b, i) - p(a, i)) * t).toString(16).padStart(2, "0");
+  const ch = (i: number) =>
+    Math.round(p(a, i) + (p(b, i) - p(a, i)) * t)
+      .toString(16)
+      .padStart(2, "0");
   return `#${ch(0)}${ch(1)}${ch(2)}`;
 }
 
 /** Hit flash: the same shades pulled halfway to white. */
 function tint(s: Shade): Shade {
-  return { light: mix(s.light, "#ffffff", 0.6), mid: mix(s.mid, "#ffffff", 0.5), dark: mix(s.dark, "#ffffff", 0.4) };
+  return {
+    light: mix(s.light, "#ffffff", 0.6),
+    mid: mix(s.mid, "#ffffff", 0.5),
+    dark: mix(s.dark, "#ffffff", 0.4),
+  };
 }
 
 function background(c: Canvas, biome: Biome) {
@@ -171,7 +236,8 @@ function sparks(c: Canvas, x: number, y: number, frame: number, color = SPARK) {
     [0, -6],
   ];
   spots.forEach(([dx, dy], i) => {
-    if (hash(i, frame, 7) > 0.35) c.set(x + dx * (1 + frame * 0.4), y + dy * (1 + frame * 0.3), i % 2 ? "#ffffff" : color);
+    if (hash(i, frame, 7) > 0.35)
+      c.set(x + dx * (1 + frame * 0.4), y + dy * (1 + frame * 0.3), i % 2 ? "#ffffff" : color);
   });
 }
 
@@ -187,7 +253,13 @@ const SWING: { dx: number; hand: [number, number]; deg: number }[] = [
   { dx: 0, hand: [9, 5], deg: -28 },
 ];
 
-function swingScene(biome: Biome, kind: ToolKind, target: (c: Canvas, f: number, hit: boolean) => void, effectColor = SPARK, x = SX): Scene {
+function swingScene(
+  biome: Biome,
+  kind: ToolKind,
+  target: (c: Canvas, f: number, hit: boolean) => void,
+  effectColor = SPARK,
+  x = SX,
+): Scene {
   return {
     frames: 4,
     poster: 2,
@@ -205,7 +277,8 @@ function swingScene(biome: Biome, kind: ToolKind, target: (c: Canvas, f: number,
 function cube(c: Canvas, x: number, y: number, w: number, h: number, shade: Shade, vein?: string) {
   c.block(x, y, w, h, shade);
   if (!vein) return;
-  for (let j = 1; j < h - 1; j++) for (let i = 1; i < w - 1; i++) if (hash(x + i, y + j) > 0.86) c.set(x + i, y + j, vein);
+  for (let j = 1; j < h - 1; j++)
+    for (let i = 1; i < w - 1; i++) if (hash(x + i, y + j) > 0.86) c.set(x + i, y + j, vein);
 }
 
 const miningFerrite = swingScene("canyon", "pick", (c, _f, hit) => {
@@ -251,7 +324,17 @@ function salvageScene(target: (c: Canvas, f: number) => void): Scene {
 const salvageHull = salvageScene((c) => {
   cube(c, 38, 12, 11, 18, STEEL);
   cube(c, 49, 16, 10, 14, STEEL);
-  for (const [x, y] of [[40, 14], [46, 14], [40, 27], [46, 27], [52, 18], [56, 18], [52, 27], [56, 27]]) c.set(x, y, "#2c3240");
+  for (const [x, y] of [
+    [40, 14],
+    [46, 14],
+    [40, 27],
+    [46, 27],
+    [52, 18],
+    [56, 18],
+    [52, 27],
+    [56, 27],
+  ])
+    c.set(x, y, "#2c3240");
   for (let i = 0; i < 9; i++) c.set(39 + i, 21, i % 2 ? "#e8b923" : "#2c3240");
   c.rect(37, 24, 2, 1, "#ff9a3c");
 });
@@ -285,7 +368,14 @@ function forageScene(biome: Biome, target: (c: Canvas, f: number) => void, kind:
       const pose = SWING[f];
       const hand = survivor(c, SX, pose);
       tool(c, kind, hand, kind === "knife" ? pose.deg * 0.5 : pose.deg);
-      if (f === 2) sparks(c, hand[0] + (kind === "knife" ? 5 : 9), hand[1] + 1, 0, kind === "knife" ? "#fff" : "#8a5a32");
+      if (f === 2)
+        sparks(
+          c,
+          hand[0] + (kind === "knife" ? 5 : 9),
+          hand[1] + 1,
+          0,
+          kind === "knife" ? "#fff" : "#8a5a32",
+        );
     },
   };
 }
@@ -294,11 +384,16 @@ const forageGlowcap = forageScene(
   "jungle",
   (c, f) => {
     const pulse = f % 2;
-    for (const [x, y, w, shade] of [[34, 20, 8, CAP_A], [43, 16, 10, CAP_B], [54, 22, 7, CAP_A]] as [number, number, number, Shade][]) {
+    for (const [x, y, w, shade] of [
+      [34, 20, 8, CAP_A],
+      [43, 16, 10, CAP_B],
+      [54, 22, 7, CAP_A],
+    ] as [number, number, number, Shade][]) {
       cube(c, x + Math.floor(w / 2) - 1, y + 4, 3, GROUND_Y - y - 4, STALK);
       cube(c, x, y, w, 5, shade);
       const halo = pulse ? shade.light : shade.mid;
-      for (let i = 0; i < 6; i++) c.set(x - 2 + hash(i, x, f % 2) * (w + 4), y - 3 + hash(i, y, 1) * 4, halo);
+      for (let i = 0; i < 6; i++)
+        c.set(x - 2 + hash(i, x, f % 2) * (w + 4), y - 3 + hash(i, y, 1) * 4, halo);
     }
   },
   "knife",
@@ -310,8 +405,14 @@ const forageSweetroot = forageScene(
     const dig = f >= 2 ? 1 : 0;
     cube(c, 38, 26 - dig, 9, 6, TUBER);
     cube(c, 48, 27 - dig, 7, 5, TUBER);
-    for (const x of [37, 41, 45, 49, 53]) c.line(x + 1, 26 - dig, x + (x % 2 ? -2 : 2), 18 + (x % 3), LEAF.mid);
-    for (const [x, y] of [[35, 19], [43, 17], [51, 20]]) cube(c, x, y, 4, 3, LEAF);
+    for (const x of [37, 41, 45, 49, 53])
+      c.line(x + 1, 26 - dig, x + (x % 2 ? -2 : 2), 18 + (x % 3), LEAF.mid);
+    for (const [x, y] of [
+      [35, 19],
+      [43, 17],
+      [51, 20],
+    ])
+      cube(c, x, y, 4, 3, LEAF);
     c.rect(36, GROUND_Y, 22, 2, "#4a3a2a");
   },
   "shovel",
@@ -334,17 +435,21 @@ function craftScene(target: (c: Canvas, f: number) => void, kind: ToolKind, ladl
   };
 }
 
-const craftPot = craftScene((c, f) => {
-  cube(c, 36, 25, 14, 5, IRON);
-  const flame = ["#ff7a2a", "#ffd23a", "#ff9a3c"];
-  for (let i = 0; i < 6; i++) c.rect(37 + i * 2, 24 - ((i + f) % 2), 2, 1, flame[(i + f) % 3]);
-  cube(c, 36, 17, 14, 7, STEEL);
-  c.rect(37, 17, 12, 1, "#2a2f3c");
-  for (let i = 0; i < 4; i++) {
-    const t = (f + i) % 4;
-    c.set(39 + i * 3 + (t % 2), 14 - t * 2 + 4, "#c9d3e6");
-  }
-}, "ladle", true);
+const craftPot = craftScene(
+  (c, f) => {
+    cube(c, 36, 25, 14, 5, IRON);
+    const flame = ["#ff7a2a", "#ffd23a", "#ff9a3c"];
+    for (let i = 0; i < 6; i++) c.rect(37 + i * 2, 24 - ((i + f) % 2), 2, 1, flame[(i + f) % 3]);
+    cube(c, 36, 17, 14, 7, STEEL);
+    c.rect(37, 17, 12, 1, "#2a2f3c");
+    for (let i = 0; i < 4; i++) {
+      const t = (f + i) % 4;
+      c.set(39 + i * 3 + (t % 2), 14 - t * 2 + 4, "#c9d3e6");
+    }
+  },
+  "ladle",
+  true,
+);
 
 const craftAnvil = craftScene((c, f) => {
   cube(c, 36, 28, 14, 2, IRON);
@@ -373,11 +478,15 @@ function craftBench(color: string): Scene {
     c.line(x, y, x + s - 1, y + s - 1, color);
     c.line(x + s - 1, y, x, y + s - 1, color);
     c.line(50, y + s + 1, 50, 19, "#56627a");
-    for (let i = 0; i < 5; i++) c.set(x - 2 + hash(i, f, 3) * 12, y - 2 + hash(i, f, 4) * 12, "#ffffff");
+    for (let i = 0; i < 5; i++)
+      c.set(x - 2 + hash(i, f, 3) * 12, y - 2 + hash(i, f, 4) * 12, "#ffffff");
   }, "hammer");
 }
 
-function fightScene(monster: (c: Canvas, f: number, mx: number, flash: boolean) => void, mx = 42): Scene {
+function fightScene(
+  monster: (c: Canvas, f: number, mx: number, flash: boolean) => void,
+  mx = 42,
+): Scene {
   const poses = [
     { dx: 0, hand: [10, 6] as [number, number], deg: -30 },
     { dx: -1, hand: [9, 4] as [number, number], deg: -75 },
@@ -424,7 +533,8 @@ const fightSkitter = fightScene((c, f, mx, flash) => {
 const STALKER = { light: "#e09a62", mid: "#a8603a", dark: "#5e3322" };
 const fightStalker = fightScene((c, f, mx, flash) => {
   const shade = flash ? tint(STALKER) : STALKER;
-  for (const [i, x] of [0, 4, 10, 14].entries()) cube(c, mx + x, GROUND_Y - 6 + ((i + f) % 2), 3, 6 - ((i + f) % 2), STALKER);
+  for (const [i, x] of [0, 4, 10, 14].entries())
+    cube(c, mx + x, GROUND_Y - 6 + ((i + f) % 2), 3, 6 - ((i + f) % 2), STALKER);
   cube(c, mx, GROUND_Y - 15, 18, 9, shade);
   cube(c, mx - 7, GROUND_Y - 18, 9, 8, shade);
   c.set(mx - 5, GROUND_Y - 15, "#ffe23a");
@@ -435,7 +545,18 @@ const fightStalker = fightScene((c, f, mx, flash) => {
   for (let i = 0; i < 3; i++) c.set(mx + 4 + i * 4, GROUND_Y - 15 + 1, STALKER.dark);
 }, 38);
 
-const WRAITH = ["...WWWW...", "..WWWWWW..", ".WWWWWWWW.", ".WEWWWWEW.", ".WWWWWWWW.", ".WWWCCWWW.", ".WWWCCWWW.", ".WWWWWWWW.", "..WWWWWW..", "..WWWWWW.."];
+const WRAITH = [
+  "...WWWW...",
+  "..WWWWWW..",
+  ".WWWWWWWW.",
+  ".WEWWWWEW.",
+  ".WWWWWWWW.",
+  ".WWWCCWWW.",
+  ".WWWCCWWW.",
+  ".WWWWWWWW.",
+  "..WWWWWW..",
+  "..WWWWWW..",
+];
 const fightWraith = fightScene((c, f, mx, flash) => {
   const bob = f % 2 ? -1 : 0;
   const base = GROUND_Y - 22 + bob;
@@ -444,7 +565,8 @@ const fightWraith = fightScene((c, f, mx, flash) => {
   c.sprite(WRAITH, pal, mx, base);
   // ragged hem
   for (let i = 0; i < 10; i += 2) c.rect(mx + i + (f % 2), base + 10, 1, 3 + ((i + f) % 3), body);
-  for (let i = 0; i < 8; i++) c.set(mx - 3 + hash(i, f, 5) * 16, base - 2 + hash(i, f, 6) * 16, "#b9a0ff");
+  for (let i = 0; i < 8; i++)
+    c.set(mx - 3 + hash(i, f, 5) * 16, base - 2 + hash(i, f, 6) * 16, "#b9a0ff");
 }, 42);
 
 const camp: Scene = {
@@ -459,7 +581,14 @@ const camp: Scene = {
     // fire
     const flame = ["#ff7a2a", "#ffd23a", "#ff9a3c"];
     cube(c, 28, 28, 7, 2, { light: "#8a5a32", mid: "#6a4224", dark: "#3a2414" });
-    for (let i = 0; i < 4; i++) c.rect(29 + i * 2 - (i === 3 ? 1 : 0), 26 - ((i + f) % 3), 2, 2 + ((i + f) % 3), flame[(i + f) % 3]);
+    for (let i = 0; i < 4; i++)
+      c.rect(
+        29 + i * 2 - (i === 3 ? 1 : 0),
+        26 - ((i + f) % 3),
+        2,
+        2 + ((i + f) % 3),
+        flame[(i + f) % 3],
+      );
     c.set(30 + (f % 3), 21 - f, "#ffe27a");
     survivor(c, 12, { hand: [8, 7] });
   },
@@ -487,4 +616,5 @@ const SCENES: Record<string, Scene> = {
   fight_wraith: fightWraith,
 };
 
-export const sceneFor = (taskId: string | null | undefined): Scene => (taskId && SCENES[taskId]) || camp;
+export const sceneFor = (taskId: string | null | undefined): Scene =>
+  (taskId && SCENES[taskId]) || camp;
