@@ -20,8 +20,9 @@ import {
   taskDurationMs,
   xpForLevel,
 } from "./engine/engine";
-import { bar, formatBundle, formatDuration, formatReport } from "./engine/format";
+import { bar, formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
 import { resetState, update } from "./engine/storage";
+import { sellPrice } from "./engine/trade";
 import { BuildingDef, BuildingId, GameState, ItemId, Report, SkillId, TaskDef } from "./engine/types";
 
 type View = "overview" | SkillId | "base" | "inventory";
@@ -170,7 +171,7 @@ function Overview(props: {
                 "```",
                 `HP  ${bar(hpFraction)} ${Math.floor(state.hp)}/${maxHp(state)}`,
                 "```",
-                `Rations: **${count(state, "ration")}**`,
+                `Rations: **${count(state, "ration")}** · Credits: **${formatCredits(state.credits)}**`,
               ].join("\n")}
             />
           }
@@ -310,7 +311,11 @@ function Inventory(props: { state: GameState; onEat: () => void }) {
             title={item.name}
             icon={Icon.Box}
             accessories={[{ text: `×${Math.floor(count(props.state, id))}` }]}
-            detail={<List.Item.Detail markdown={`# ${item.name}\n${item.description}`} />}
+            detail={
+              <List.Item.Detail
+                markdown={`# ${item.name}\n${item.description}\n\nWorth **${formatCredits(sellPrice(props.state, id))}** each.`}
+              />
+            }
             actions={
               <ActionPanel>
                 {item.heal && <Action title={`Eat (+${item.heal} HP)`} icon={Icon.Heart} onAction={props.onEat} />}

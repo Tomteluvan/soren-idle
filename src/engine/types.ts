@@ -23,6 +23,8 @@ export interface ItemDef {
   id: ItemId;
   name: string;
   description: string;
+  /** What one unit is worth in Credits at the base sell rate. */
+  value: number;
   /** Heals this much HP when eaten. */
   heal?: number;
   /** Owning this item makes tasks of `skill` take `speed` times as long (best one wins). */
@@ -96,6 +98,8 @@ export interface GameState {
   hp: number;
   xp: Record<SkillId, number>;
   inventory: Bundle;
+  /** Currency earned by trading with the locals. */
+  credits: number;
   buildings: Partial<Record<BuildingId, number>>;
   /** Fractional output of passive buildings, carried between ticks. */
   passive: Partial<Record<BuildingId, number>>;

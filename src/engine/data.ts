@@ -1,44 +1,126 @@
 import { BuildingDef, BuildingId, ItemDef, ItemId, SkillDef, SkillId, TaskDef } from "./types";
 
 export const SKILLS: SkillDef[] = [
-  { id: "salvaging", name: "Salvaging", blurb: "Pick the wreck of your ship apart for metal and electronics." },
+  {
+    id: "salvaging",
+    name: "Salvaging",
+    blurb: "Pick the wreck of your ship apart for metal and electronics.",
+  },
   { id: "mining", name: "Mining", blurb: "Crack open the alien rock for ore and crystals." },
-  { id: "foraging", name: "Foraging", blurb: "Find out which local plants are food and which are lethal." },
-  { id: "engineering", name: "Engineering", blurb: "Turn raw materials into rations, tools and gear." },
-  { id: "combat", name: "Combat", blurb: "The wildlife disagrees with your presence. Disagree back." },
+  {
+    id: "foraging",
+    name: "Foraging",
+    blurb: "Find out which local plants are food and which are lethal.",
+  },
+  {
+    id: "engineering",
+    name: "Engineering",
+    blurb: "Turn raw materials into rations, tools and gear.",
+  },
+  {
+    id: "combat",
+    name: "Combat",
+    blurb: "The wildlife disagrees with your presence. Disagree back.",
+  },
 ];
 
 export const ITEMS: Record<ItemId, ItemDef> = {
-  scrap_metal: { id: "scrap_metal", name: "Scrap Metal", description: "Twisted hull plating. Mostly still metal." },
-  circuit_scrap: { id: "circuit_scrap", name: "Circuit Scrap", description: "Fried boards with a few good components left." },
-  ferrite_ore: { id: "ferrite_ore", name: "Ferrite Ore", description: "Dense, dark ore. Magnetic enough to annoy your compass." },
-  lumina_crystal: { id: "lumina_crystal", name: "Lumina Crystal", description: "Glows faintly. Hums when you hold it." },
-  glowcap: { id: "glowcap", name: "Glowcap", description: "Bioluminescent fungus. Your scanner says it is probably edible." },
-  sweetroot: { id: "sweetroot", name: "Sweetroot", description: "A starchy tuber. Tastes like regret and sugar." },
-  ration: { id: "ration", name: "Glowcap Ration", description: "Cooked, pressed and vaguely palatable.", heal: 15 },
-  alloy_plate: { id: "alloy_plate", name: "Alloy Plate", description: "Smelted plating, a building block for better gear." },
+  scrap_metal: {
+    id: "scrap_metal",
+    name: "Scrap Metal",
+    description: "Twisted hull plating. Mostly still metal.",
+    value: 2,
+  },
+  circuit_scrap: {
+    id: "circuit_scrap",
+    name: "Circuit Scrap",
+    description: "Fried boards with a few good components left.",
+    value: 5,
+  },
+  ferrite_ore: {
+    id: "ferrite_ore",
+    name: "Ferrite Ore",
+    description: "Dense, dark ore. Magnetic enough to annoy your compass.",
+    value: 3,
+  },
+  lumina_crystal: {
+    id: "lumina_crystal",
+    name: "Lumina Crystal",
+    description: "Glows faintly. Hums when you hold it.",
+    value: 25,
+  },
+  glowcap: {
+    id: "glowcap",
+    name: "Glowcap",
+    description: "Bioluminescent fungus. Your scanner says it is probably edible.",
+    value: 2,
+  },
+  sweetroot: {
+    id: "sweetroot",
+    name: "Sweetroot",
+    description: "A starchy tuber. Tastes like regret and sugar.",
+    value: 4,
+  },
+  ration: {
+    id: "ration",
+    name: "Glowcap Ration",
+    description: "Cooked, pressed and vaguely palatable.",
+    value: 10,
+    heal: 15,
+  },
+  alloy_plate: {
+    id: "alloy_plate",
+    name: "Alloy Plate",
+    description: "Smelted plating, a building block for better gear.",
+    value: 18,
+  },
   cutting_torch: {
     id: "cutting_torch",
     name: "Cutting Torch",
     description: "Salvaging takes 20% less time.",
+    value: 120,
     tool: { skill: "salvaging", speed: 0.8 },
   },
   plasma_drill: {
     id: "plasma_drill",
     name: "Plasma Drill",
     description: "Mining takes 20% less time.",
+    value: 400,
     tool: { skill: "mining", speed: 0.8 },
   },
   harvest_kit: {
     id: "harvest_kit",
     name: "Harvest Kit",
     description: "Foraging takes 20% less time.",
+    value: 200,
     tool: { skill: "foraging", speed: 0.8 },
   },
-  pulse_blade: { id: "pulse_blade", name: "Pulse Blade", description: "+4 damage per combat round.", weaponDamage: 4 },
-  composite_armor: { id: "composite_armor", name: "Composite Armor", description: "Take 1 less damage per enemy hit.", armor: 1 },
-  chitin_shard: { id: "chitin_shard", name: "Chitin Shard", description: "Light, hard, and still slightly twitchy." },
-  xeno_core: { id: "xeno_core", name: "Xeno Core", description: "A dense organ that pulses with strange energy." },
+  pulse_blade: {
+    id: "pulse_blade",
+    name: "Pulse Blade",
+    description: "+4 damage per combat round.",
+    value: 350,
+    weaponDamage: 4,
+  },
+  composite_armor: {
+    id: "composite_armor",
+    name: "Composite Armor",
+    description: "Take 1 less damage per enemy hit.",
+    value: 500,
+    armor: 1,
+  },
+  chitin_shard: {
+    id: "chitin_shard",
+    name: "Chitin Shard",
+    description: "Light, hard, and still slightly twitchy.",
+    value: 6,
+  },
+  xeno_core: {
+    id: "xeno_core",
+    name: "Xeno Core",
+    description: "A dense organ that pulses with strange energy.",
+    value: 150,
+  },
 };
 
 export const TASKS: TaskDef[] = [

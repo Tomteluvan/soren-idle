@@ -2,7 +2,7 @@ import { Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
 import { count, levelOf, maxHp, stopTask } from "./engine/engine";
-import { formatReport } from "./engine/format";
+import { formatCredits, formatReport } from "./engine/format";
 import { update } from "./engine/storage";
 
 export default function Command() {
@@ -24,6 +24,7 @@ export default function Command() {
             <MenuBarExtra.Item title={task ? task.name : "Idle"} />
             <MenuBarExtra.Item title={`HP ${Math.floor(state.hp)}/${maxHp(state)}`} />
             <MenuBarExtra.Item title={`Rations ${count(state, "ration")}`} />
+            <MenuBarExtra.Item title={`Credits ${formatCredits(state.credits)}`} />
           </MenuBarExtra.Section>
           {data.report.stoppedReason && (
             <MenuBarExtra.Section>

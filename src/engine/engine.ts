@@ -15,6 +15,7 @@ export function newGame(now = Date.now()): GameState {
     hp: maxHpFor(0),
     xp: Object.fromEntries(SKILLS.map((s) => [s.id, 0])) as Record<SkillId, number>,
     inventory: {},
+    credits: 0,
     buildings: {},
     passive: {},
     stats: { cycles: 0, kills: 0, deaths: 0 },

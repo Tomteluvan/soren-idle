@@ -26,3 +26,5 @@ export function formatReport(r: Report): string {
   if (r.stoppedReason) parts.push(r.stoppedReason);
   return parts.join(" · ");
 }
+
+export const formatCredits = (n: number) => `${Math.floor(n).toLocaleString("en-US")} cr`;
