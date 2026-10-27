@@ -34,6 +34,7 @@ export function keepCount(s: GameState, id: ItemId): number {
 }
 
 export function sellableCount(s: GameState, id: ItemId): number {
+  if (ITEMS[id].unsellable) return 0;
   return Math.max(0, Math.floor(count(s, id)) - keepCount(s, id));
 }
 
@@ -56,8 +57,9 @@ export function sell(
   if (amount < 1) {
     return {
       state: s,
-      error:
-        count(s, id) < 1
+      error: ITEMS[id].unsellable
+        ? "The locals will not buy that"
+        : count(s, id) < 1
           ? "Nothing to sell"
           : (s.keep[id] ?? 0) > 0
             ? "Keeping the ones you set aside"

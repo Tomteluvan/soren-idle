@@ -8,6 +8,7 @@ import {
   REROLL_COST,
   TASK_BY_ID,
   TASKS,
+  TIER_LEVELS,
 } from "./data";
 import { levelFromXp } from "./levels";
 import { pick, randomInt } from "./rng";
@@ -30,10 +31,13 @@ export const bountyLevel = (s: GameState) => {
 /** Harder creatures pay better and sit in a higher tier. */
 export const bountyTier = (task: TaskDef) => (task.levelReq < 8 ? 1 : task.levelReq < 20 ? 2 : 3);
 
-/** The hunts a bounty can ask for: creatures you are strong enough to fight. */
+/** The hunts a bounty can ask for: creatures you are strong enough to fight, in unlocked tiers. */
 export function huntable(s: GameState): TaskDef[] {
   const level = levelFromXp(s.xp.combat);
-  return TASKS.filter((t) => t.monster && !t.boss && t.levelReq <= level);
+  const bounty = bountyLevel(s);
+  return TASKS.filter(
+    (t) => t.monster && !t.boss && t.levelReq <= level && TIER_LEVELS[bountyTier(t) - 1] <= bounty,
+  );
 }
 
 function makeBounty(s: GameState, avoid: string[]): Bounty | undefined {

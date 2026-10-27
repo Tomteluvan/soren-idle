@@ -4,6 +4,7 @@ import {
   CropDef,
   ItemDef,
   ItemId,
+  ShopEntry,
   SkillDef,
   SkillId,
   StockItem,
@@ -190,6 +191,31 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     description: "Take 3 less damage per enemy hit. Light enough to forget you are wearing it.",
     value: 900,
     armor: 3,
+  },
+  veyari_lance: {
+    id: "veyari_lance",
+    name: "Veyari Lance",
+    description:
+      "+14 damage per combat round. A hunter's lance, made by the locals and given to those they trust.",
+    value: 0,
+    weaponDamage: 14,
+    unsellable: true,
+  },
+  veyari_warplate: {
+    id: "veyari_warplate",
+    name: "Veyari Warplate",
+    description: "Take 7 less damage per enemy hit. Grown, not forged.",
+    value: 0,
+    armor: 7,
+    unsellable: true,
+  },
+  stim_pack: {
+    id: "stim_pack",
+    name: "Stim Pack",
+    description: "A local battlefield remedy. Heals far more than a ration and tastes of copper.",
+    value: 0,
+    heal: 80,
+    unsellable: true,
   },
 };
 
@@ -406,6 +432,16 @@ export const TASKS: TaskDef[] = [
     monster: { name: "Rift Wraith", hp: 200, damage: 14, drops: { xeno_core: 1 } },
   },
 ];
+
+/** What the Bounty Shop sells: things nobody can craft or trade for. */
+export const BOUNTY_SHOP: ShopEntry[] = [
+  { item: "stim_pack", cost: 8, levelReq: 2 },
+  { item: "veyari_lance", cost: 600, levelReq: 4 },
+  { item: "veyari_warplate", cost: 900, levelReq: 5 },
+];
+
+/** Bounty level needed before the board offers a tier (index 0 is tier 1). */
+export const TIER_LEVELS = [1, 2, 4];
 
 /** Share of an item's value the locals pay, by Trading Hub level. */
 export const HUB_SELL_RATES = [0.6, 0.7, 0.8, 0.9, 1];

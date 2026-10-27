@@ -24,7 +24,10 @@ export type ItemId =
   | "skyweave_thread"
   | "aether_cell"
   | "honey_ration"
-  | "skyweave_suit";
+  | "skyweave_suit"
+  | "veyari_lance"
+  | "veyari_warplate"
+  | "stim_pack";
 
 export type Bundle = Partial<Record<ItemId, number>>;
 
@@ -42,6 +45,17 @@ export interface ItemDef {
   weaponDamage?: number;
   /** Owning this item reduces damage taken per round. */
   armor?: number;
+  /** The locals do not buy this: it cannot be sold. */
+  unsellable?: boolean;
+}
+
+/** One thing the Bounty Shop sells. */
+export interface ShopEntry {
+  item: ItemId;
+  /** Price in Bounty Marks. */
+  cost: number;
+  /** Bounty level needed before you can buy it. */
+  levelReq: number;
 }
 
 export interface SkillDef {

@@ -30,8 +30,9 @@ function trader(
 }
 
 describe("item values", () => {
-  it("every item is worth something", () => {
-    for (const item of Object.values(ITEMS)) expect(item.value).toBeGreaterThan(0);
+  it("every item the locals buy is worth something", () => {
+    for (const item of Object.values(ITEMS))
+      if (!item.unsellable) expect(item.value, item.id).toBeGreaterThan(0);
   });
 
   it("everything the locals sell costs more than it pays out", () => {

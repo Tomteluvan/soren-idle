@@ -68,6 +68,8 @@ import {
 } from "./engine/trade";
 import { abandonBounty, acceptBounty, bountyTarget, rerollBoard } from "./engine/bounty";
 import { Bounties } from "./bounties-view";
+import { buyFromShop } from "./engine/shop";
+import { BountyShop } from "./shop-view";
 import { Hydroponics } from "./hydroponics-view";
 import { Stats } from "./stats-view";
 import { Trade } from "./trade-view";
@@ -82,7 +84,7 @@ import {
   TaskDef,
 } from "./engine/types";
 
-type View = "overview" | SkillId | "base" | "bounties" | "trade" | "inventory" | "stats";
+type View = "overview" | SkillId | "base" | "bounties" | "shop" | "trade" | "inventory" | "stats";
 
 /** Auto-eat choices: share of max HP, with 0 meaning only when the next fight needs it. */
 const EAT_LEVELS: [number, string][] = [
@@ -187,6 +189,7 @@ export default function Command() {
           <List.Dropdown.Item title="Base" value="base" icon={Icon.House} />
           <List.Dropdown.Item title="Trade" value="trade" icon={Icon.Coins} />
           <List.Dropdown.Item title="Bounties" value="bounties" icon={Icon.Flag} />
+          <List.Dropdown.Item title="Bounty Shop" value="shop" icon={Icon.Cart} />
           <List.Dropdown.Item title="Inventory" value="inventory" icon={Icon.Box} />
           <List.Dropdown.Item title="Stats" value="stats" icon={Icon.BarChart} />
         </List.Dropdown>
@@ -250,6 +253,17 @@ export default function Command() {
             )
           }
           onHunt={(taskId) => act((s) => startTask(s, taskId))}
+        />
+      )}
+      {view === "shop" && (
+        <BountyShop
+          state={state}
+          onBuy={(id) =>
+            act(
+              (s) => buyFromShop(s, id),
+              (r) => `Bought ${ITEMS[id].name} for ${formatMarks(r.cost ?? 0)}`,
+            )
+          }
         />
       )}
       {view === "inventory" && (
@@ -664,7 +678,7 @@ function Inventory(props: {
             ]}
             detail={
               <List.Item.Detail
-                markdown={`# ${item.name}\n${item.description}\n\nWorth **${formatCredits(sellPrice(state, id))}** each.`}
+                markdown={`# ${item.name}\n${item.description}${item.unsellable ? "\n\n_The locals will not buy this._" : `\n\nWorth **${formatCredits(sellPrice(state, id))}** each.`}`}
               />
             }
             actions={
