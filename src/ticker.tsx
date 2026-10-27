@@ -1,12 +1,23 @@
-import { Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
+import { getPreferenceValues, Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
 import { contactRemainingMs, count, levelOf, maxHp, stopTask } from "./engine/engine";
 import { formatCredits, formatDuration, formatReport } from "./engine/format";
+import { ripeCount } from "./engine/hydroponics";
 import { update } from "./engine/storage";
+import { notify } from "./notify";
 
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(() => update());
+  const { data, isLoading, revalidate } = usePromise(async () => {
+    const result = await update();
+    const { stoppedReason, completed } = result.report;
+    if (
+      (stoppedReason || completed) &&
+      getPreferenceValues<{ notifications: boolean }>().notifications
+    )
+      notify("Braven Idle", stoppedReason ?? completed ?? "");
+    return result;
+  });
 
   const state = data?.state;
   const task = state?.activeTask ? TASK_BY_ID[state.activeTask] : undefined;
@@ -30,13 +41,19 @@ export default function Command() {
             <MenuBarExtra.Item title={`HP ${Math.floor(state.hp)}/${maxHp(state)}`} />
             <MenuBarExtra.Item title={`Rations ${count(state, "ration")}`} />
             <MenuBarExtra.Item title={`Credits ${formatCredits(state.credits)}`} />
+            {ripeCount(state) > 0 && (
+              <MenuBarExtra.Item title={`Hydroponics: ${ripeCount(state)} ready to harvest`} />
+            )}
             {contactRemainingMs(state) !== null && (
               <MenuBarExtra.Item
                 title={`Locals arrive in ${formatDuration(contactRemainingMs(state) ?? 0)}`}
               />
             )}
           </MenuBarExtra.Section>
-          {(data.report.stoppedReason || data.report.notices.length > 0) && (
+          {(data.report.stoppedReason ||
+            data.report.completed ||
+            data.report.notices.length > 0 ||
+            data.report.levelUps.length > 0) && (
             <MenuBarExtra.Section>
               <MenuBarExtra.Item title={formatReport(data.report)} />
             </MenuBarExtra.Section>

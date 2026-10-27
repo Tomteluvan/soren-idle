@@ -9,7 +9,16 @@ import {
   SKILLS,
   TASK_BY_ID,
 } from "./data";
-import { BuildingId, Bundle, GameState, ItemId, Report, SkillId, TaskDef } from "./types";
+import {
+  BuildingId,
+  Bundle,
+  FoodPriority,
+  GameState,
+  ItemId,
+  Report,
+  SkillId,
+  TaskDef,
+} from "./types";
 
 const FOOD_HEAL_THRESHOLD = 0.5;
 const REGEN_HP_PER_MS = 0.2 / 1000;
@@ -22,6 +31,7 @@ export function newGame(now = Date.now()): GameState {
     lastTick: now,
     activeTask: null,
     taskProgressMs: 0,
+    taskRemaining: null,
     hp: maxHpFor(0),
     xp: Object.fromEntries(SKILLS.map((s) => [s.id, 0])) as Record<SkillId, number>,
     inventory: {},
@@ -29,8 +39,11 @@ export function newGame(now = Date.now()): GameState {
     contactAt: null,
     buildings: {},
     passive: {},
+    keep: {},
+    settings: { eatBelow: 0, foodPriority: "weakest" },
+    plots: [],
     hints: [],
-    stats: { cycles: 0, kills: 0, deaths: 0 },
+    stats: { cycles: 0, kills: 0, deaths: 0, produced: {}, creditsEarned: 0 },
   };
 }
 
@@ -167,9 +180,45 @@ export function fightDamage(s: GameState, task: TaskDef): number {
   return Math.ceil(rounds * Math.max(1, m.damage - playerArmor(s)) * 0.4);
 }
 
+export interface TaskRates {
+  xpPerHour: number;
+  /** What one hour of this task makes (outputs, or monster drops). */
+  itemsPerHour: Bundle;
+  /** What one hour of this task uses up. */
+  inputsPerHour: Bundle;
+  /** Expected HP lost per hour in combat. */
+  hpLossPerHour: number;
+  /** Time to the next level at this rate, or null at the level cap. */
+  nextLevelMs: number | null;
+}
+
+const scaleBundle = (bundle: Bundle = {}, k: number): Bundle =>
+  Object.fromEntries(Object.entries(bundle).map(([id, n]) => [id, n * k]));
+
+/** What doing this task nonstop would give per hour, at your current gear. */
+export function taskRates(s: GameState, task: TaskDef): TaskRates {
+  const perHour = 3_600_000 / taskDurationMs(s, task);
+  const level = levelOf(s, task.skill);
+  const xpPerHour = task.xp * perHour;
+  return {
+    xpPerHour,
+    itemsPerHour: scaleBundle(task.monster ? task.monster.drops : task.outputs, perHour),
+    inputsPerHour: scaleBundle(task.inputs, perHour),
+    hpLossPerHour: task.monster ? fightDamage(s, task) * perHour : 0,
+    nextLevelMs:
+      level >= MAX_LEVEL
+        ? null
+        : Math.ceil(((xpForLevel(level + 1) - s.xp[task.skill]) / xpPerHour) * 3_600_000),
+  };
+}
+
 // --- actions ----------------------------------------------------------------
 
-export function startTask(s: GameState, taskId: string): { state: GameState; error?: string } {
+export function startTask(
+  s: GameState,
+  taskId: string,
+  runs?: number,
+): { state: GameState; error?: string } {
   const task = TASK_BY_ID[taskId];
   if (!task) return { state: s, error: "Unknown task" };
   if (levelOf(s, task.skill) < task.levelReq)
@@ -182,18 +231,23 @@ export function startTask(s: GameState, taskId: string): { state: GameState; err
     return { state: s, error: "You already own this" };
   }
   if (!canAfford(s, task.inputs)) return { state: s, error: "Missing materials" };
-  return { state: { ...s, activeTask: taskId, taskProgressMs: 0 } };
+  const limit = task.once ? 1 : runs && runs > 0 ? Math.floor(runs) : null;
+  return { state: { ...s, activeTask: taskId, taskProgressMs: 0, taskRemaining: limit } };
 }
 
 export function stopTask(s: GameState): GameState {
-  return { ...s, activeTask: null, taskProgressMs: 0 };
+  return { ...s, activeTask: null, taskProgressMs: 0, taskRemaining: null };
 }
 
-/** The weakest food the survivor owns, so strong food is not wasted on small wounds. */
-export function foodOwned(s: GameState): ItemId | undefined {
+/** The food the survivor eats first: the weakest by default, so strong food is not wasted. */
+export function foodOwned(
+  s: GameState,
+  priority: FoodPriority = s.settings.foodPriority,
+): ItemId | undefined {
+  const sign = priority === "weakest" ? 1 : -1;
   return Object.values(ITEMS)
     .filter((i) => i.heal && count(s, i.id) > 0)
-    .sort((a, b) => (a.heal ?? 0) - (b.heal ?? 0))[0]?.id;
+    .sort((a, b) => sign * ((a.heal ?? 0) - (b.heal ?? 0)))[0]?.id;
 }
 
 export function eat(
@@ -210,7 +264,7 @@ export function eat(
 
 // --- simulation -------------------------------------------------------------
 
-function gainXp(s: GameState, skill: SkillId, amount: number, report: Report) {
+export function gainXp(s: GameState, skill: SkillId, amount: number, report: Report) {
   const before = levelFromXp(s.xp[skill]);
   s.xp[skill] += amount;
   report.xp[skill] = (report.xp[skill] ?? 0) + amount;
@@ -223,11 +277,9 @@ function gainXp(s: GameState, skill: SkillId, amount: number, report: Report) {
 function runCycle(s: GameState, task: TaskDef, report: Report): string | undefined {
   if (task.monster) {
     const damage = fightDamage(s, task);
-    for (
-      let food = foodOwned(s);
-      food && s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) && s.hp < maxHp(s);
-      food = foodOwned(s)
-    ) {
+    const wantsFood = () =>
+      s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);
+    for (let food = foodOwned(s); food && wantsFood() && s.hp < maxHp(s); food = foodOwned(s)) {
       s.inventory[food] = count(s, food) - 1;
       s.hp = Math.min(maxHp(s), s.hp + (ITEMS[food].heal ?? 0));
     }
@@ -277,8 +329,9 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
     (task?.skill === "combat" ? 0 : REGEN_HP_PER_MS) +
     SHELTER_REGEN_HP_PER_MS * buildingLevel(s, "shelter");
   s.hp = Math.min(maxHp(s), s.hp + elapsed * regen);
-  if (!task) return { state: s, report };
+  if (!task) return finish(s, report);
 
+  if (task.once && s.taskRemaining === null) s.taskRemaining = 1;
   let remaining = s.taskProgressMs + elapsed;
   // Tool crafted mid-run changes duration, so recompute each cycle.
   while (s.activeTask) {
@@ -291,11 +344,20 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
       break;
     }
     remaining -= duration;
-    if (task.once) {
+    if (s.taskRemaining !== null && --s.taskRemaining <= 0) {
+      report.completed = `Finished ${task.name}`;
       s.activeTask = null;
       break;
     }
   }
   s.taskProgressMs = s.activeTask ? remaining : 0;
+  if (!s.activeTask) s.taskRemaining = null;
+  return finish(s, report);
+}
+
+/** Folds what the report gained into the lifetime totals. */
+function finish(s: GameState, report: Report): { state: GameState; report: Report } {
+  for (const [id, n] of Object.entries(report.items) as [ItemId, number][])
+    s.stats.produced[id] = (s.stats.produced[id] ?? 0) + n;
   return { state: s, report };
 }

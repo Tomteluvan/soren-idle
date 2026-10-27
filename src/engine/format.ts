@@ -26,8 +26,31 @@ export function formatReport(r: Report): string {
   if (Object.keys(r.items).length) parts.push(`+${formatBundle(r.items)}`);
   for (const up of r.levelUps) parts.push(`${SKILL_BY_ID[up.skill].name} level ${up.level}!`);
   parts.push(...r.notices);
+  if (r.completed) parts.push(r.completed);
   if (r.stoppedReason) parts.push(r.stoppedReason);
   return parts.join(" · ");
 }
 
 export const formatCredits = (n: number) => `${Math.floor(n).toLocaleString("en-US")} cr`;
+
+export function formatDate(ms: number): string {
+  return new Date(ms).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+/** "per hour" figures read better rounded: 1,240, 12.5, 0.4. */
+export function formatRate(n: number): string {
+  if (n >= 100) return Math.round(n).toLocaleString("en-US");
+  if (n >= 10) return n.toFixed(0);
+  return n.toFixed(1);
+}
+
+export function formatRates(bundle: Bundle = {}): string {
+  const parts = (Object.entries(bundle) as [ItemId, number][]).map(
+    ([id, n]) => `${formatRate(n)} ${ITEMS[id].name}`,
+  );
+  return parts.length ? parts.join(", ") : "nothing";
+}

@@ -23,7 +23,18 @@
       "subtitle": "Braven Idle",
       "description": "Menu bar status that keeps your survivor working in the background.",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "notifications",
+          "type": "checkbox",
+          "label": "Notifications",
+          "title": "Notify when a task stops",
+          "description": "Show a macOS notification when a task stops or a run finishes while you are away.",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

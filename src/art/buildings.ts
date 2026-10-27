@@ -294,6 +294,58 @@ const ART: Record<BuildingId, Draw> = {
       ].join(""),
     ),
 
+  hydroponic_bay: () => {
+    // three racked trays with sprouts at different heights, a grow lamp over each
+    const tray = (y: number, sprouts: number[]) =>
+      [
+        rect(96, y + 14, 128, 6, INK.ore, INK.bg, 1),
+        rect(100, y + 20, 4, 14, INK.dim),
+        rect(216, y + 20, 4, 14, INK.dim),
+        ...sprouts.map((h, i) => {
+          const x = 110 + i * 26;
+          return (
+            stroke(`M${x} ${y + 14}V${y + 14 - h}`, INK.glow, 2) +
+            poly(
+              [
+                [x, y + 14 - h],
+                [x - 7, y + 8 - h],
+                [x - 2, y + 16 - h],
+              ],
+              INK.glow,
+            ) +
+            poly(
+              [
+                [x, y + 14 - h],
+                [x + 7, y + 8 - h],
+                [x + 2, y + 16 - h],
+              ],
+              INK.white,
+            )
+          );
+        }),
+        rect(96, y - 18, 128, 3, INK.white),
+        poly(
+          [
+            [100, y - 15],
+            [220, y - 15],
+            [232, y - 4],
+            [88, y - 4],
+          ],
+          INK.glow,
+          "none",
+          0,
+        ),
+      ].join("");
+    return [
+      shadow(160),
+      rect(88, 40, 4, GROUND - 40, INK.dim),
+      rect(228, 40, 4, GROUND - 40, INK.dim),
+      tray(56, [6, 10, 14, 10, 6]),
+      tray(98, [10, 14, 8, 14, 10]),
+      tray(140, [4, 4, 6, 4, 4]),
+    ].join("");
+  },
+
   forager_drone: () =>
     drone(
       82,

@@ -15,6 +15,7 @@ import { artMarkdown, buildingMarkdown, FRAME_MS, preloadMarkdown } from "./art"
 import {
   BUILDING_BY_ID,
   BUILDINGS,
+  CROP_BY_ID,
   ITEMS,
   SKILLS,
   SKILL_BY_ID,
@@ -34,6 +35,7 @@ import {
   maxHp,
   playerArmor,
   playerDamage,
+  taskRates,
   powerCapacity,
   powerUsed,
   startTask,
@@ -41,15 +43,35 @@ import {
   taskDurationMs,
   xpForLevel,
 } from "./engine/engine";
-import { bar, formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
+import {
+  bar,
+  formatBundle,
+  formatCredits,
+  formatDuration,
+  formatRates,
+  formatReport,
+} from "./engine/format";
 import { dismissHint, nextHint } from "./engine/hints";
 import { exportSave, importSave } from "./engine/migrate";
-import { resetState, saveState, update } from "./engine/storage";
-import { buy, sell, sellPrice } from "./engine/trade";
+import { resetState, saveState, takeSaveNotice, update } from "./engine/storage";
+import { harvest, harvestAll, plant } from "./engine/hydroponics";
+import {
+  buy,
+  canTrade,
+  keepCount,
+  sell,
+  sellEverything,
+  sellPrice,
+  sellableCount,
+  setKeep,
+} from "./engine/trade";
+import { Hydroponics } from "./hydroponics-view";
+import { Stats } from "./stats-view";
 import { Trade } from "./trade-view";
 import {
   BuildingDef,
   BuildingId,
+  FoodPriority,
   GameState,
   ItemId,
   Report,
@@ -57,7 +79,17 @@ import {
   TaskDef,
 } from "./engine/types";
 
-type View = "overview" | SkillId | "base" | "trade" | "inventory";
+type View = "overview" | SkillId | "base" | "trade" | "inventory" | "stats";
+
+/** Auto-eat choices: share of max HP, with 0 meaning only when the next fight needs it. */
+const EAT_LEVELS: [number, string][] = [
+  [0, "Only When Needed"],
+  [0.25, "Below 25% HP"],
+  [0.5, "Below 50% HP"],
+  [0.75, "Below 75% HP"],
+];
+
+const RUN_CHOICES = [1, 5, 10, 25, 100];
 
 const SKILL_ICON: Record<SkillId, Icon> = {
   salvaging: Icon.Hammer,
@@ -66,6 +98,7 @@ const SKILL_ICON: Record<SkillId, Icon> = {
   cooking: Icon.MugSteam,
   engineering: Icon.Gear,
   combat: Icon.Shield,
+  hydroponics: Icon.Raindrop,
 };
 
 export default function Command() {
@@ -116,6 +149,14 @@ export default function Command() {
         setState((await update((s) => dismissHint(s, hint.id))).state);
       }
     };
+    takeSaveNotice().then((notice) => {
+      if (notice)
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Your save could not be read",
+          message: `${notice}. A copy was kept and a new game started.`,
+        });
+    });
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
@@ -143,6 +184,7 @@ export default function Command() {
           <List.Dropdown.Item title="Base" value="base" icon={Icon.House} />
           <List.Dropdown.Item title="Trade" value="trade" icon={Icon.Coins} />
           <List.Dropdown.Item title="Inventory" value="inventory" icon={Icon.Box} />
+          <List.Dropdown.Item title="Stats" value="stats" icon={Icon.BarChart} />
         </List.Dropdown>
       }
     >
@@ -155,6 +197,7 @@ export default function Command() {
           onReset={reset}
           onExport={exportToClipboard}
           onImport={importFromClipboard}
+          onSettings={(change) => sync(change)}
         />
       )}
       {view === "base" && <Base state={state} onBuild={(id) => act((s) => build(s, id))} />}
@@ -175,13 +218,50 @@ export default function Command() {
           }
         />
       )}
-      {view === "inventory" && <Inventory state={state} onEat={(id) => act((s) => eat(s, id))} />}
-      {SKILLS.some((s) => s.id === view) && (
+      {view === "inventory" && (
+        <Inventory
+          state={state}
+          onEat={(id) => act((s) => eat(s, id))}
+          onSell={(id, qty) =>
+            act(
+              (s) => sell(s, id, qty),
+              (r) => `Sold ${r.amount}× ${ITEMS[id].name} for ${formatCredits(r.credits ?? 0)}`,
+            )
+          }
+          onSellEverything={sellEverythingConfirmed}
+          onKeep={(id, n) => sync((s) => setKeep(s, id, n))}
+        />
+      )}
+      {view === "stats" && <Stats state={state} />}
+      {view === "hydroponics" && (
+        <Hydroponics
+          state={state}
+          onPlant={(index, crop) =>
+            act(
+              (s) => plant(s, index, crop),
+              () => `Planted ${CROP_BY_ID[crop].name}`,
+            )
+          }
+          onHarvest={(index) =>
+            act(
+              (s) => harvest(s, index),
+              (r) => `Harvested ${formatBundle(r.report?.items)}`,
+            )
+          }
+          onHarvestAll={() =>
+            act(
+              (s) => harvestAll(s),
+              (r) => `Harvested ${formatBundle(r.items)}`,
+            )
+          }
+        />
+      )}
+      {SKILLS.some((s) => s.id === view) && view !== "hydroponics" && (
         <Tasks
           state={state}
           skill={view as SkillId}
           frame={frame}
-          onStart={(id) => act((s) => startTask(s, id))}
+          onStart={(id, runs) => act((s) => startTask(s, id, runs))}
           onStop={() => sync(stopTask)}
         />
       )}
@@ -212,6 +292,19 @@ export default function Command() {
     await showToast({ style: Toast.Style.Success, title: "Save imported" });
   }
 
+  async function sellEverythingConfirmed() {
+    const ok = await confirmAlert({
+      title: "Sell everything?",
+      message: "Sells all items you have not set aside with Keep, materials for crafting included.",
+      primaryAction: { title: "Sell Everything", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+    await act(
+      (s) => sellEverything(s),
+      (r) => `Sold everything for ${formatCredits(r.credits ?? 0)}`,
+    );
+  }
+
   async function reset() {
     await resetState();
     await sync();
@@ -220,7 +313,9 @@ export default function Command() {
 }
 
 function notify(report: Report) {
-  if (report.notices.length) {
+  if (report.completed && !report.levelUps.length && !report.notices.length) {
+    showToast({ style: Toast.Style.Success, title: report.completed });
+  } else if (report.notices.length) {
     showToast({ style: Toast.Style.Success, title: "Contact", message: report.notices.join(" ") });
   } else if (report.levelUps.length || report.stoppedReason) {
     showToast({
@@ -246,6 +341,7 @@ function Overview(props: {
   onReset: () => void;
   onExport: () => void;
   onImport: () => void;
+  onSettings: (change: (s: GameState) => GameState) => void;
 }) {
   const { state } = props;
   const task = state.activeTask ? TASK_BY_ID[state.activeTask] : undefined;
@@ -278,6 +374,7 @@ function Overview(props: {
                 `HP  ${bar(hpFraction)} ${Math.floor(state.hp)}/${maxHp(state)}`,
                 "```",
                 `Rations: **${count(state, "ration")}** · Credits: **${formatCredits(state.credits)}**`,
+                `Auto-eat: **${EAT_LEVELS.find(([v]) => v === state.settings.eatBelow)?.[1] ?? "Custom"}**, **${state.settings.foodPriority}** food first`,
                 ...(task ? ["", preloadMarkdown(state.activeTask)] : []),
               ].join("\n")}
             />
@@ -285,6 +382,36 @@ function Overview(props: {
           actions={
             <ActionPanel>
               {task && <Action title="Stop Task" icon={Icon.Stop} onAction={props.onStop} />}
+              <ActionPanel.Submenu title="Auto-Eat At" icon={Icon.Heart}>
+                {EAT_LEVELS.map(([value, label]) => (
+                  <Action
+                    key={value}
+                    title={label}
+                    icon={state.settings.eatBelow === value ? Icon.CheckCircle : Icon.Circle}
+                    onAction={() =>
+                      props.onSettings((s) => ({
+                        ...s,
+                        settings: { ...s.settings, eatBelow: value },
+                      }))
+                    }
+                  />
+                ))}
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu title="Eat First" icon={Icon.Box}>
+                {(["weakest", "strongest"] as FoodPriority[]).map((priority) => (
+                  <Action
+                    key={priority}
+                    title={`${priority[0].toUpperCase()}${priority.slice(1)} Food`}
+                    icon={state.settings.foodPriority === priority ? Icon.CheckCircle : Icon.Circle}
+                    onAction={() =>
+                      props.onSettings((s) => ({
+                        ...s,
+                        settings: { ...s.settings, foodPriority: priority },
+                      }))
+                    }
+                  />
+                ))}
+              </ActionPanel.Submenu>
               <Action
                 title="Copy Save to Clipboard"
                 icon={Icon.CopyClipboard}
@@ -350,9 +477,11 @@ function Overview(props: {
 
 function taskProgress(state: GameState, task: TaskDef): string {
   const duration = taskDurationMs(state, task);
+  const runs = state.taskRemaining;
   return [
     "```",
     `${bar(state.taskProgressMs / duration)} ${formatDuration(duration - state.taskProgressMs)} left`,
+    ...(runs !== null && !task.once ? [`${runs} run${runs === 1 ? "" : "s"} to go`] : []),
     "```",
   ].join("\n");
 }
@@ -361,7 +490,7 @@ function Tasks(props: {
   state: GameState;
   skill: SkillId;
   frame: number;
-  onStart: (id: string) => void;
+  onStart: (id: string, runs?: number) => void;
   onStop: () => void;
 }) {
   const { state, skill } = props;
@@ -400,6 +529,13 @@ function Tasks(props: {
                     onAction={() => props.onStart(task.id)}
                   />
                 )}
+                {!active && !task.once && (
+                  <ActionPanel.Submenu title="Run a Set Number" icon={Icon.Repeat}>
+                    {RUN_CHOICES.map((n) => (
+                      <Action key={n} title={`${n}×`} onAction={() => props.onStart(task.id, n)} />
+                    ))}
+                  </ActionPanel.Submenu>
+                )}
               </ActionPanel>
             }
           />
@@ -413,6 +549,14 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
   const lines = [artMarkdown(task.id, frame, active), `# ${task.name}`, task.description, ""];
   if (active) lines.push(taskProgress(state, task), "");
   lines.push(`- **Time:** ${formatDuration(taskDurationMs(state, task))}`, `- **XP:** ${task.xp}`);
+  const rates = taskRates(state, task);
+  lines.push(
+    `- **Per hour:** ${formatRates(rates.itemsPerHour)} · ${Math.round(rates.xpPerHour).toLocaleString("en-US")} XP`,
+  );
+  if (task.monster) lines.push(`- **HP lost per hour:** ~${Math.round(rates.hpLossPerHour)}`);
+  if (task.inputs) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
+  if (rates.nextLevelMs !== null)
+    lines.push(`- **Next level in:** ${formatDuration(rates.nextLevelMs)} nonstop`);
   if (task.inputs) lines.push(`- **Needs:** ${formatBundle(task.inputs)}`);
   if (task.outputs) lines.push(`- **Makes:** ${formatBundle(task.outputs)}`);
   if (task.monster) {
@@ -430,8 +574,17 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
 
 // --- inventory --------------------------------------------------------------
 
-function Inventory(props: { state: GameState; onEat: (id: ItemId) => void }) {
-  const owned = (Object.keys(ITEMS) as ItemId[]).filter((id) => count(props.state, id) > 0);
+const KEEP_CHOICES = [0, 10, 25, 50, 100];
+
+function Inventory(props: {
+  state: GameState;
+  onEat: (id: ItemId) => void;
+  onSell: (id: ItemId, qty: number | "all") => void;
+  onSellEverything: () => void;
+  onKeep: (id: ItemId, n: number) => void;
+}) {
+  const { state } = props;
+  const owned = (Object.keys(ITEMS) as ItemId[]).filter((id) => count(state, id) > 0);
   if (!owned.length) {
     return (
       <List.EmptyView
@@ -445,15 +598,20 @@ function Inventory(props: { state: GameState; onEat: (id: ItemId) => void }) {
     <List.Section title="Inventory">
       {owned.map((id) => {
         const item = ITEMS[id];
+        const keep = keepCount(state, id);
+        const sellable = sellableCount(state, id);
         return (
           <List.Item
             key={id}
             title={item.name}
             icon={Icon.Box}
-            accessories={[{ text: `×${Math.floor(count(props.state, id))}` }]}
+            accessories={[
+              ...(keep > 0 ? [{ tag: `Keep ${keep}` }] : []),
+              { text: `×${Math.floor(count(state, id))}` },
+            ]}
             detail={
               <List.Item.Detail
-                markdown={`# ${item.name}\n${item.description}\n\nWorth **${formatCredits(sellPrice(props.state, id))}** each.`}
+                markdown={`# ${item.name}\n${item.description}\n\nWorth **${formatCredits(sellPrice(state, id))}** each.`}
               />
             }
             actions={
@@ -463,6 +621,35 @@ function Inventory(props: { state: GameState; onEat: (id: ItemId) => void }) {
                     title={`Eat (+${item.heal} HP)`}
                     icon={Icon.Heart}
                     onAction={() => props.onEat(id)}
+                  />
+                )}
+                {canTrade(state) && sellable > 0 && (
+                  <>
+                    <Action title="Sell 1" icon={Icon.Coins} onAction={() => props.onSell(id, 1)} />
+                    <Action
+                      title={`Sell All (${sellable})`}
+                      icon={Icon.Coins}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                      onAction={() => props.onSell(id, "all")}
+                    />
+                  </>
+                )}
+                <ActionPanel.Submenu title="Keep When Selling" icon={Icon.Lock}>
+                  {KEEP_CHOICES.map((n) => (
+                    <Action
+                      key={n}
+                      title={n === 0 ? "Keep None" : `Keep ${n}`}
+                      icon={(state.keep[id] ?? 0) === n ? Icon.CheckCircle : Icon.Circle}
+                      onAction={() => props.onKeep(id, n)}
+                    />
+                  ))}
+                </ActionPanel.Submenu>
+                {canTrade(state) && (
+                  <Action
+                    title="Sell Everything"
+                    icon={Icon.Coins}
+                    style={Action.Style.Destructive}
+                    onAction={props.onSellEverything}
                   />
                 )}
               </ActionPanel>

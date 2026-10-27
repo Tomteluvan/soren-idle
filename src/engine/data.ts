@@ -1,6 +1,7 @@
 import {
   BuildingDef,
   BuildingId,
+  CropDef,
   ItemDef,
   ItemId,
   SkillDef,
@@ -35,6 +36,11 @@ export const SKILLS: SkillDef[] = [
     id: "combat",
     name: "Combat",
     blurb: "The wildlife disagrees with your presence. Disagree back.",
+  },
+  {
+    id: "hydroponics",
+    name: "Hydroponics",
+    blurb: "Plant, wait, harvest. The crops grow whether or not you are watching.",
   },
 ];
 
@@ -537,6 +543,17 @@ export const BUILDINGS: BuildingDef[] = [
     requiresBuilding: { id: "translator", level: 1 },
   },
   {
+    id: "hydroponic_bay",
+    name: "Hydroponic Bay",
+    description: "Racks of nutrient trays. One plot per level, and crops grow while you are away.",
+    maxLevel: 4,
+    baseCost: { alloy_plate: 4, scrap_metal: 20, glowcap: 10 },
+    costGrowth: 1.7,
+    levelNotes: ["1 plot", "2 plots", "3 plots", "4 plots"],
+    requires: { skill: "engineering", level: 6 },
+    powerUse: 1,
+  },
+  {
     id: "beacon",
     name: "Signal Beacon",
     description: "Broadcasts a signal across the planet. Someone might be listening.",
@@ -546,6 +563,41 @@ export const BUILDINGS: BuildingDef[] = [
     requires: { skill: "engineering", level: 12 },
   },
 ];
+
+export const CROPS: CropDef[] = [
+  {
+    id: "glowcap_bed",
+    name: "Glowcap Bed",
+    description: "Spores in a tray of warm nutrient gel. Hard to kill.",
+    levelReq: 1,
+    growMs: 5 * 60_000,
+    xp: 30,
+    seeds: { glowcap: 2 },
+    yield: { glowcap: 8 },
+  },
+  {
+    id: "sweetroot_bed",
+    name: "Sweetroot Bed",
+    description: "Sweetroot likes the dark and takes its time.",
+    levelReq: 4,
+    growMs: 10 * 60_000,
+    xp: 80,
+    seeds: { sweetroot: 2 },
+    yield: { sweetroot: 8 },
+  },
+  {
+    id: "lumina_bloom",
+    name: "Lumina Bloom",
+    description: "Seed a tray with crystal dust and something crystalline grows back.",
+    levelReq: 8,
+    growMs: 20 * 60_000,
+    xp: 200,
+    seeds: { lumina_crystal: 2 },
+    yield: { lumina_crystal: 6 },
+  },
+];
+
+export const CROP_BY_ID: Record<string, CropDef> = Object.fromEntries(CROPS.map((c) => [c.id, c]));
 
 export const BUILDING_BY_ID: Record<BuildingId, BuildingDef> = Object.fromEntries(
   BUILDINGS.map((b) => [b.id, b]),

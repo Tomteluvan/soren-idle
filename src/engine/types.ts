@@ -1,4 +1,5 @@
-export type SkillId = "salvaging" | "mining" | "foraging" | "cooking" | "engineering" | "combat";
+export type SkillId =
+  "salvaging" | "mining" | "foraging" | "cooking" | "engineering" | "combat" | "hydroponics";
 
 export type ItemId =
   | "scrap_metal"
@@ -80,7 +81,8 @@ export type BuildingId =
   | "forager_drone"
   | "beacon"
   | "translator"
-  | "hub";
+  | "hub"
+  | "hydroponic_bay";
 
 export interface BuildingDef {
   id: BuildingId;
@@ -105,6 +107,32 @@ export interface BuildingDef {
   produces?: { item: ItemId; everyMs: number };
 }
 
+export interface CropDef {
+  id: string;
+  name: string;
+  description: string;
+  levelReq: number;
+  growMs: number;
+  xp: number;
+  /** Seed stock planted into an empty plot. */
+  seeds: Bundle;
+  /** Collected at harvest. */
+  yield: Bundle;
+}
+
+export interface Plot {
+  crop: string;
+  plantedAt: number;
+}
+
+export type FoodPriority = "weakest" | "strongest";
+
+export interface Settings {
+  /** Eat when HP drops below this share of max HP. 0 means only when the next fight needs it. */
+  eatBelow: number;
+  foodPriority: FoodPriority;
+}
+
 export interface StockItem {
   item: ItemId;
   /** Price per unit in Credits before discounts. */
@@ -120,6 +148,8 @@ export interface GameState {
   activeTask: string | null;
   /** Milliseconds already spent on the current cycle. */
   taskProgressMs: number;
+  /** Cycles left in the current run, or null to repeat until it cannot continue. */
+  taskRemaining: number | null;
   hp: number;
   xp: Record<SkillId, number>;
   inventory: Bundle;
@@ -130,10 +160,22 @@ export interface GameState {
   buildings: Partial<Record<BuildingId, number>>;
   /** Fractional output of passive buildings, carried between ticks. */
   passive: Partial<Record<BuildingId, number>>;
+  /** Items to keep back when selling, per item. */
+  keep: Partial<Record<ItemId, number>>;
+  settings: Settings;
+  /** One entry per hydroponic plot; null is an empty plot. */
+  plots: (Plot | null)[];
   /** Ids of first-run hints the player has already seen. */
   hints: string[];
   /** Lifetime counters, mostly for flavour. */
-  stats: { cycles: number; kills: number; deaths: number };
+  stats: {
+    cycles: number;
+    kills: number;
+    deaths: number;
+    /** Everything ever gained, by item. */
+    produced: Bundle;
+    creditsEarned: number;
+  };
 }
 
 export interface Report {
@@ -145,4 +187,6 @@ export interface Report {
   /** Story beats that happened while time passed. */
   notices: string[];
   stoppedReason?: string;
+  /** Set when a fixed run or one-off craft finished by itself. */
+  completed?: string;
 }

@@ -28,8 +28,21 @@ export function sellPrice(s: GameState, id: ItemId): number {
   return Math.max(1, Math.floor(ITEMS[id].value * sellRate(s)));
 }
 
+/** How many of an item the player wants to hold on to when selling. */
+export function keepCount(s: GameState, id: ItemId): number {
+  return Math.max(isGear(id) ? 1 : 0, s.keep[id] ?? 0);
+}
+
 export function sellableCount(s: GameState, id: ItemId): number {
-  return Math.max(0, Math.floor(count(s, id)) - (isGear(id) ? 1 : 0));
+  return Math.max(0, Math.floor(count(s, id)) - keepCount(s, id));
+}
+
+/** Sets how many of an item `sell` leaves alone. */
+export function setKeep(s: GameState, id: ItemId, n: number): GameState {
+  const keep = { ...s.keep };
+  if (n > 0) keep[id] = Math.floor(n);
+  else delete keep[id];
+  return { ...s, keep };
 }
 
 export function sell(
@@ -43,14 +56,39 @@ export function sell(
   if (amount < 1) {
     return {
       state: s,
-      error: isGear(id) && count(s, id) > 0 ? "Keeping your only one" : "Nothing to sell",
+      error:
+        count(s, id) < 1
+          ? "Nothing to sell"
+          : (s.keep[id] ?? 0) > 0
+            ? "Keeping the ones you set aside"
+            : "Keeping your only one",
     };
   }
   const credits = amount * sellPrice(s, id);
   const next = structuredClone(s);
   next.inventory[id] = count(s, id) - amount;
   next.credits += credits;
+  next.stats.creditsEarned += credits;
   return { state: next, credits, amount };
+}
+
+/** Sells everything the keep settings allow. */
+export function sellEverything(s: GameState): {
+  state: GameState;
+  error?: string;
+  credits?: number;
+} {
+  if (!canTrade(s)) return { state: s, error: "Build a Trading Hub first" };
+  let state = s;
+  let credits = 0;
+  for (const id of Object.keys(ITEMS) as ItemId[]) {
+    const sold = sell(state, id, "all");
+    if (!sold.error) {
+      state = sold.state;
+      credits += sold.credits ?? 0;
+    }
+  }
+  return credits ? { state, credits } : { state: s, error: "Nothing to sell" };
 }
 
 // --- buying -----------------------------------------------------------------

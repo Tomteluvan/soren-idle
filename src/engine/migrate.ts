@@ -20,7 +20,8 @@ export function migrateSave(saved: Partial<GameState>): GameState {
     ...base,
     ...saved,
     xp: { ...base.xp, ...saved.xp },
-    stats: { ...base.stats, ...saved.stats },
+    stats: { ...base.stats, ...saved.stats, produced: { ...saved.stats?.produced } },
+    settings: { ...base.settings, ...saved.settings },
   };
   for (let v = saved.version ?? 1; v < SAVE_VERSION; v++) STEPS[v]?.(state);
   state.version = SAVE_VERSION;
