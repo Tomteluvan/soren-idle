@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { artMarkdown, buildingMarkdown, FRAME_MS, preloadMarkdown } from "./art";
 import {
@@ -31,7 +42,9 @@ import {
   xpForLevel,
 } from "./engine/engine";
 import { bar, formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
-import { resetState, update } from "./engine/storage";
+import { dismissHint, nextHint } from "./engine/hints";
+import { exportSave, importSave } from "./engine/migrate";
+import { resetState, saveState, update } from "./engine/storage";
 import { buy, sell, sellPrice } from "./engine/trade";
 import { Trade } from "./trade-view";
 import {
@@ -97,6 +110,11 @@ export default function Command() {
         first = false;
         notify(report);
       }
+      const hint = nextHint(state);
+      if (hint && !report.levelUps.length && !report.stoppedReason && !report.notices.length) {
+        await showToast({ style: Toast.Style.Success, title: "Tip", message: hint.text });
+        setState((await update((s) => dismissHint(s, hint.id))).state);
+      }
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -135,6 +153,8 @@ export default function Command() {
           onStop={() => sync(stopTask)}
           onOpen={setView}
           onReset={reset}
+          onExport={exportToClipboard}
+          onImport={importFromClipboard}
         />
       )}
       {view === "base" && <Base state={state} onBuild={(id) => act((s) => build(s, id))} />}
@@ -168,6 +188,30 @@ export default function Command() {
     </List>
   );
 
+  async function exportToClipboard() {
+    if (!state) return;
+    await Clipboard.copy(exportSave(state));
+    await showToast({ style: Toast.Style.Success, title: "Save copied to clipboard" });
+  }
+
+  async function importFromClipboard() {
+    const { state: imported, error } = importSave((await Clipboard.readText()) ?? "");
+    if (!imported) {
+      await showToast({ style: Toast.Style.Failure, title: error ?? "Import failed" });
+      return;
+    }
+    const ok = await confirmAlert({
+      title: "Replace your current game?",
+      message: "The save on the clipboard overwrites your progress.",
+      primaryAction: { title: "Import", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+    await saveState(imported);
+    await sync();
+    setView("overview");
+    await showToast({ style: Toast.Style.Success, title: "Save imported" });
+  }
+
   async function reset() {
     await resetState();
     await sync();
@@ -200,6 +244,8 @@ function Overview(props: {
   onStop: () => void;
   onOpen: (v: View) => void;
   onReset: () => void;
+  onExport: () => void;
+  onImport: () => void;
 }) {
   const { state } = props;
   const task = state.activeTask ? TASK_BY_ID[state.activeTask] : undefined;
@@ -210,7 +256,13 @@ function Overview(props: {
       <List.Section title="Survivor">
         <List.Item
           title={task ? task.name : "Idle"}
-          subtitle={task ? undefined : "Pick a skill to get to work"}
+          subtitle={
+            task
+              ? undefined
+              : state.stats.cycles === 0
+                ? "Start with Salvaging: Scavenge Hull Scrap"
+                : "Pick a skill to get to work"
+          }
           icon={task ? SKILL_ICON[task.skill] : Icon.Pause}
           accessories={[{ text: `${Math.floor(state.hp)}/${maxHp(state)} HP` }]}
           detail={
@@ -233,6 +285,16 @@ function Overview(props: {
           actions={
             <ActionPanel>
               {task && <Action title="Stop Task" icon={Icon.Stop} onAction={props.onStop} />}
+              <Action
+                title="Copy Save to Clipboard"
+                icon={Icon.CopyClipboard}
+                onAction={props.onExport}
+              />
+              <Action
+                title="Import Save from Clipboard"
+                icon={Icon.Download}
+                onAction={props.onImport}
+              />
               <Action
                 title="Reset Game"
                 icon={Icon.Trash}
