@@ -54,9 +54,22 @@ export type ItemId =
   | "arc_saber"
   | "ward_plate"
   | "scout_visor"
-  | "prism_visor";
+  | "prism_visor"
+  | "shard_cleaver"
+  | "spore_lance"
+  | "siege_maul"
+  | "thorn_lance"
+  | "fang_blade"
+  | "chitin_crown"
+  | "sovereign_mail"
+  | "matriarch_chitin"
+  | "broodking_fang"
+  | "sovereign_shard";
 
 export type Bundle = Partial<Record<ItemId, number>>;
+
+/** Kinetic beats bio, bio beats energy, energy beats kinetic. */
+export type DamageType = "kinetic" | "energy" | "bio";
 
 export type EquipSlot = "weapon" | "body" | "head" | "salvager" | "miner" | "forager" | "charm";
 
@@ -72,6 +85,8 @@ export interface ItemDef {
   slot?: EquipSlot;
   /** Higher tiers replace lower ones automatically when you get them. */
   tier?: number;
+  /** A weapon's damage type, or the type a body armor is tuned against. */
+  damageType?: DamageType;
   /** Combat level needed to equip it. */
   combatReq?: number;
   /** Equipped, this makes tasks of `skill` take `speed` times as long. */
@@ -121,6 +136,7 @@ export interface SkillDef {
 
 export interface Monster {
   name: string;
+  type: DamageType;
   hp: number;
   damage: number;
   drops: Bundle;
@@ -148,6 +164,19 @@ export interface TaskDef {
   rareDrops?: RareDrop[];
   /** A boss fight, see `areas`. */
   boss?: boolean;
+}
+
+/** A stretch of wilderness: a few creatures, and a boss that appears once you have thinned them out. */
+export interface AreaDef {
+  id: string;
+  name: string;
+  blurb: string;
+  /** Hunt task ids, easiest first. */
+  hunts: string[];
+  /** The boss's task id. */
+  boss: string;
+  /** Kills across the area's hunts before the boss shows itself. */
+  bossKills: number;
 }
 
 export type BuildingId =
@@ -287,6 +316,8 @@ export interface GameState {
   stats: {
     cycles: number;
     kills: number;
+    /** Kills by hunt task id. */
+    hunts: Record<string, number>;
     deaths: number;
     /** Everything ever gained, by item. */
     produced: Bundle;

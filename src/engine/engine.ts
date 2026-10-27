@@ -12,6 +12,7 @@ import {
   SKILLS,
   TASK_BY_ID,
 } from "./data";
+import { bossLockReason, matchup } from "./areas";
 import { onKill, refillBoard, refreshBoardIfDue } from "./bounty";
 import { levelFromXp, xpForLevel } from "./levels";
 import { nextRandom } from "./rng";
@@ -58,7 +59,15 @@ export function newGame(now = Date.now()): GameState {
     settings: { eatBelow: 0, foodPriority: "weakest" },
     plots: [],
     hints: [],
-    stats: { cycles: 0, kills: 0, deaths: 0, produced: {}, creditsEarned: 0, bounties: 0 },
+    stats: {
+      cycles: 0,
+      kills: 0,
+      hunts: {},
+      deaths: 0,
+      produced: {},
+      creditsEarned: 0,
+      bounties: 0,
+    },
   };
 }
 
@@ -252,6 +261,14 @@ export function modifiers(s: GameState, at = s.lastTick) {
       owned.reduce((sum, i) => sum + (i.weaponDamage ?? 0), 0) +
       (activeBuff(s, "damage", at)?.power ?? 0),
     armor: owned.reduce((sum, i) => sum + (i.armor ?? 0), 0),
+    weaponType:
+      s.equipped.weapon && count(s, s.equipped.weapon) > 0
+        ? ITEMS[s.equipped.weapon].damageType
+        : undefined,
+    armorType:
+      s.equipped.body && count(s, s.equipped.body) > 0
+        ? ITEMS[s.equipped.body].damageType
+        : undefined,
     yield: activeBuff(s, "yield", at)?.power ?? 1,
     rare: owned.reduce((m, i) => m * (i.rareBonus ?? 1), 1),
   };
@@ -270,12 +287,27 @@ export const playerDamage = (s: GameState, at = s.lastTick) =>
 
 export const playerArmor = (s: GameState, at = s.lastTick) => modifiers(s, at).armor;
 
+/** Damage per round against this creature, after the combat triangle. */
+export function damageAgainst(s: GameState, task: TaskDef, at = s.lastTick): number {
+  const m = task.monster;
+  const base = playerDamage(s, at);
+  return m ? Math.max(1, Math.round(base * matchup(modifiers(s, at).weaponType, m.type))) : base;
+}
+
+/** Damage per enemy hit once your armor and the combat triangle are counted. */
+export function hitDamage(s: GameState, task: TaskDef, at = s.lastTick): number {
+  const m = task.monster;
+  if (!m) return 0;
+  const mods = modifiers(s, at);
+  return Math.max(1, Math.round(m.damage * matchup(m.type, mods.armorType)) - mods.armor);
+}
+
 /** Expected damage taken in a fight against this task's monster. */
 export function fightDamage(s: GameState, task: TaskDef, at = s.lastTick): number {
   const m = task.monster;
   if (!m) return 0;
-  const rounds = Math.ceil(m.hp / playerDamage(s, at));
-  return Math.ceil(rounds * Math.max(1, m.damage - playerArmor(s, at)) * 0.4);
+  const rounds = Math.ceil(m.hp / damageAgainst(s, task, at));
+  return Math.ceil(rounds * hitDamage(s, task, at) * 0.4);
 }
 
 /** A yield potion's bonus: whole extras, plus a chance of one more for the fraction. */
@@ -340,6 +372,10 @@ export function startTask(
     return { state: s, error: "You already own this" };
   }
   if (!canAfford(s, task.inputs)) return { state: s, error: "Missing materials" };
+  const locked = bossLockReason(s, task);
+  if (locked) return { state: s, error: locked };
+  if (task.boss && s.hp <= fightDamage(s, task))
+    return { state: s, error: "Too wounded for this fight. Eat first, there is no food mid-fight" };
   const limit = task.once ? 1 : runs && runs > 0 ? Math.floor(runs) : null;
   return { state: { ...s, activeTask: taskId, taskProgressMs: 0, taskRemaining: limit } };
 }
@@ -420,7 +456,12 @@ function runCycle(s: GameState, task: TaskDef, report: Report, at: number): stri
     const damage = fightDamage(s, task, at);
     const wantsFood = () =>
       s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);
-    for (let food = foodOwned(s); food && wantsFood() && s.hp < maxHp(s); food = foodOwned(s)) {
+    // Bosses are fought without a break: no eating until the fight is over.
+    for (
+      let food = foodOwned(s);
+      !task.boss && food && wantsFood() && s.hp < maxHp(s);
+      food = foodOwned(s)
+    ) {
       s.inventory[food] = count(s, food) - 1;
       s.hp = Math.min(maxHp(s), s.hp + (ITEMS[food].heal ?? 0));
     }
@@ -431,6 +472,7 @@ function runCycle(s: GameState, task: TaskDef, report: Report, at: number): stri
     if (full) return `Storage full: ${ITEMS[full].name}. Sell or use some to continue`;
     s.hp -= damage;
     s.stats.kills++;
+    s.stats.hunts[task.id] = (s.stats.hunts[task.id] ?? 0) + 1;
     addItems(s, drops, 1, report);
     onKill(s, task, report);
   } else {

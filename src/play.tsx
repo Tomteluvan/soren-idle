@@ -15,6 +15,7 @@ import { artMarkdown, buildingMarkdown, FRAME_MS, preloadMarkdown } from "./art"
 import {
   BUILDING_BY_ID,
   BUILDINGS,
+  AREAS,
   CROP_BY_ID,
   ITEMS,
   SKILLS,
@@ -36,12 +37,14 @@ import {
   isEquipped,
   unequip,
   firstContact,
+  damageAgainst,
   fightDamage,
+  hitDamage,
   isGear,
   levelOf,
   maxHp,
+  modifiers,
   playerArmor,
-  playerDamage,
   rareChanceMult,
   taskRates,
   powerCapacity,
@@ -79,6 +82,7 @@ import { abandonBounty, acceptBounty, bountyTarget, rerollBoard } from "./engine
 import { Bounties } from "./bounties-view";
 import { buyFromShop } from "./engine/shop";
 import { BountyShop } from "./shop-view";
+import { areaKills, areaOf, bossLockReason, counterTo, huntsOf, matchup } from "./engine/areas";
 import { Equipment, gearStats } from "./equipment-view";
 import { Hydroponics } from "./hydroponics-view";
 import { Stats } from "./stats-view";
@@ -88,6 +92,7 @@ import {
   BuildingId,
   FoodPriority,
   GameState,
+  DamageType,
   ItemId,
   Report,
   SkillId,
@@ -605,53 +610,81 @@ function Tasks(props: {
   const { state, skill } = props;
   const level = levelOf(state, skill);
 
+  const item = (task: TaskDef) => {
+    const levelLocked = level < task.levelReq;
+    const bossLock = bossLockReason(state, task);
+    const locked = levelLocked || !!bossLock;
+    const active = state.activeTask === task.id;
+    const owned =
+      task.once &&
+      task.outputs &&
+      (Object.keys(task.outputs) as ItemId[]).every((id) => count(state, id) > 0);
+    return (
+      <List.Item
+        key={task.id}
+        title={task.name}
+        icon={locked ? { source: Icon.Lock, tintColor: Color.SecondaryText } : SKILL_ICON[skill]}
+        accessories={[
+          ...(active ? [{ icon: { source: Icon.Play, tintColor: Color.Green } }] : []),
+          ...(task.boss ? [{ tag: { value: "Boss", color: Color.Red } }] : []),
+          ...(levelLocked ? [{ tag: `Lv ${task.levelReq}` }] : []),
+          ...(bossLock && !levelLocked ? [{ tag: "Locked" }] : []),
+          ...(owned ? [{ tag: { value: "Owned", color: Color.Green } }] : []),
+        ]}
+        detail={<List.Item.Detail markdown={taskMarkdown(state, task, active, props.frame)} />}
+        actions={
+          <ActionPanel>
+            {active ? (
+              <Action title="Stop Task" icon={Icon.Stop} onAction={props.onStop} />
+            ) : (
+              <Action title="Start Task" icon={Icon.Play} onAction={() => props.onStart(task.id)} />
+            )}
+            {!active && !task.once && (
+              <ActionPanel.Submenu title="Run a Set Number" icon={Icon.Repeat}>
+                {RUN_CHOICES.map((n) => (
+                  <Action key={n} title={`${n}×`} onAction={() => props.onStart(task.id, n)} />
+                ))}
+              </ActionPanel.Submenu>
+            )}
+          </ActionPanel>
+        }
+      />
+    );
+  };
+
+  if (skill === "combat") {
+    return (
+      <>
+        {AREAS.map((area) => (
+          <List.Section
+            key={area.id}
+            title={area.name}
+            subtitle={`${areaKills(state, area)} defeated`}
+          >
+            {[...huntsOf(area), TASK_BY_ID[area.boss]].map(item)}
+          </List.Section>
+        ))}
+      </>
+    );
+  }
+
   return (
     <List.Section title={SKILL_BY_ID[skill].name} subtitle={`Level ${level}`}>
-      {TASKS.filter((t) => t.skill === skill).map((task) => {
-        const locked = level < task.levelReq;
-        const active = state.activeTask === task.id;
-        const owned =
-          task.once &&
-          task.outputs &&
-          (Object.keys(task.outputs) as ItemId[]).every((id) => count(state, id) > 0);
-        return (
-          <List.Item
-            key={task.id}
-            title={task.name}
-            icon={
-              locked ? { source: Icon.Lock, tintColor: Color.SecondaryText } : SKILL_ICON[skill]
-            }
-            accessories={[
-              ...(active ? [{ icon: { source: Icon.Play, tintColor: Color.Green } }] : []),
-              ...(locked ? [{ tag: `Lv ${task.levelReq}` }] : []),
-              ...(owned ? [{ tag: { value: "Owned", color: Color.Green } }] : []),
-            ]}
-            detail={<List.Item.Detail markdown={taskMarkdown(state, task, active, props.frame)} />}
-            actions={
-              <ActionPanel>
-                {active ? (
-                  <Action title="Stop Task" icon={Icon.Stop} onAction={props.onStop} />
-                ) : (
-                  <Action
-                    title="Start Task"
-                    icon={Icon.Play}
-                    onAction={() => props.onStart(task.id)}
-                  />
-                )}
-                {!active && !task.once && (
-                  <ActionPanel.Submenu title="Run a Set Number" icon={Icon.Repeat}>
-                    {RUN_CHOICES.map((n) => (
-                      <Action key={n} title={`${n}×`} onAction={() => props.onStart(task.id, n)} />
-                    ))}
-                  </ActionPanel.Submenu>
-                )}
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {TASKS.filter((t) => t.skill === skill).map(item)}
     </List.Section>
   );
+}
+
+/** Notes a combat-triangle advantage or disadvantage next to a stat. */
+function matchupNote(
+  attacker: DamageType | undefined,
+  defender: DamageType | undefined,
+  side: "deal" | "take",
+) {
+  const k = matchup(attacker, defender);
+  if (k === 1) return "";
+  const good = side === "deal" ? k > 1 : k < 1;
+  return good ? " (good matchup)" : " (bad matchup)";
 }
 
 function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: number): string {
@@ -681,12 +714,30 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
   if (task.outputs) lines.push(`- **Makes:** ${formatBundle(task.outputs)}`);
   if (task.monster) {
     const m = task.monster;
+    const area = areaOf(task.id);
+    const mods = modifiers(state);
+    const dealt = damageAgainst(state, task);
+    const rounds = Math.ceil(m.hp / dealt);
+    const bossLock = bossLockReason(state, task);
     lines.push(
-      `- **Enemy:** ${m.name} (${m.hp} HP, ${m.damage} dmg)`,
-      `- **Your damage:** ${playerDamage(state)} per round, armor ${playerArmor(state)}`,
+      `- **Kill time:** ${formatDuration(taskDurationMs(state, task))} (${rounds} round${rounds === 1 ? "" : "s"}), then the next one steps up`,
+      `- **Enemy:** ${m.name}, ${m.type} (${m.hp} HP, ${m.damage} dmg per hit)`,
+      `- **Your damage:** ${dealt} per round${matchupNote(mods.weaponType, m.type, "deal")}`,
+      `- **Armor:** ${playerArmor(state)}, hit for ${hitDamage(state, task)}${matchupNote(m.type, mods.armorType, "take")}`,
+      `- **Best against it:** ${counterTo(m.type)} weapon and armor`,
       `- **Expected HP loss:** ~${fightDamage(state, task)}`,
       `- **Drops:** ${formatBundle(m.drops)}`,
     );
+    if (task.boss) {
+      lines.push(
+        "",
+        bossLock
+          ? `**Locked.** ${bossLock}.`
+          : "**Boss.** No eating once the fight starts, so heal first. It drops something unique.",
+      );
+    } else if (area) {
+      lines.push(`- **Area:** ${area.name}`);
+    }
   }
   if (active) lines.push("", preloadMarkdown(task.id));
   return lines.join("\n");
