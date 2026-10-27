@@ -62,7 +62,6 @@ import {
   formatDuration,
   formatMarks,
   formatRates,
-  formatReport,
 } from "./engine/format";
 import { dismissHint, nextHint } from "./engine/hints";
 import { exportSave, importSave } from "./engine/migrate";
@@ -139,6 +138,7 @@ export default function Command() {
   const [view, setView] = useState<View>("overview");
   const [frame, setFrame] = useState(0);
   const [away, setAway] = useState<Report | null>(null);
+  const [search, setSearch] = useState("");
 
   async function sync(change?: (s: GameState) => GameState) {
     const { state, report } = await update(change);
@@ -218,10 +218,18 @@ export default function Command() {
 
   if (!state) return <List isLoading />;
 
+  // Typing a search looks through every task, item and building, whatever section is open.
+  const searching = search.trim().length > 0;
+  const taskSkills = SKILLS.map((k) => k.id).filter((id) =>
+    id === "hydroponics" ? false : searching || id === view,
+  );
+
   return (
     <List
       isShowingDetail
-      searchBarPlaceholder="Search"
+      filtering={{ keepSectionOrder: true }}
+      onSearchTextChange={setSearch}
+      searchBarPlaceholder="Search tasks, items and buildings"
       searchBarAccessory={
         <List.Dropdown tooltip="Section" value={view} onChange={(v) => setView(v as View)}>
           <List.Dropdown.Item title="Overview" value="overview" />
@@ -240,7 +248,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {view === "overview" && (
+      {!searching && view === "overview" && (
         <Overview
           state={state}
           away={away}
@@ -254,8 +262,10 @@ export default function Command() {
           onSettings={(change) => sync(change)}
         />
       )}
-      {view === "base" && <Base state={state} onBuild={(id) => act((s) => build(s, id))} />}
-      {view === "trade" && (
+      {(searching || view === "base") && (
+        <Base state={state} onBuild={(id) => act((s) => build(s, id))} />
+      )}
+      {!searching && view === "trade" && (
         <Trade
           state={state}
           onSell={(id, qty) =>
@@ -272,7 +282,7 @@ export default function Command() {
           }
         />
       )}
-      {view === "bounties" && (
+      {!searching && view === "bounties" && (
         <Bounties
           state={state}
           onAccept={(id, start) =>
@@ -302,7 +312,7 @@ export default function Command() {
           onHunt={(taskId) => act((s) => startTask(s, taskId))}
         />
       )}
-      {view === "equipment" && (
+      {!searching && view === "equipment" && (
         <Equipment
           state={state}
           onEquip={(id) =>
@@ -314,7 +324,7 @@ export default function Command() {
           onUnequip={(slot) => sync((s) => unequip(s, slot))}
         />
       )}
-      {view === "shop" && (
+      {!searching && view === "shop" && (
         <BountyShop
           state={state}
           onBuy={(id) =>
@@ -325,7 +335,7 @@ export default function Command() {
           }
         />
       )}
-      {view === "inventory" && (
+      {(searching || view === "inventory") && (
         <Inventory
           state={state}
           onEat={(id) => act((s) => eat(s, id))}
@@ -351,8 +361,8 @@ export default function Command() {
           onKeep={(id, n) => sync((s) => setKeep(s, id, n))}
         />
       )}
-      {view === "stats" && <Stats state={state} />}
-      {view === "hydroponics" && (
+      {!searching && view === "stats" && <Stats state={state} />}
+      {!searching && view === "hydroponics" && (
         <Hydroponics
           state={state}
           onPlant={(index, crop) =>
@@ -375,15 +385,16 @@ export default function Command() {
           }
         />
       )}
-      {SKILLS.some((s) => s.id === view) && view !== "hydroponics" && (
+      {taskSkills.map((skill) => (
         <Tasks
+          key={skill}
           state={state}
-          skill={view as SkillId}
+          skill={skill}
           frame={frame}
           onStart={(id, runs) => act((s) => startTask(s, id, runs))}
           onStop={() => sync(stopTask)}
         />
-      )}
+      ))}
     </List>
   );
 
@@ -548,7 +559,7 @@ function Overview(props: {
           actions={
             <ActionPanel>
               {task && <Action title="Stop Task" icon={Icon.Stop} onAction={props.onStop} />}
-              <ActionPanel.Submenu title="Auto-Eat At" icon={Icon.Heart}>
+              <ActionPanel.Submenu title="Auto-Eat at" icon={Icon.Heart}>
                 {EAT_LEVELS.map(([value, label]) => (
                   <Action
                     key={value}
@@ -662,6 +673,19 @@ function Tasks(props: {
   const { state, skill } = props;
   const level = levelOf(state, skill);
 
+  const keywords = (task: TaskDef) => [
+    SKILL_BY_ID[task.skill].name,
+    ...(
+      Object.keys({
+        ...task.inputs,
+        ...task.outputs,
+        ...task.monster?.drops,
+      }) as ItemId[]
+    ).map((id) => ITEMS[id].name),
+    ...(task.rareDrops ?? []).map((d) => ITEMS[d.item].name),
+    ...(task.monster ? [task.monster.name, task.monster.type] : []),
+  ];
+
   const item = (task: TaskDef) => {
     const levelLocked = level < task.levelReq;
     const bossLock = bossLockReason(state, task);
@@ -675,6 +699,7 @@ function Tasks(props: {
       <List.Item
         key={task.id}
         title={task.name}
+        keywords={keywords(task)}
         icon={locked ? { source: Icon.Lock, tintColor: Color.SecondaryText } : SKILL_ICON[skill]}
         accessories={[
           ...(active ? [{ icon: { source: Icon.Play, tintColor: Color.Green } }] : []),
@@ -832,6 +857,11 @@ function Inventory(props: {
           <List.Item
             key={id}
             title={item.name}
+            keywords={[
+              ...(item.heal ? ["food", "eat"] : []),
+              ...(item.potion ? ["potion", "drink", item.potion.kind] : []),
+              ...(item.slot ? ["gear", "equipment", item.slot] : []),
+            ]}
             icon={Icon.Box}
             accessories={[
               ...(isEquipped(state, id)
@@ -961,6 +991,7 @@ function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
           <List.Item
             key={def.id}
             title={def.name}
+            keywords={["building", ...(def.produces ? [ITEMS[def.produces.item].name] : [])]}
             icon={locked ? { source: Icon.Lock, tintColor: Color.SecondaryText } : Icon.House}
             accessories={[
               ...(lockTag ? [{ tag: lockTag }] : []),

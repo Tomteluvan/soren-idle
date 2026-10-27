@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { ABANDON_COST, BOARD_BONUS, REROLL_COST } from "./engine/data";
 import {
   boardCapacity,
@@ -64,7 +64,7 @@ export function Bounties(props: {
     <Action
       title={`Reroll Board (${REROLL_COST} Marks)`}
       icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={props.onReroll}
     />
   );
