@@ -38,6 +38,7 @@ import {
   maxHp,
   playerArmor,
   playerDamage,
+  rareChanceMult,
   taskRates,
   powerCapacity,
   powerUsed,
@@ -364,35 +365,31 @@ export default function Command() {
 }
 
 function notify(report: Report) {
-  if (report.bounties.length) {
-    showToast({
-      style: Toast.Style.Success,
-      title: "Bounty complete",
-      message: formatReport({
-        ...report,
-        notices: [],
-        levelUps: [],
-        completed: undefined,
-        stoppedReason: undefined,
-        items: {},
-      }),
-    });
-  } else if (report.completed && !report.levelUps.length && !report.notices.length) {
-    showToast({ style: Toast.Style.Success, title: report.completed });
-  } else if (report.notices.length) {
-    showToast({ style: Toast.Style.Success, title: "Contact", message: report.notices.join(" ") });
-  } else if (report.levelUps.length || report.stoppedReason) {
-    showToast({
-      style: report.stoppedReason ? Toast.Style.Failure : Toast.Style.Success,
-      title: report.levelUps.length ? "Level up!" : "Task stopped",
-      message: [
-        ...report.levelUps.map((u) => `${SKILL_BY_ID[u.skill].name} ${u.level}`),
-        report.stoppedReason,
-      ]
-        .filter(Boolean)
-        .join(" · "),
-    });
-  }
+  const found = Object.keys(report.rare).length > 0;
+  const lines = [
+    ...report.levelUps.map((u) => `${SKILL_BY_ID[u.skill].name} ${u.level}`),
+    ...report.bounties.map((b) => `Bounty for ${b.poster}: +${b.marks} Marks`),
+    ...(found ? [`Rare find: ${formatBundle(report.rare)}`] : []),
+    ...report.notices,
+    report.stoppedReason,
+  ].filter(Boolean);
+  const title = report.stoppedReason
+    ? "Task stopped"
+    : report.levelUps.length
+      ? "Level up!"
+      : report.bounties.length
+        ? "Bounty complete"
+        : found
+          ? "Rare find!"
+          : report.notices.length
+            ? "Contact"
+            : report.completed;
+  if (!title) return;
+  showToast({
+    style: report.stoppedReason ? Toast.Style.Failure : Toast.Style.Success,
+    title,
+    message: lines.join(" · ") || undefined,
+  });
 }
 
 // --- overview ---------------------------------------------------------------
@@ -627,6 +624,17 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
   if (task.inputs) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
   if (rates.nextLevelMs !== null)
     lines.push(`- **Next level in:** ${formatDuration(rates.nextLevelMs)} nonstop`);
+  if (task.rareDrops) {
+    const mult = rareChanceMult(state);
+    lines.push(
+      `- **Rare finds:** ${task.rareDrops
+        .map(
+          (d) =>
+            `${ITEMS[d.item].name} (${+(d.chance * mult * 100).toFixed(2)}% per ${task.monster ? "kill" : "cycle"})`,
+        )
+        .join(", ")}`,
+    );
+  }
   if (task.inputs) lines.push(`- **Needs:** ${formatBundle(task.inputs)}`);
   if (task.outputs) lines.push(`- **Makes:** ${formatBundle(task.outputs)}`);
   if (task.monster) {

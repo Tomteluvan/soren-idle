@@ -3,7 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { bountyTarget } from "./engine/bounty";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
 import { contactRemainingMs, count, levelOf, maxHp, stopTask } from "./engine/engine";
-import { formatCredits, formatDuration, formatReport } from "./engine/format";
+import { formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
 import { ripeCount } from "./engine/hydroponics";
 import { update } from "./engine/storage";
 import { notify } from "./notify";
@@ -12,7 +12,11 @@ export default function Command() {
   const { data, isLoading, revalidate } = usePromise(async () => {
     const result = await update();
     const { stoppedReason, completed, bounties } = result.report;
-    const bounty = bounties.length ? `Bounty complete: +${bounties[0].marks} Marks` : undefined;
+    const bounty = bounties.length
+      ? `Bounty complete: +${bounties[0].marks} Marks`
+      : Object.keys(result.report.rare).length
+        ? `Rare find: ${formatBundle(result.report.rare)}`
+        : undefined;
     if (
       (stoppedReason || completed || bounty) &&
       getPreferenceValues<{ notifications: boolean }>().notifications
@@ -61,6 +65,7 @@ export default function Command() {
             data.report.completed ||
             data.report.notices.length > 0 ||
             data.report.bounties.length > 0 ||
+            Object.keys(data.report.rare).length > 0 ||
             data.report.levelUps.length > 0) && (
             <MenuBarExtra.Section>
               <MenuBarExtra.Item title={formatReport(data.report)} />

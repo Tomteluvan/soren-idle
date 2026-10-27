@@ -217,6 +217,51 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     heal: 80,
     unsellable: true,
   },
+  prism_geode: {
+    id: "prism_geode",
+    name: "Prism Geode",
+    description: "Crack it open and the light inside splits into colours you have no names for.",
+    value: 120,
+  },
+  star_sapphire: {
+    id: "star_sapphire",
+    name: "Star Sapphire",
+    description: "A deep blue stone with a six-pointed glint that follows your eye.",
+    value: 400,
+  },
+  nav_core: {
+    id: "nav_core",
+    name: "Intact Nav Core",
+    description: "The navigation unit from a ship that was not yours. Still warm.",
+    value: 250,
+  },
+  flight_recorder: {
+    id: "flight_recorder",
+    name: "Flight Recorder",
+    description:
+      "Sealed, scorched and still ticking. The locals pay well for other people's last words.",
+    value: 500,
+  },
+  golden_spore: {
+    id: "golden_spore",
+    name: "Golden Spore",
+    description: "A single spore the colour of old brass. It smells like the inside of a bell.",
+    value: 100,
+  },
+  amber_bulb: {
+    id: "amber_bulb",
+    name: "Amber Bulb",
+    description: "A sweetroot that grew around something and kept it. You can see it moving.",
+    value: 180,
+  },
+  prospector_charm: {
+    id: "prospector_charm",
+    name: "Prospector's Charm",
+    description: "Rare finds are 50% more likely. The locals say it is not luck, only attention.",
+    value: 0,
+    rareBonus: 1.5,
+    unsellable: true,
+  },
 };
 
 export const TASKS: TaskDef[] = [
@@ -240,6 +285,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 4000,
     xp: 16,
     outputs: { circuit_scrap: 1 },
+    rareDrops: [{ item: "nav_core", chance: 0.004 }],
   },
   {
     id: "salvage_cargo",
@@ -250,6 +296,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 6000,
     xp: 40,
     outputs: { scrap_metal: 3, circuit_scrap: 1 },
+    rareDrops: [{ item: "flight_recorder", chance: 0.003 }],
   },
   // Mining
   {
@@ -261,6 +308,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 3500,
     xp: 10,
     outputs: { ferrite_ore: 1 },
+    rareDrops: [{ item: "prism_geode", chance: 0.004 }],
   },
   {
     id: "mine_lumina",
@@ -271,6 +319,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 5000,
     xp: 30,
     outputs: { lumina_crystal: 1 },
+    rareDrops: [{ item: "star_sapphire", chance: 0.004 }],
   },
   // Foraging
   {
@@ -282,6 +331,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 3000,
     xp: 8,
     outputs: { glowcap: 1 },
+    rareDrops: [{ item: "golden_spore", chance: 0.003 }],
   },
   {
     id: "forage_sweetroot",
@@ -292,6 +342,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 4500,
     xp: 22,
     outputs: { sweetroot: 1 },
+    rareDrops: [{ item: "amber_bulb", chance: 0.004 }],
   },
   // Cooking
   {
@@ -410,6 +461,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 4000,
     xp: 12,
     monster: { name: "Dust Skitter", hp: 20, damage: 3, drops: { chitin_shard: 1 } },
+    rareDrops: [{ item: "xeno_core", chance: 0.002 }],
   },
   {
     id: "fight_stalker",
@@ -420,6 +472,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 6000,
     xp: 40,
     monster: { name: "Cave Stalker", hp: 70, damage: 7, drops: { chitin_shard: 2 } },
+    rareDrops: [{ item: "xeno_core", chance: 0.01 }],
   },
   {
     id: "fight_wraith",
@@ -436,6 +489,7 @@ export const TASKS: TaskDef[] = [
 /** What the Bounty Shop sells: things nobody can craft or trade for. */
 export const BOUNTY_SHOP: ShopEntry[] = [
   { item: "stim_pack", cost: 8, levelReq: 2 },
+  { item: "prospector_charm", cost: 400, levelReq: 3 },
   { item: "veyari_lance", cost: 600, levelReq: 4 },
   { item: "veyari_warplate", cost: 900, levelReq: 5 },
 ];

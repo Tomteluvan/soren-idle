@@ -14,6 +14,7 @@ import {
 } from "./data";
 import { onKill, refillBoard, refreshBoardIfDue } from "./bounty";
 import { levelFromXp, xpForLevel } from "./levels";
+import { nextRandom } from "./rng";
 import {
   BuildingId,
   Bundle,
@@ -196,6 +197,10 @@ export function taskDurationMs(s: GameState, task: TaskDef): number {
   return Math.max(1000, Math.round(task.durationMs * mult));
 }
 
+/** How much likelier rare drops are, from the gear you carry. */
+export const rareChanceMult = (s: GameState) =>
+  Object.values(ITEMS).reduce((m, i) => (count(s, i.id) > 0 ? m * (i.rareBonus ?? 1) : m), 1);
+
 export function playerDamage(s: GameState): number {
   const bonus = Object.values(ITEMS).reduce(
     (sum, i) => sum + (count(s, i.id) > 0 ? (i.weaponDamage ?? 0) : 0),
@@ -312,6 +317,17 @@ export function gainXp(s: GameState, skill: SkillId, amount: number, report: Rep
   if (skill === "combat" && after > before) s.hp = Math.min(maxHp(s), s.hp + 5 * (after - before));
 }
 
+/** Rolls the task's rare drops for one cycle. */
+function rollRareDrops(s: GameState, task: TaskDef, report: Report) {
+  const mult = rareChanceMult(s);
+  for (const drop of task.rareDrops ?? []) {
+    if (nextRandom(s) >= drop.chance * mult) continue;
+    const before = count(s, drop.item);
+    addItems(s, { [drop.item]: 1 }, 1, report);
+    if (count(s, drop.item) > before) report.rare[drop.item] = (report.rare[drop.item] ?? 0) + 1;
+  }
+}
+
 /** Runs one cycle of a task. Returns a reason string if the task cannot continue. */
 function runCycle(s: GameState, task: TaskDef, report: Report): string | undefined {
   if (task.monster) {
@@ -337,6 +353,7 @@ function runCycle(s: GameState, task: TaskDef, report: Report): string | undefin
     addItems(s, task.inputs, -1);
     addItems(s, task.outputs, 1, report);
   }
+  rollRareDrops(s, task, report);
   gainXp(s, task.skill, task.xp, report);
   s.stats.cycles++;
   report.cycles++;
@@ -344,7 +361,16 @@ function runCycle(s: GameState, task: TaskDef, report: Report): string | undefin
 }
 
 export function emptyReport(): Report {
-  return { elapsedMs: 0, cycles: 0, items: {}, xp: {}, levelUps: [], notices: [], bounties: [] };
+  return {
+    elapsedMs: 0,
+    cycles: 0,
+    items: {},
+    rare: {},
+    xp: {},
+    levelUps: [],
+    notices: [],
+    bounties: [],
+  };
 }
 
 /** Advances the game to `now`, running as many task cycles as the elapsed time allows. */

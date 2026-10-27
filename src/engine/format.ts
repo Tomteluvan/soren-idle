@@ -24,6 +24,7 @@ export function formatBundle(bundle: Bundle = {}): string {
 export function formatReport(r: Report): string {
   const parts: string[] = [];
   if (Object.keys(r.items).length) parts.push(`+${formatBundle(r.items)}`);
+  if (Object.keys(r.rare).length) parts.push(`Rare find: ${formatBundle(r.rare)}`);
   for (const up of r.levelUps) parts.push(`${SKILL_BY_ID[up.skill].name} level ${up.level}!`);
   for (const b of r.bounties)
     parts.push(

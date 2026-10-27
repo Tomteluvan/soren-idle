@@ -27,7 +27,14 @@ export type ItemId =
   | "skyweave_suit"
   | "veyari_lance"
   | "veyari_warplate"
-  | "stim_pack";
+  | "stim_pack"
+  | "prism_geode"
+  | "star_sapphire"
+  | "nav_core"
+  | "flight_recorder"
+  | "golden_spore"
+  | "amber_bulb"
+  | "prospector_charm";
 
 export type Bundle = Partial<Record<ItemId, number>>;
 
@@ -45,6 +52,8 @@ export interface ItemDef {
   weaponDamage?: number;
   /** Owning this item reduces damage taken per round. */
   armor?: number;
+  /** Owning this item multiplies the chance of rare drops by this much. */
+  rareBonus?: number;
   /** The locals do not buy this: it cannot be sold. */
   unsellable?: boolean;
 }
@@ -71,6 +80,12 @@ export interface Monster {
   drops: Bundle;
 }
 
+/** A chance, rolled every cycle, of finding something on top of the usual output. */
+export interface RareDrop {
+  item: ItemId;
+  chance: number;
+}
+
 export interface TaskDef {
   id: string;
   skill: SkillId;
@@ -84,6 +99,7 @@ export interface TaskDef {
   /** Stops after one cycle (one-off crafts such as gear). */
   once?: boolean;
   monster?: Monster;
+  rareDrops?: RareDrop[];
   /** A boss fight, see `areas`. */
   boss?: boolean;
 }
@@ -233,6 +249,8 @@ export interface Report {
   elapsedMs: number;
   cycles: number;
   items: Bundle;
+  /** The part of `items` that came from rare drops. */
+  rare: Bundle;
   xp: Partial<Record<SkillId, number>>;
   levelUps: { skill: SkillId; level: number }[];
   /** Story beats that happened while time passed. */
