@@ -46,18 +46,18 @@ let queue: Promise<unknown> = Promise.resolve();
  * before writing, and the whole update is redone if the other command got there first.
  */
 export function update(
-  change: (s: GameState) => GameState = (s) => s,
+  change: (s: GameState, report: Report) => GameState = (s) => s,
 ): Promise<{ state: GameState; report: Report }> {
   const run = queue.then(() => attempt(change));
   queue = run.catch(() => undefined);
   return run;
 }
 
-async function attempt(change: (s: GameState) => GameState) {
+async function attempt(change: (s: GameState, report: Report) => GameState) {
   for (let i = 1; ; i++) {
     const raw = await LocalStorage.getItem<string>(KEY);
     const { state, report } = advance(await readState(raw), Date.now());
-    const next = change(state);
+    const next = change(state, report);
     if (i < MAX_ATTEMPTS && (await LocalStorage.getItem<string>(KEY)) !== raw) continue;
     await saveState(next);
     return { state: next, report };

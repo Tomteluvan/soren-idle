@@ -1,5 +1,6 @@
 import { getPreferenceValues, Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { awayLines, recordAway } from "./engine/away";
 import { bountyTarget } from "./engine/bounty";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
 import { contactRemainingMs, count, levelOf, maxHp, stopTask } from "./engine/engine";
@@ -16,7 +17,7 @@ import { notify } from "./notify";
 
 export default function Command() {
   const { data, isLoading, revalidate } = usePromise(async () => {
-    const result = await update();
+    const result = await update(recordAway);
     const { stoppedReason, completed, bounties } = result.report;
     const bounty = bounties.length
       ? `Bounty complete: +${bounties[0].marks} Marks`
@@ -78,6 +79,18 @@ export default function Command() {
             data.report.levelUps.length > 0) && (
             <MenuBarExtra.Section>
               <MenuBarExtra.Item title={formatReport(data.report)} />
+            </MenuBarExtra.Section>
+          )}
+          {state.unseen && awayLines(state.unseen).length > 0 && (
+            <MenuBarExtra.Section>
+              <MenuBarExtra.Submenu
+                title={`Since you last looked (${formatDuration(state.unseen.elapsedMs)})`}
+                icon={Icon.Clock}
+              >
+                {awayLines(state.unseen).map((line) => (
+                  <MenuBarExtra.Item key={line} title={line} />
+                ))}
+              </MenuBarExtra.Submenu>
             </MenuBarExtra.Section>
           )}
           <MenuBarExtra.Section>

@@ -310,6 +310,8 @@ export interface GameState {
   settings: Settings;
   /** One entry per hydroponic plot; null is an empty plot. */
   plots: (Plot | null)[];
+  /** What happened while the menu bar ticker ran and the game was not open, until you look. */
+  unseen: Report | null;
   /** Ids of first-run hints the player has already seen. */
   hints: string[];
   /** Lifetime counters, mostly for flavour. */
@@ -326,10 +328,23 @@ export interface GameState {
   };
 }
 
+/** What one skill did while time passed. */
+export interface SkillReport {
+  /** Time spent working at it. */
+  ms: number;
+  cycles: number;
+  xp: number;
+  items: Bundle;
+}
+
 export interface Report {
   elapsedMs: number;
   cycles: number;
   items: Bundle;
+  /** The part of `items` the drones brought back. */
+  passive: Bundle;
+  /** What each skill did, for the away summary. */
+  skills: Partial<Record<SkillId, SkillReport>>;
   /** The part of `items` that came from rare drops. */
   rare: Bundle;
   xp: Partial<Record<SkillId, number>>;

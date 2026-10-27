@@ -15,6 +15,7 @@ import {
 import { bossLockReason, matchup } from "./areas";
 import { onKill, refillBoard, refreshBoardIfDue } from "./bounty";
 import { levelFromXp, xpForLevel } from "./levels";
+import { emptyReport, mergeReports } from "./report";
 import { nextRandom } from "./rng";
 import {
   BuffKind,
@@ -52,6 +53,7 @@ export function newGame(now = Date.now()): GameState {
     board: { offers: [], active: null, refreshAt: 0, nextId: 1 },
     contactAt: null,
     equipped: {},
+    unseen: null,
     buffs: {},
     buildings: {},
     passive: {},
@@ -451,6 +453,20 @@ function rollRareDrops(s: GameState, task: TaskDef, report: Report, at: number) 
 
 /** Runs one cycle of a task that starts at time `at`. Returns a reason if the task cannot continue. */
 function runCycle(s: GameState, task: TaskDef, report: Report, at: number): string | undefined {
+  const cycle = emptyReport();
+  const stop = runCycleInto(s, task, cycle, at);
+  if (stop) return stop;
+  cycle.skills[task.skill] = {
+    ms: 0,
+    cycles: 1,
+    xp: cycle.xp[task.skill] ?? 0,
+    items: { ...cycle.items },
+  };
+  mergeReports(report, cycle);
+  return undefined;
+}
+
+function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): string | undefined {
   const yieldMult = task.once ? 1 : modifiers(s, at).yield;
   if (task.monster) {
     const damage = fightDamage(s, task, at);
@@ -491,18 +507,7 @@ function runCycle(s: GameState, task: TaskDef, report: Report, at: number): stri
   return undefined;
 }
 
-export function emptyReport(): Report {
-  return {
-    elapsedMs: 0,
-    cycles: 0,
-    items: {},
-    rare: {},
-    xp: {},
-    levelUps: [],
-    notices: [],
-    bounties: [],
-  };
-}
+export { emptyReport };
 
 /** Advances the game to `now`, running as many task cycles as the elapsed time allows. */
 export function advance(prev: GameState, now: number): { state: GameState; report: Report } {
@@ -522,7 +527,11 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
     const owed = (s.passive[def.id] ?? 0) + (elapsed * level) / def.produces.everyMs;
     const whole = Math.floor(owed);
     s.passive[def.id] = owed - whole;
-    if (whole > 0) addItems(s, { [def.produces.item]: whole }, 1, report);
+    if (whole > 0) {
+      const haul = emptyReport();
+      addItems(s, { [def.produces.item]: whole }, 1, haul);
+      mergeReports(report, { ...emptyReport(), items: haul.items, passive: haul.items });
+    }
   }
 
   const task = s.activeTask ? TASK_BY_ID[s.activeTask] : undefined;
@@ -556,6 +565,9 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
       break;
     }
   }
+  const worked = Math.max(0, done + (s.activeTask ? remaining : 0) - prev.taskProgressMs);
+  if (worked > 0)
+    (report.skills[task.skill] ??= { ms: 0, cycles: 0, xp: 0, items: {} }).ms = worked;
   s.taskProgressMs = s.activeTask ? remaining : 0;
   if (!s.activeTask) s.taskRemaining = null;
   return finish(s, report);

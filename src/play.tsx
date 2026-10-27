@@ -67,7 +67,7 @@ import {
 import { dismissHint, nextHint } from "./engine/hints";
 import { exportSave, importSave } from "./engine/migrate";
 import { resetState, saveState, takeSaveNotice, update } from "./engine/storage";
-import { harvest, harvestAll, plant } from "./engine/hydroponics";
+
 import {
   buy,
   canTrade,
@@ -83,6 +83,9 @@ import { Bounties } from "./bounties-view";
 import { buyFromShop } from "./engine/shop";
 import { BountyShop } from "./shop-view";
 import { areaKills, areaOf, bossLockReason, counterTo, huntsOf, matchup } from "./engine/areas";
+import { awayMarkdown, clearAway, topItems } from "./engine/away";
+import { emptyReport, mergeReports } from "./engine/report";
+import { harvest, harvestAll, plant, ripeCount } from "./engine/hydroponics";
 import { Equipment, gearStats } from "./equipment-view";
 import { Hydroponics } from "./hydroponics-view";
 import { Stats } from "./stats-view";
@@ -135,6 +138,7 @@ export default function Command() {
   const [state, setState] = useState<GameState>();
   const [view, setView] = useState<View>("overview");
   const [frame, setFrame] = useState(0);
+  const [away, setAway] = useState<Report | null>(null);
 
   async function sync(change?: (s: GameState) => GameState) {
     const { state, report } = await update(change);
@@ -159,18 +163,33 @@ export default function Command() {
   useEffect(() => {
     let first = true;
     const tick = async () => {
-      const { state, report } = await update();
+      const isFirst = first;
+      first = false;
+      // Whatever the menu bar ticker collected while this window was closed counts as time away.
+      let seen: Report | undefined;
+      const { state, report } = await update((s, r) => {
+        if (isFirst) seen = mergeReports(structuredClone(s.unseen ?? emptyReport()), r);
+        return clearAway(s);
+      });
       setState(state);
       // The first tick covers time spent away, so show it even when it is quiet.
-      if (first && report.elapsedMs > 60_000) {
-        first = false;
+      if (seen && seen.elapsedMs > 60_000) {
+        setAway(seen);
         await showToast({
           style: Toast.Style.Success,
-          title: `While you were away (${formatDuration(report.elapsedMs)})`,
-          message: formatReport(report) || "Nothing happened",
+          title: `While you were away (${formatDuration(seen.elapsedMs)})`,
+          message:
+            [
+              ...(Object.keys(seen.rare).length ? [`★ ${formatBundle(seen.rare)}`] : []),
+              topItems(seen),
+              ...seen.levelUps.map((u) => `${SKILL_BY_ID[u.skill].name} ${u.level}`),
+            ]
+              .filter(Boolean)
+              .join(" · ") ||
+            seen.stoppedReason ||
+            "Nothing happened",
         });
       } else {
-        first = false;
         notify(report);
       }
       const hint = nextHint(state);
@@ -224,6 +243,8 @@ export default function Command() {
       {view === "overview" && (
         <Overview
           state={state}
+          away={away}
+          onDismissAway={() => setAway(null)}
           frame={frame}
           onStop={() => sync(stopTask)}
           onOpen={setView}
@@ -442,6 +463,8 @@ function notify(report: Report) {
 
 function Overview(props: {
   state: GameState;
+  away: Report | null;
+  onDismissAway: () => void;
   frame: number;
   onStop: () => void;
   onOpen: (v: View) => void;
@@ -456,6 +479,35 @@ function Overview(props: {
 
   return (
     <>
+      {props.away && (
+        <List.Section title="While you were away">
+          <List.Item
+            title={`Away for ${formatDuration(props.away.elapsedMs)}`}
+            subtitle={
+              props.away.cycles ? `${props.away.cycles.toLocaleString("en-US")} tasks` : undefined
+            }
+            icon={Icon.Clock}
+            accessories={
+              Object.keys(props.away.rare).length
+                ? [{ tag: { value: "Rare find", color: Color.Orange } }]
+                : []
+            }
+            detail={
+              <List.Item.Detail
+                markdown={awayMarkdown(
+                  props.away,
+                  ripeCount(state) > 0 ? [`Hydroponics: ${ripeCount(state)} ready to harvest`] : [],
+                )}
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action title="Dismiss" icon={Icon.Check} onAction={props.onDismissAway} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
       <List.Section title="Survivor">
         <List.Item
           title={task ? task.name : "Idle"}
