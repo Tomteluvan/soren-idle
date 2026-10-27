@@ -159,6 +159,12 @@ export function powerCapacity(s: GameState): number {
   return BUILDINGS.reduce((sum, b) => sum + (b.powerProvided ?? 0) * buildingLevel(s, b.id), 0);
 }
 
+/** Share of full output the powered buildings get: 1 unless they draw more than the generators give. */
+export function powerEfficiency(s: GameState): number {
+  const used = powerUsed(s);
+  return used > 0 ? Math.min(1, powerCapacity(s) / used) : 1;
+}
+
 export function powerUsed(s: GameState): number {
   return BUILDINGS.reduce((sum, b) => sum + (b.powerUse ?? 0) * buildingLevel(s, b.id), 0);
 }
@@ -524,7 +530,9 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
   for (const def of BUILDINGS) {
     const level = buildingLevel(s, def.id);
     if (!def.produces || level === 0) continue;
-    const owed = (s.passive[def.id] ?? 0) + (elapsed * level) / def.produces.everyMs;
+    const owed =
+      (s.passive[def.id] ?? 0) +
+      (elapsed * level * (def.powerUse ? powerEfficiency(s) : 1)) / def.produces.everyMs;
     const whole = Math.floor(owed);
     s.passive[def.id] = owed - whole;
     if (whole > 0) {

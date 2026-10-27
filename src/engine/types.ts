@@ -215,7 +215,7 @@ export interface BuildingDef {
   /** Power the building adds / draws per level. */
   powerProvided?: number;
   powerUse?: number;
-  /** Per level, produces one `item` every `everyMs` while powered. */
+  /** Per level, produces one `item` every `everyMs`, scaled down when power is short. */
   produces?: { item: ItemId; everyMs: number };
 }
 

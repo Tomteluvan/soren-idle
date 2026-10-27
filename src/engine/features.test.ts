@@ -137,7 +137,7 @@ describe("lifetime totals", () => {
   });
 
   it("include what drones bring back while idle", () => {
-    const s = withItems({}, { buildings: { salvage_drone: 2 } });
+    const s = withItems({}, { buildings: { salvage_drone: 2, generator: 1 } });
     const { state } = advance(s, 10 * MINUTE);
     expect(state.stats.produced.scrap_metal).toBeGreaterThan(0);
   });

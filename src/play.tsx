@@ -48,6 +48,7 @@ import {
   rareChanceMult,
   taskRates,
   powerCapacity,
+  powerEfficiency,
   powerUsed,
   startTask,
   stopTask,
@@ -947,8 +948,10 @@ function effectLine(def: BuildingDef, level: number, state: GameState): string {
   if (def.levelNotes) return level ? `Level ${level}: ${def.levelNotes[level - 1]}` : "Not built";
   if (def.id === "workshop") return `Engineering ${8 * level}% faster`;
   if (def.powerProvided) return `${def.powerProvided * level} power`;
-  if (def.produces)
-    return `${level} × ${ITEMS[def.produces.item].name} per ${def.produces.everyMs / 1000}s`;
+  if (def.produces) {
+    const eff = powerEfficiency(state);
+    return `${level} × ${ITEMS[def.produces.item].name} per ${def.produces.everyMs / 1000}s${eff < 1 ? `, at ${Math.round(eff * 100)}% power` : ""}`;
+  }
   return level ? "Built" : "Not built";
 }
 

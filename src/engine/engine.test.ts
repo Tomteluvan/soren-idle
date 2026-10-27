@@ -12,6 +12,7 @@ import {
   maxHp,
   newGame,
   powerCapacity,
+  powerEfficiency,
   startTask,
   stopTask,
   taskDurationMs,
@@ -250,5 +251,24 @@ describe("base", () => {
     expect(taskDurationMs(built, TASK_BY_ID.mine_ferrite)).toBe(
       taskDurationMs(s, TASK_BY_ID.mine_ferrite),
     );
+  });
+});
+
+describe("drone power", () => {
+  const drones = (generator: number) =>
+    withItems({}, { buildings: { salvage_drone: 4, mining_drone: 4, generator, storage: 5 } });
+  const hour = 60 * MINUTE;
+
+  it("runs at full output when there is enough power", () => {
+    expect(powerEfficiency(drones(3))).toBe(1); // 8 drawn, 9 given
+    expect(advance(drones(3), hour).state.inventory.scrap_metal).toBe(4 * (hour / 20_000));
+  });
+
+  it("scales output down when drones draw more than the generators give", () => {
+    expect(powerEfficiency(drones(2))).toBeCloseTo(6 / 8);
+    expect(advance(drones(2), hour).state.inventory.scrap_metal).toBe(
+      Math.floor(4 * (hour / 20_000) * 0.75),
+    );
+    expect(advance(drones(0), hour).state.inventory.scrap_metal).toBeUndefined();
   });
 });
