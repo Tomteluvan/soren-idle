@@ -70,6 +70,8 @@ export interface TaskDef {
   /** Stops after one cycle (one-off crafts such as gear). */
   once?: boolean;
   monster?: Monster;
+  /** A boss fight, see `areas`. */
+  boss?: boolean;
 }
 
 export type BuildingId =
@@ -82,7 +84,8 @@ export type BuildingId =
   | "beacon"
   | "translator"
   | "hub"
-  | "hydroponic_bay";
+  | "hydroponic_bay"
+  | "bounty_board";
 
 export interface BuildingDef {
   id: BuildingId;
@@ -127,6 +130,29 @@ export interface Plot {
 
 export type FoodPriority = "weakest" | "strongest";
 
+/** A request posted on the Bounty Board: defeat `count` of the creature hunted by `task`. */
+export interface Bounty {
+  id: number;
+  /** The local who posted it. */
+  poster: string;
+  /** A line of flavour from the poster. */
+  line: string;
+  /** The hunt that counts: only kills made while this task runs add progress. */
+  task: string;
+  count: number;
+  tier: number;
+  marks: number;
+  xp: number;
+}
+
+export interface BountyBoard {
+  offers: Bounty[];
+  active: { bounty: Bounty; progress: number } | null;
+  /** When the unclaimed offers are replaced, or 0 while no board has been built. */
+  refreshAt: number;
+  nextId: number;
+}
+
 export interface Settings {
   /** Eat when HP drops below this share of max HP. 0 means only when the next fight needs it. */
   eatBelow: number;
@@ -153,8 +179,14 @@ export interface GameState {
   hp: number;
   xp: Record<SkillId, number>;
   inventory: Bundle;
+  /** State of the seeded random number generator; every roll in the game advances it. */
+  rng: number;
   /** Currency earned by trading with the locals. */
   credits: number;
+  /** Currency earned by finishing bounties. */
+  marks: number;
+  bountyXp: number;
+  board: BountyBoard;
   /** When the locals answer the beacon, or null while no beacon has been built. */
   contactAt: number | null;
   buildings: Partial<Record<BuildingId, number>>;
@@ -175,6 +207,7 @@ export interface GameState {
     /** Everything ever gained, by item. */
     produced: Bundle;
     creditsEarned: number;
+    bounties: number;
   };
 }
 
@@ -186,6 +219,8 @@ export interface Report {
   levelUps: { skill: SkillId; level: number }[];
   /** Story beats that happened while time passed. */
   notices: string[];
+  /** Bounties finished while time passed. */
+  bounties: { poster: string; marks: number; level?: number }[];
   stoppedReason?: string;
   /** Set when a fixed run or one-off craft finished by itself. */
   completed?: string;

@@ -2,6 +2,7 @@ import {
   BUILDING_BY_ID,
   BUILDINGS,
   CONTACT_DELAY_MS,
+  BOARD_REFRESH_MS,
   ITEMS,
   MAX_LEVEL,
   MAX_OFFLINE_MS,
@@ -9,6 +10,8 @@ import {
   SKILLS,
   TASK_BY_ID,
 } from "./data";
+import { onKill, refillBoard, refreshBoardIfDue } from "./bounty";
+import { levelFromXp, xpForLevel } from "./levels";
 import {
   BuildingId,
   Bundle,
@@ -35,7 +38,11 @@ export function newGame(now = Date.now()): GameState {
     hp: maxHpFor(0),
     xp: Object.fromEntries(SKILLS.map((s) => [s.id, 0])) as Record<SkillId, number>,
     inventory: {},
+    rng: (now ^ 0x9e3779b9) | 0,
     credits: 0,
+    marks: 0,
+    bountyXp: 0,
+    board: { offers: [], active: null, refreshAt: 0, nextId: 1 },
     contactAt: null,
     buildings: {},
     passive: {},
@@ -43,21 +50,13 @@ export function newGame(now = Date.now()): GameState {
     settings: { eatBelow: 0, foodPriority: "weakest" },
     plots: [],
     hints: [],
-    stats: { cycles: 0, kills: 0, deaths: 0, produced: {}, creditsEarned: 0 },
+    stats: { cycles: 0, kills: 0, deaths: 0, produced: {}, creditsEarned: 0, bounties: 0 },
   };
 }
 
 // --- levels -----------------------------------------------------------------
 
-export function xpForLevel(level: number): number {
-  return level <= 1 ? 0 : Math.floor(30 * (level - 1) ** 2);
-}
-
-export function levelFromXp(xp: number): number {
-  let level = 1;
-  while (level < MAX_LEVEL && xp >= xpForLevel(level + 1)) level++;
-  return level;
-}
+export { levelFromXp, xpForLevel };
 
 export const levelOf = (s: GameState, skill: SkillId) => levelFromXp(s.xp[skill]);
 
@@ -142,6 +141,10 @@ export function build(s: GameState, id: BuildingId): { state: GameState; error?:
   addItems(next, cost, -1);
   next.buildings[id] = level + 1;
   if (id === "beacon") next.contactAt = s.lastTick + CONTACT_DELAY_MS;
+  if (id === "bounty_board") {
+    if (!next.board.refreshAt) next.board.refreshAt = s.lastTick + BOARD_REFRESH_MS;
+    refillBoard(next);
+  }
   return { state: next };
 }
 
@@ -288,6 +291,7 @@ function runCycle(s: GameState, task: TaskDef, report: Report): string | undefin
     s.hp -= damage;
     s.stats.kills++;
     addItems(s, task.monster.drops, 1, report);
+    onKill(s, task, report);
   } else {
     if (!canAfford(s, task.inputs)) return `Out of materials for ${task.name}`;
     addItems(s, task.inputs, -1);
@@ -300,7 +304,7 @@ function runCycle(s: GameState, task: TaskDef, report: Report): string | undefin
 }
 
 export function emptyReport(): Report {
-  return { elapsedMs: 0, cycles: 0, items: {}, xp: {}, levelUps: [], notices: [] };
+  return { elapsedMs: 0, cycles: 0, items: {}, xp: {}, levelUps: [], notices: [], bounties: [] };
 }
 
 /** Advances the game to `now`, running as many task cycles as the elapsed time allows. */
@@ -357,6 +361,7 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
 
 /** Folds what the report gained into the lifetime totals. */
 function finish(s: GameState, report: Report): { state: GameState; report: Report } {
+  refreshBoardIfDue(s);
   for (const [id, n] of Object.entries(report.items) as [ItemId, number][])
     s.stats.produced[id] = (s.stats.produced[id] ?? 0) + n;
   return { state: s, report };

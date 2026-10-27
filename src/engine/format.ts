@@ -25,6 +25,10 @@ export function formatReport(r: Report): string {
   const parts: string[] = [];
   if (Object.keys(r.items).length) parts.push(`+${formatBundle(r.items)}`);
   for (const up of r.levelUps) parts.push(`${SKILL_BY_ID[up.skill].name} level ${up.level}!`);
+  for (const b of r.bounties)
+    parts.push(
+      `Bounty for ${b.poster} done: +${b.marks} Marks${b.level ? `, Bounty level ${b.level}!` : ""}`,
+    );
   parts.push(...r.notices);
   if (r.completed) parts.push(r.completed);
   if (r.stoppedReason) parts.push(r.stoppedReason);
@@ -32,6 +36,8 @@ export function formatReport(r: Report): string {
 }
 
 export const formatCredits = (n: number) => `${Math.floor(n).toLocaleString("en-US")} cr`;
+
+export const formatMarks = (n: number) => `${Math.floor(n).toLocaleString("en-US")} Marks`;
 
 export function formatDate(ms: number): string {
   return new Date(ms).toLocaleDateString("en-US", {

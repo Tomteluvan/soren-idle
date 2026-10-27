@@ -500,6 +500,43 @@ const ART: Record<BuildingId, Draw> = {
     ].join("");
   },
 
+  bounty_board: () => {
+    // a wide board on two posts, covered in pinned requests, with a lamp over it
+    const note = (x: number, y: number, w: number, h: number, hot = false) =>
+      rect(x, y, w, h, hot ? INK.glow : INK.white, INK.bg, 1) +
+      stroke(`M${x + 3} ${y + 6}H${x + w - 3}M${x + 3} ${y + 11}H${x + w - 7}`, INK.bg, 1) +
+      rect(x + w / 2 - 1.5, y + 2, 3, 3, INK.bg);
+    return [
+      shadow(220),
+      rect(100, 112, 6, 46, INK.dim),
+      rect(214, 112, 6, 46, INK.dim),
+      rect(84, 50, 152, 70, INK.ore, INK.bg, 1.5),
+      rect(90, 56, 140, 58, "#000", INK.ui, 1.5),
+      note(98, 62, 28, 22),
+      note(132, 66, 24, 18, true),
+      note(162, 60, 30, 24),
+      note(198, 64, 24, 20),
+      note(104, 88, 24, 20),
+      note(134, 90, 34, 18),
+      note(176, 90, 22, 20, true),
+      note(204, 90, 20, 18),
+      // lamp
+      stroke("M160 50V38", INK.white, 2),
+      rect(146, 30, 28, 8, INK.white, INK.bg, 1),
+      poly(
+        [
+          [148, 38],
+          [172, 38],
+          [182, 50],
+          [138, 50],
+        ],
+        INK.glow,
+        "none",
+        0,
+      ),
+    ].join("");
+  },
+
   hub: () => {
     let stripes = "";
     for (let i = 0; i < 6; i++) {

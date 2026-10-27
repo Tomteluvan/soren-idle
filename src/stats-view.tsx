@@ -15,6 +15,7 @@ export function Stats({ state }: { state: GameState }) {
     ["Tasks completed", state.stats.cycles.toLocaleString("en-US")],
     ["Creatures defeated", state.stats.kills.toLocaleString("en-US")],
     ["Credits earned", formatCredits(state.stats.creditsEarned)],
+    ["Bounties completed", state.stats.bounties.toLocaleString("en-US")],
   ];
 
   return (

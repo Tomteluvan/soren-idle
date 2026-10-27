@@ -48,6 +48,7 @@ import {
   formatBundle,
   formatCredits,
   formatDuration,
+  formatMarks,
   formatRates,
   formatReport,
 } from "./engine/format";
@@ -65,6 +66,8 @@ import {
   sellableCount,
   setKeep,
 } from "./engine/trade";
+import { abandonBounty, acceptBounty, bountyTarget, rerollBoard } from "./engine/bounty";
+import { Bounties } from "./bounties-view";
 import { Hydroponics } from "./hydroponics-view";
 import { Stats } from "./stats-view";
 import { Trade } from "./trade-view";
@@ -79,7 +82,7 @@ import {
   TaskDef,
 } from "./engine/types";
 
-type View = "overview" | SkillId | "base" | "trade" | "inventory" | "stats";
+type View = "overview" | SkillId | "base" | "bounties" | "trade" | "inventory" | "stats";
 
 /** Auto-eat choices: share of max HP, with 0 meaning only when the next fight needs it. */
 const EAT_LEVELS: [number, string][] = [
@@ -183,6 +186,7 @@ export default function Command() {
           </List.Dropdown.Section>
           <List.Dropdown.Item title="Base" value="base" icon={Icon.House} />
           <List.Dropdown.Item title="Trade" value="trade" icon={Icon.Coins} />
+          <List.Dropdown.Item title="Bounties" value="bounties" icon={Icon.Flag} />
           <List.Dropdown.Item title="Inventory" value="inventory" icon={Icon.Box} />
           <List.Dropdown.Item title="Stats" value="stats" icon={Icon.BarChart} />
         </List.Dropdown>
@@ -216,6 +220,36 @@ export default function Command() {
               (r) => `Bought ${qty}× ${ITEMS[id].name} for ${formatCredits(r.cost ?? 0)}`,
             )
           }
+        />
+      )}
+      {view === "bounties" && (
+        <Bounties
+          state={state}
+          onAccept={(id, start) =>
+            act(
+              (s) => {
+                const accepted = acceptBounty(s, id);
+                const target = s.board.offers.find((o) => o.id === id);
+                return start && !accepted.error && target
+                  ? startTask(accepted.state, target.task)
+                  : accepted;
+              },
+              () => "Bounty accepted",
+            )
+          }
+          onAbandon={() =>
+            act(
+              (s) => abandonBounty(s),
+              () => "Bounty abandoned",
+            )
+          }
+          onReroll={() =>
+            act(
+              (s) => rerollBoard(s),
+              () => "The board has new bounties",
+            )
+          }
+          onHunt={(taskId) => act((s) => startTask(s, taskId))}
         />
       )}
       {view === "inventory" && (
@@ -313,7 +347,20 @@ export default function Command() {
 }
 
 function notify(report: Report) {
-  if (report.completed && !report.levelUps.length && !report.notices.length) {
+  if (report.bounties.length) {
+    showToast({
+      style: Toast.Style.Success,
+      title: "Bounty complete",
+      message: formatReport({
+        ...report,
+        notices: [],
+        levelUps: [],
+        completed: undefined,
+        stoppedReason: undefined,
+        items: {},
+      }),
+    });
+  } else if (report.completed && !report.levelUps.length && !report.notices.length) {
     showToast({ style: Toast.Style.Success, title: report.completed });
   } else if (report.notices.length) {
     showToast({ style: Toast.Style.Success, title: "Contact", message: report.notices.join(" ") });
@@ -373,7 +420,13 @@ function Overview(props: {
                 "```",
                 `HP  ${bar(hpFraction)} ${Math.floor(state.hp)}/${maxHp(state)}`,
                 "```",
-                `Rations: **${count(state, "ration")}** · Credits: **${formatCredits(state.credits)}**`,
+                `Rations: **${count(state, "ration")}** · Credits: **${formatCredits(state.credits)}**${state.board.refreshAt ? ` · ${formatMarks(state.marks)}` : ""}`,
+                ...(state.board.active
+                  ? [
+                      "",
+                      `Bounty: hunt ${state.board.active.bounty.count}× ${bountyTarget(state.board.active.bounty).monster?.name} (${state.board.active.progress}/${state.board.active.bounty.count})`,
+                    ]
+                  : []),
                 `Auto-eat: **${EAT_LEVELS.find(([v]) => v === state.settings.eatBelow)?.[1] ?? "Custom"}**, **${state.settings.foodPriority}** food first`,
                 ...(task ? ["", preloadMarkdown(state.activeTask)] : []),
               ].join("\n")}

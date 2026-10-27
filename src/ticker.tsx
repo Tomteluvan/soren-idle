@@ -1,5 +1,6 @@
 import { getPreferenceValues, Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { bountyTarget } from "./engine/bounty";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
 import { contactRemainingMs, count, levelOf, maxHp, stopTask } from "./engine/engine";
 import { formatCredits, formatDuration, formatReport } from "./engine/format";
@@ -10,12 +11,13 @@ import { notify } from "./notify";
 export default function Command() {
   const { data, isLoading, revalidate } = usePromise(async () => {
     const result = await update();
-    const { stoppedReason, completed } = result.report;
+    const { stoppedReason, completed, bounties } = result.report;
+    const bounty = bounties.length ? `Bounty complete: +${bounties[0].marks} Marks` : undefined;
     if (
-      (stoppedReason || completed) &&
+      (stoppedReason || completed || bounty) &&
       getPreferenceValues<{ notifications: boolean }>().notifications
     )
-      notify("Braven Idle", stoppedReason ?? completed ?? "");
+      notify("Braven Idle", stoppedReason ?? completed ?? bounty ?? "");
     return result;
   });
 
@@ -41,6 +43,11 @@ export default function Command() {
             <MenuBarExtra.Item title={`HP ${Math.floor(state.hp)}/${maxHp(state)}`} />
             <MenuBarExtra.Item title={`Rations ${count(state, "ration")}`} />
             <MenuBarExtra.Item title={`Credits ${formatCredits(state.credits)}`} />
+            {state.board.active && (
+              <MenuBarExtra.Item
+                title={`Bounty ${state.board.active.progress}/${state.board.active.bounty.count} ${bountyTarget(state.board.active.bounty).monster?.name}`}
+              />
+            )}
             {ripeCount(state) > 0 && (
               <MenuBarExtra.Item title={`Hydroponics: ${ripeCount(state)} ready to harvest`} />
             )}
@@ -53,6 +60,7 @@ export default function Command() {
           {(data.report.stoppedReason ||
             data.report.completed ||
             data.report.notices.length > 0 ||
+            data.report.bounties.length > 0 ||
             data.report.levelUps.length > 0) && (
             <MenuBarExtra.Section>
               <MenuBarExtra.Item title={formatReport(data.report)} />

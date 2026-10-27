@@ -42,6 +42,11 @@ export const HINTS: Hint[] = [
     text: "Engineering 12 lets you build a Signal Beacon to call the locals.",
     when: (s) => levelOf(s, "engineering") >= 10,
   },
+  {
+    id: "bounties",
+    text: "The Bounty Board has requests. Accept one in Bounties, then hunt its target for Marks.",
+    when: (s) => (s.buildings.bounty_board ?? 0) > 0 && !s.board.active,
+  },
 ];
 
 /** The next hint the player should see, if any. */

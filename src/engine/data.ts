@@ -554,6 +554,27 @@ export const BUILDINGS: BuildingDef[] = [
     powerUse: 1,
   },
   {
+    id: "bounty_board",
+    name: "Bounty Board",
+    description: "Locals travel here to post requests for you, mostly about dangerous wildlife.",
+    maxLevel: 3,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { alloy_plate: 12, circuit_scrap: 10, scrap_metal: 30 },
+      { alloy_plate: 24, glyph_tablet: 5, resonance_coil: 1 },
+      { alloy_plate: 40, glyph_tablet: 10, resonance_coil: 3, void_lens: 1 },
+    ],
+    levelNotes: [
+      "3 bounties on offer.",
+      "4 bounties on offer, and they pay 15% more Marks.",
+      "5 bounties on offer, and they pay 30% more Marks.",
+    ],
+    requires: { skill: "engineering", level: 15 },
+    requiresContact: true,
+    requiresBuilding: { id: "translator", level: 1 },
+  },
+  {
     id: "beacon",
     name: "Signal Beacon",
     description: "Broadcasts a signal across the planet. Someone might be listening.",
@@ -598,6 +619,36 @@ export const CROPS: CropDef[] = [
 ];
 
 export const CROP_BY_ID: Record<string, CropDef> = Object.fromEntries(CROPS.map((c) => [c.id, c]));
+
+/** How often the unclaimed bounties on the board are replaced. */
+export const BOARD_REFRESH_MS = 60 * 60 * 1000;
+/** Marks per kill by bounty tier, and the extra the board pays per level (index 0 is level 1). */
+export const MARKS_PER_KILL = [1, 2, 4];
+export const BOARD_BONUS = [0, 0.15, 0.3];
+export const REROLL_COST = 10;
+export const ABANDON_COST = 5;
+
+/** Locals who post bounties. */
+export const POSTERS = [
+  "Oru the herder",
+  "Tessik of the lower terraces",
+  "Marah Veln",
+  "Old Dovu",
+  "Kesh, a grain-warden",
+  "Ilun the courier",
+  "Sorrel of the ferry",
+  "Brann Teyo",
+];
+
+/** Flavour for a request. `{m}` is the creature's name. */
+export const BOUNTY_LINES = [
+  "A {m} has been seen at the edge of the fields. We cannot sleep.",
+  "The {m} keep coming back. Please. Thin them out.",
+  "My brother went after a {m} alone. He is fine. His boots are not.",
+  "Everything quiet has gone quiet. It is the {m}. It is always the {m}.",
+  "We will pay what we can. The {m} must not reach the water.",
+  "You fight well, sky-friend. Would you fight a {m} for us?",
+];
 
 export const BUILDING_BY_ID: Record<BuildingId, BuildingDef> = Object.fromEntries(
   BUILDINGS.map((b) => [b.id, b]),
