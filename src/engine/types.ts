@@ -47,9 +47,18 @@ export type ItemId =
   | "fury_serum"
   | "quicksilver_tonic"
   | "windfall_elixir"
-  | "berserker_extract";
+  | "berserker_extract"
+  | "arc_torch"
+  | "quantum_drill"
+  | "deep_harvester"
+  | "arc_saber"
+  | "ward_plate"
+  | "scout_visor"
+  | "prism_visor";
 
 export type Bundle = Partial<Record<ItemId, number>>;
+
+export type EquipSlot = "weapon" | "body" | "head" | "salvager" | "miner" | "forager" | "charm";
 
 export interface ItemDef {
   id: ItemId;
@@ -59,13 +68,19 @@ export interface ItemDef {
   value: number;
   /** Heals this much HP when eaten. */
   heal?: number;
-  /** Owning this item makes tasks of `skill` take `speed` times as long (best one wins). */
+  /** Where it is worn. Only equipped gear counts; each slot holds one item. */
+  slot?: EquipSlot;
+  /** Higher tiers replace lower ones automatically when you get them. */
+  tier?: number;
+  /** Combat level needed to equip it. */
+  combatReq?: number;
+  /** Equipped, this makes tasks of `skill` take `speed` times as long. */
   tool?: { skill: SkillId; speed: number };
-  /** Owning this item adds this much damage per combat round. */
+  /** Equipped, this adds this much damage per combat round. */
   weaponDamage?: number;
-  /** Owning this item reduces damage taken per round. */
+  /** Equipped, this reduces damage taken per round. */
   armor?: number;
-  /** Owning this item multiplies the chance of rare drops by this much. */
+  /** Equipped, this multiplies the chance of rare drops by this much. */
   rareBonus?: number;
   /** Drinking this gives a timed buff. */
   potion?: Potion;
@@ -257,6 +272,8 @@ export interface GameState {
   buildings: Partial<Record<BuildingId, number>>;
   /** Fractional output of passive buildings, carried between ticks. */
   passive: Partial<Record<BuildingId, number>>;
+  /** What is worn in each slot. */
+  equipped: Partial<Record<EquipSlot, ItemId>>;
   /** Potion effects that are running, one per kind. */
   buffs: Partial<Record<BuffKind, ActiveBuff>>;
   /** Items to keep back when selling, per item. */

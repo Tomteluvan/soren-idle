@@ -44,6 +44,11 @@ export const HINTS: Hint[] = [
     when: (s) => levelOf(s, "engineering") >= 10,
   },
   {
+    id: "equipment",
+    text: "Gear only works while worn. Crafted pieces equip themselves, and Equipment lets you swap them.",
+    when: (s) => (Object.values(s.equipped) as unknown[]).length > 0,
+  },
+  {
     id: "potions",
     text: "Potions give timed buffs. Open Inventory and choose Drink; they keep running while you are away.",
     when: (s) => Object.values(ITEMS).some((i) => i.potion && (s.inventory[i.id] ?? 0) > 0),

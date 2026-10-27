@@ -32,6 +32,9 @@ import {
   count,
   drink,
   eat,
+  equip,
+  isEquipped,
+  unequip,
   firstContact,
   fightDamage,
   isGear,
@@ -76,6 +79,7 @@ import { abandonBounty, acceptBounty, bountyTarget, rerollBoard } from "./engine
 import { Bounties } from "./bounties-view";
 import { buyFromShop } from "./engine/shop";
 import { BountyShop } from "./shop-view";
+import { Equipment, gearStats } from "./equipment-view";
 import { Hydroponics } from "./hydroponics-view";
 import { Stats } from "./stats-view";
 import { Trade } from "./trade-view";
@@ -90,7 +94,16 @@ import {
   TaskDef,
 } from "./engine/types";
 
-type View = "overview" | SkillId | "base" | "bounties" | "shop" | "trade" | "inventory" | "stats";
+type View =
+  | "overview"
+  | SkillId
+  | "base"
+  | "bounties"
+  | "shop"
+  | "equipment"
+  | "trade"
+  | "inventory"
+  | "stats";
 
 /** Auto-eat choices: share of max HP, with 0 meaning only when the next fight needs it. */
 const EAT_LEVELS: [number, string][] = [
@@ -194,6 +207,7 @@ export default function Command() {
             ))}
           </List.Dropdown.Section>
           <List.Dropdown.Item title="Base" value="base" icon={Icon.House} />
+          <List.Dropdown.Item title="Equipment" value="equipment" icon={Icon.Shield} />
           <List.Dropdown.Item title="Trade" value="trade" icon={Icon.Coins} />
           <List.Dropdown.Item title="Bounties" value="bounties" icon={Icon.Flag} />
           <List.Dropdown.Item title="Bounty Shop" value="shop" icon={Icon.Cart} />
@@ -262,6 +276,18 @@ export default function Command() {
           onHunt={(taskId) => act((s) => startTask(s, taskId))}
         />
       )}
+      {view === "equipment" && (
+        <Equipment
+          state={state}
+          onEquip={(id) =>
+            act(
+              (s) => equip(s, id),
+              () => `Equipped ${ITEMS[id].name}`,
+            )
+          }
+          onUnequip={(slot) => sync((s) => unequip(s, slot))}
+        />
+      )}
       {view === "shop" && (
         <BountyShop
           state={state}
@@ -277,6 +303,12 @@ export default function Command() {
         <Inventory
           state={state}
           onEat={(id) => act((s) => eat(s, id))}
+          onEquip={(id) =>
+            act(
+              (s) => equip(s, id),
+              () => `Equipped ${ITEMS[id].name}`,
+            )
+          }
           onDrink={(id) =>
             act(
               (s) => drink(s, id),
@@ -668,6 +700,7 @@ function Inventory(props: {
   state: GameState;
   onEat: (id: ItemId) => void;
   onDrink: (id: ItemId) => void;
+  onEquip: (id: ItemId) => void;
   onSell: (id: ItemId, qty: number | "all") => void;
   onSellEverything: () => void;
   onKeep: (id: ItemId, n: number) => void;
@@ -698,7 +731,10 @@ function Inventory(props: {
             title={item.name}
             icon={Icon.Box}
             accessories={[
-              ...(keep > 0 ? [{ tag: `Keep ${keep}` }] : []),
+              ...(isEquipped(state, id)
+                ? [{ tag: { value: "Equipped", color: Color.Green } }]
+                : []),
+              ...(keep > 0 && !isGear(id) ? [{ tag: `Keep ${keep}` }] : []),
               {
                 text: `×${Math.floor(count(state, id))}`,
                 tooltip: isGear(id)
@@ -708,7 +744,7 @@ function Inventory(props: {
             ]}
             detail={
               <List.Item.Detail
-                markdown={`# ${item.name}\n${item.description}${item.unsellable ? "\n\n_The locals will not buy this._" : `\n\nWorth **${formatCredits(sellPrice(state, id))}** each.`}`}
+                markdown={`# ${item.name}\n${item.description}${item.slot ? `\n\n**${gearStats(id)}**` : ""}${item.unsellable ? "\n\n_The locals will not buy this._" : `\n\nWorth **${formatCredits(sellPrice(state, id))}** each.`}`}
               />
             }
             actions={
@@ -719,6 +755,9 @@ function Inventory(props: {
                     icon={Icon.Heart}
                     onAction={() => props.onEat(id)}
                   />
+                )}
+                {item.slot && !isEquipped(state, id) && (
+                  <Action title="Equip" icon={Icon.Check} onAction={() => props.onEquip(id)} />
                 )}
                 {item.potion && (
                   <Action title="Drink" icon={Icon.Pill} onAction={() => props.onDrink(id)} />

@@ -6,6 +6,7 @@ import {
   buildingCost,
   count,
   eat,
+  equip,
   levelFromXp,
   levelOf,
   maxHp,
@@ -120,7 +121,7 @@ describe("advance: crafting", () => {
 
   it("tools shorten matching tasks only", () => {
     const base = newGame(0);
-    const withTorch = withItems({ cutting_torch: 1 });
+    const withTorch = equip(withItems({ cutting_torch: 1 }), "cutting_torch").state;
     expect(taskDurationMs(withTorch, TASK_BY_ID.salvage_hull)).toBeLessThan(
       taskDurationMs(base, TASK_BY_ID.salvage_hull),
     );

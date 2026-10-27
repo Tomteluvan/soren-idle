@@ -4,6 +4,7 @@ import {
   advance,
   build,
   count,
+  equip,
   foodOwned,
   levelOf,
   newGame,
@@ -71,7 +72,10 @@ describe("task rates", () => {
 
   it("use the faster time that a tool gives", () => {
     const slow = taskRates(newGame(0), TASK_BY_ID["mine_ferrite"]);
-    const fast = taskRates(withItems({ plasma_drill: 1 }), TASK_BY_ID["mine_ferrite"]);
+    const fast = taskRates(
+      equip(withItems({ plasma_drill: 1 }), "plasma_drill").state,
+      TASK_BY_ID["mine_ferrite"],
+    );
     expect(fast.xpPerHour).toBeGreaterThan(slow.xpPerHour);
   });
 

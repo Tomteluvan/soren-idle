@@ -17,6 +17,8 @@ import { levelFromXp, xpForLevel } from "./levels";
 import { nextRandom } from "./rng";
 import {
   BuffKind,
+  EquipSlot,
+  ItemDef,
   BuildingId,
   Bundle,
   FoodPriority,
@@ -48,6 +50,7 @@ export function newGame(now = Date.now()): GameState {
     bountyXp: 0,
     board: { offers: [], active: null, refreshAt: 0, nextId: 1 },
     contactAt: null,
+    equipped: {},
     buffs: {},
     buildings: {},
     passive: {},
@@ -80,10 +83,7 @@ export function canAfford(s: GameState, cost: Bundle = {}): boolean {
 }
 
 /** Equipment is carried one at a time, so it does not take up storage. */
-export function isGear(id: ItemId): boolean {
-  const item = ITEMS[id];
-  return !!(item.tool || item.weaponDamage || item.armor);
-}
+export const isGear = (id: ItemId): boolean => !!ITEMS[id].slot;
 
 /** How many of each item the survivor can hold. */
 export const storageCap = (s: GameState) =>
@@ -189,6 +189,49 @@ export function build(s: GameState, id: BuildingId): { state: GameState; error?:
 
 // --- derived stats ----------------------------------------------------------
 
+// --- equipment --------------------------------------------------------------
+
+/** What is worn right now. Anything no longer in the inventory is ignored. */
+export const equippedItems = (s: GameState): ItemDef[] =>
+  (Object.values(s.equipped) as ItemId[]).filter((id) => count(s, id) > 0).map((id) => ITEMS[id]);
+
+export const isEquipped = (s: GameState, id: ItemId) => {
+  const slot = ITEMS[id].slot;
+  return !!slot && s.equipped[slot] === id;
+};
+
+/** Why an item cannot be worn, or undefined if it can. */
+export function equipError(s: GameState, id: ItemId): string | undefined {
+  const item = ITEMS[id];
+  if (!item.slot) return "That cannot be equipped";
+  if (count(s, id) < 1) return "You do not have that";
+  if (item.combatReq && levelOf(s, "combat") < item.combatReq)
+    return `Requires Combat level ${item.combatReq}`;
+  return undefined;
+}
+
+export function equip(s: GameState, id: ItemId): { state: GameState; error?: string } {
+  const error = equipError(s, id);
+  if (error) return { state: s, error };
+  const slot = ITEMS[id].slot as EquipSlot;
+  return { state: { ...s, equipped: { ...s.equipped, [slot]: id } } };
+}
+
+export function unequip(s: GameState, slot: EquipSlot): GameState {
+  const equipped = { ...s.equipped };
+  delete equipped[slot];
+  return { ...s, equipped };
+}
+
+/** Wears a new item if its slot is empty or it is a higher tier than what is worn. Changes `s`. */
+export function autoEquip(s: GameState, id: ItemId) {
+  const item = ITEMS[id];
+  if (!item.slot || equipError(s, id)) return;
+  const worn = s.equipped[item.slot];
+  if (!worn || count(s, worn) < 1 || (item.tier ?? 0) > (ITEMS[worn].tier ?? 0))
+    s.equipped[item.slot] = id;
+}
+
 /** A potion buff that is still running at time `at`. */
 export const activeBuff = (s: GameState, kind: BuffKind, at = s.lastTick) => {
   const buff = s.buffs[kind];
@@ -200,7 +243,7 @@ export const activeBuff = (s: GameState, kind: BuffKind, at = s.lastTick) => {
  * the gear you carry and the potions you are under. `at` is the moment to evaluate buffs at.
  */
 export function modifiers(s: GameState, at = s.lastTick) {
-  const owned = Object.values(ITEMS).filter((i) => count(s, i.id) > 0);
+  const owned = equippedItems(s);
   const toolSpeed = (skill: SkillId) =>
     Math.min(1, ...owned.filter((i) => i.tool?.skill === skill).map((i) => i.tool?.speed ?? 1));
   return {
@@ -397,6 +440,7 @@ function runCycle(s: GameState, task: TaskDef, report: Report, at: number): stri
     if (full) return `Storage full: ${ITEMS[full].name}. Sell or use some to continue`;
     addItems(s, task.inputs, -1);
     addItems(s, outputs, 1, report);
+    for (const id of Object.keys(outputs) as ItemId[]) autoEquip(s, id);
   }
   rollRareDrops(s, task, report, at);
   gainXp(s, task.skill, task.xp, report);

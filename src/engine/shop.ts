@@ -1,6 +1,6 @@
 import { BOUNTY_SHOP, ITEMS } from "./data";
 import { boardLevel, bountyLevel } from "./bounty";
-import { count, isGear, roomFor } from "./engine";
+import { autoEquip, count, isGear, roomFor } from "./engine";
 import { GameState, ItemId, ShopEntry } from "./types";
 
 export const shopOpen = (s: GameState) => boardLevel(s) > 0;
@@ -32,6 +32,7 @@ export function buyFromShop(
   const next = structuredClone(s);
   next.marks -= entry.cost;
   next.inventory[id] = count(s, id) + 1;
+  autoEquip(next, id);
   return { state: next, cost: entry.cost };
 }
 

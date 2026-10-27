@@ -1,5 +1,5 @@
-import { SAVE_VERSION, TASK_BY_ID } from "./data";
-import { newGame } from "./engine";
+import { ITEMS, SAVE_VERSION, TASK_BY_ID } from "./data";
+import { autoEquip, newGame } from "./engine";
 import { HINTS } from "./hints";
 import { GameState } from "./types";
 
@@ -10,6 +10,11 @@ const STEPS: Record<number, (s: GameState) => void> = {
   1: (s) => {
     if ((s.buildings.beacon ?? 0) > 0 && s.contactAt === null) s.contactAt = s.lastTick;
     s.hints = HINTS.filter((h) => h.id !== "low_hp" && h.when(s)).map((h) => h.id);
+  },
+  // v2 -> v3: gear used to count just by being owned. Now it has to be worn, so put it on.
+  2: (s) => {
+    for (const id of Object.keys(s.inventory) as (keyof typeof ITEMS)[])
+      if (ITEMS[id] && (s.inventory[id] ?? 0) > 0) autoEquip(s, id);
   },
 };
 
@@ -22,6 +27,7 @@ export function migrateSave(saved: Partial<GameState>): GameState {
     xp: { ...base.xp, ...saved.xp },
     stats: { ...base.stats, ...saved.stats, produced: { ...saved.stats?.produced } },
     settings: { ...base.settings, ...saved.settings },
+    equipped: { ...saved.equipped },
   };
   for (let v = saved.version ?? 1; v < SAVE_VERSION; v++) STEPS[v]?.(state);
   state.version = SAVE_VERSION;

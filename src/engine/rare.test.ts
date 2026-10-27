@@ -77,6 +77,7 @@ describe("rare drops", () => {
     const charmed = runCycles("mine_ferrite", 20_000, {
       ...roomy,
       inventory: { prospector_charm: 1 },
+      equipped: { charm: "prospector_charm" },
     });
     expect(charmed.state.inventory.prism_geode ?? 0).toBeGreaterThan(
       (plain.state.inventory.prism_geode ?? 0) * 1.2,
