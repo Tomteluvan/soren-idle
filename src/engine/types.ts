@@ -114,7 +114,7 @@ export interface StockItem {
 }
 
 export interface GameState {
-  version: 1;
+  version: number;
   createdAt: number;
   lastTick: number;
   activeTask: string | null;
@@ -130,6 +130,8 @@ export interface GameState {
   buildings: Partial<Record<BuildingId, number>>;
   /** Fractional output of passive buildings, carried between ticks. */
   passive: Partial<Record<BuildingId, number>>;
+  /** Ids of first-run hints the player has already seen. */
+  hints: string[];
   /** Lifetime counters, mostly for flavour. */
   stats: { cycles: number; kills: number; deaths: number };
 }

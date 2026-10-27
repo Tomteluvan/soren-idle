@@ -5,6 +5,7 @@ import {
   ITEMS,
   MAX_LEVEL,
   MAX_OFFLINE_MS,
+  SAVE_VERSION,
   SKILLS,
   TASK_BY_ID,
 } from "./data";
@@ -16,7 +17,7 @@ const SHELTER_REGEN_HP_PER_MS = 0.15 / 1000;
 
 export function newGame(now = Date.now()): GameState {
   return {
-    version: 1,
+    version: SAVE_VERSION,
     createdAt: now,
     lastTick: now,
     activeTask: null,
@@ -28,6 +29,7 @@ export function newGame(now = Date.now()): GameState {
     contactAt: null,
     buildings: {},
     passive: {},
+    hints: [],
     stats: { cycles: 0, kills: 0, deaths: 0 },
   };
 }

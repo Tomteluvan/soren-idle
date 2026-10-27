@@ -60,7 +60,7 @@ describe("migrateSave", () => {
   });
 
   it("treats a beacon from an older save as contact already made", () => {
-    const old = { ...newGame(5), buildings: { beacon: 1 } } as Partial<GameState>;
+    const old = { ...newGame(5), version: 1, buildings: { beacon: 1 } } as Partial<GameState>;
     delete old.contactAt;
     const migrated = migrateSave(old);
     expect(firstContact(migrated)).toBe(true);
