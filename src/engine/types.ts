@@ -99,7 +99,9 @@ export type BuildingId =
   | "translator"
   | "hub"
   | "hydroponic_bay"
-  | "bounty_board";
+  | "bounty_board"
+  | "storage"
+  | "stasis_pod";
 
 export interface BuildingDef {
   id: BuildingId;
@@ -111,6 +113,8 @@ export interface BuildingDef {
   costGrowth: number;
   /** Explicit cost per level (index 0 is level 1). Overrides baseCost and costGrowth. */
   levelCosts?: Bundle[];
+  /** Credits each level costs on top of the materials (index 0 is level 1). */
+  levelCredits?: number[];
   /** One line per level describing what that level gives you. */
   levelNotes?: string[];
   requires?: { skill: SkillId; level: number };

@@ -1,7 +1,6 @@
 import { BOUNTY_SHOP, ITEMS } from "./data";
 import { boardLevel, bountyLevel } from "./bounty";
-import { count } from "./engine";
-import { isGear } from "./trade";
+import { count, isGear, roomFor } from "./engine";
 import { GameState, ItemId, ShopEntry } from "./types";
 
 export const shopOpen = (s: GameState) => boardLevel(s) > 0;
@@ -29,6 +28,7 @@ export function buyFromShop(
   if (bountyLevel(s) < entry.levelReq)
     return { state: s, error: `Requires Bounty level ${entry.levelReq}` };
   if (s.marks < entry.cost) return { state: s, error: "Not enough Bounty Marks" };
+  if (roomFor(s, id) < 1) return { state: s, error: "Not enough room in storage" };
   const next = structuredClone(s);
   next.marks -= entry.cost;
   next.inventory[id] = count(s, id) + 1;

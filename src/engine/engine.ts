@@ -6,6 +6,8 @@ import {
   ITEMS,
   MAX_LEVEL,
   MAX_OFFLINE_MS,
+  OFFLINE_BONUS_HOURS,
+  STORAGE_CAPS,
   SAVE_VERSION,
   SKILLS,
   TASK_BY_ID,
@@ -74,10 +76,35 @@ export function canAfford(s: GameState, cost: Bundle = {}): boolean {
   return (Object.entries(cost) as [ItemId, number][]).every(([id, n]) => count(s, id) >= n);
 }
 
+/** Equipment is carried one at a time, so it does not take up storage. */
+export function isGear(id: ItemId): boolean {
+  const item = ITEMS[id];
+  return !!(item.tool || item.weaponDamage || item.armor);
+}
+
+/** How many of each item the survivor can hold. */
+export const storageCap = (s: GameState) =>
+  STORAGE_CAPS[Math.min(buildingLevel(s, "storage"), STORAGE_CAPS.length - 1)];
+
+/** How many more of an item fit in storage. */
+export const roomFor = (s: GameState, id: ItemId) =>
+  isGear(id) ? Infinity : Math.max(0, storageCap(s) - count(s, id));
+
+/** The first item in a bundle that would overflow storage, if any. */
+export function overflowing(s: GameState, bundle: Bundle = {}): ItemId | undefined {
+  return (Object.entries(bundle) as [ItemId, number][]).find(([id, n]) => roomFor(s, id) < n)?.[0];
+}
+
+/** Milliseconds of away time that count, raised by the Stasis Pod. */
+export const offlineCapMs = (s: GameState) =>
+  MAX_OFFLINE_MS + OFFLINE_BONUS_HOURS * 3_600_000 * buildingLevel(s, "stasis_pod");
+
+/** Adds or removes items. Gains stop at the storage limit, and only what fits is reported. */
 function addItems(s: GameState, bundle: Bundle = {}, sign: 1 | -1 = 1, report?: Report) {
   for (const [id, n] of Object.entries(bundle) as [ItemId, number][]) {
-    s.inventory[id] = Math.max(0, count(s, id) + sign * n);
-    if (sign === 1 && report) report.items[id] = (report.items[id] ?? 0) + n;
+    const delta = sign === 1 ? Math.min(n, roomFor(s, id)) : n;
+    s.inventory[id] = Math.max(0, count(s, id) + sign * delta);
+    if (sign === 1 && report && delta > 0) report.items[id] = (report.items[id] ?? 0) + delta;
   }
 }
 
@@ -96,6 +123,12 @@ export function buildingCost(s: GameState, id: BuildingId): Bundle {
       Math.ceil(n * def.costGrowth ** level),
     ]),
   );
+}
+
+/** Credits the next level of a building costs. */
+export function buildingCredits(s: GameState, id: BuildingId): number {
+  const credits = BUILDING_BY_ID[id].levelCredits;
+  return credits ? (credits[Math.min(buildingLevel(s, id), credits.length - 1)] ?? 0) : 0;
 }
 
 /** True once the locals have answered the beacon. */
@@ -137,8 +170,11 @@ export function build(s: GameState, id: BuildingId): { state: GameState; error?:
   }
   const cost = buildingCost(s, id);
   if (!canAfford(s, cost)) return { state: s, error: "Missing materials" };
+  const credits = buildingCredits(s, id);
+  if (s.credits < credits) return { state: s, error: "Not enough Credits" };
   const next = structuredClone(s);
   addItems(next, cost, -1);
+  next.credits -= credits;
   next.buildings[id] = level + 1;
   if (id === "beacon") next.contactAt = s.lastTick + CONTACT_DELAY_MS;
   if (id === "bounty_board") {
@@ -288,12 +324,16 @@ function runCycle(s: GameState, task: TaskDef, report: Report): string | undefin
     }
     if (s.hp <= damage)
       return `Retreated from ${task.monster.name}: too wounded and out of rations`;
+    const full = overflowing(s, task.monster.drops);
+    if (full) return `Storage full: ${ITEMS[full].name}. Sell or use some to continue`;
     s.hp -= damage;
     s.stats.kills++;
     addItems(s, task.monster.drops, 1, report);
     onKill(s, task, report);
   } else {
     if (!canAfford(s, task.inputs)) return `Out of materials for ${task.name}`;
+    const full = overflowing(s, task.outputs);
+    if (full) return `Storage full: ${ITEMS[full].name}. Sell or use some to continue`;
     addItems(s, task.inputs, -1);
     addItems(s, task.outputs, 1, report);
   }
@@ -311,7 +351,7 @@ export function emptyReport(): Report {
 export function advance(prev: GameState, now: number): { state: GameState; report: Report } {
   const s = structuredClone(prev);
   const report = emptyReport();
-  const elapsed = Math.min(Math.max(0, now - s.lastTick), MAX_OFFLINE_MS);
+  const elapsed = Math.min(Math.max(0, now - s.lastTick), offlineCapMs(s));
   s.lastTick = now;
   report.elapsedMs = elapsed;
   if (!firstContact(prev) && firstContact(s)) {

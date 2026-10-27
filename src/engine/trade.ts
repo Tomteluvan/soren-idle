@@ -1,5 +1,5 @@
 import { GREETINGS, HUB_SELL_RATES, ITEMS, STOCK, TRANSLATOR_DISCOUNTS } from "./data";
-import { buildingLevel, count } from "./engine";
+import { buildingLevel, count, isGear, roomFor } from "./engine";
 import { GameState, ItemId, StockItem } from "./types";
 
 export const hubLevel = (s: GameState) => buildingLevel(s, "hub");
@@ -13,11 +13,7 @@ export const greeting = (s: GameState) => GREETINGS[translatorLevel(s)];
 
 // --- selling ----------------------------------------------------------------
 
-/** Equipment keeps one copy: selling your only torch would silently slow you down. */
-export function isGear(id: ItemId): boolean {
-  const item = ITEMS[id];
-  return !!(item.tool || item.weaponDamage || item.armor);
-}
+export { isGear };
 
 /** Share of an item's value the locals pay. Before a Hub exists this shows the first level's rate. */
 export function sellRate(s: GameState): number {
@@ -121,6 +117,7 @@ export function buy(
   if (!canTrade(s)) return { state: s, error: "Build a Trading Hub first" };
   const stock = stockFor(s).find((x) => x.item === id);
   if (!stock) return { state: s, error: "The locals do not offer that yet" };
+  if (roomFor(s, id) < qty) return { state: s, error: "Not enough room in storage" };
   const cost = qty * buyPrice(s, stock);
   const paid = spendCredits(s, cost);
   if (paid.error) return { state: s, error: paid.error };

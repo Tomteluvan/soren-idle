@@ -471,6 +471,11 @@ export const GREETINGS = [
   '"Everything we have is yours to ask for. Nothing is held back, friend."',
 ];
 
+/** How many of one item you can hold, by Storage Depot level (index 0 is no depot). */
+export const STORAGE_CAPS = [1000, 2000, 4000, 8000, 16000, 32000];
+/** Extra offline hours the Stasis Pod adds per level. */
+export const OFFLINE_BONUS_HOURS = 4;
+
 export const BUILDINGS: BuildingDef[] = [
   {
     id: "shelter",
@@ -588,6 +593,47 @@ export const BUILDINGS: BuildingDef[] = [
     levelNotes: ["1 plot", "2 plots", "3 plots", "4 plots"],
     requires: { skill: "engineering", level: 6 },
     powerUse: 1,
+  },
+  {
+    id: "storage",
+    name: "Storage Depot",
+    description: "Each item stack holds more. When a stack is full, the task feeding it stops.",
+    maxLevel: 5,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { scrap_metal: 40, alloy_plate: 4 },
+      { scrap_metal: 80, alloy_plate: 10, circuit_scrap: 6 },
+      { alloy_plate: 20, circuit_scrap: 12 },
+      { alloy_plate: 40, circuit_scrap: 20, resonance_coil: 1 },
+      { alloy_plate: 60, resonance_coil: 3, void_lens: 1 },
+    ],
+    levelCredits: [0, 0, 300, 900, 2500],
+    levelNotes: STORAGE_CAPS.slice(1).map(
+      (n) => `Each item stack holds ${n.toLocaleString("en-US")}.`,
+    ),
+    requires: { skill: "engineering", level: 5 },
+  },
+  {
+    id: "stasis_pod",
+    name: "Stasis Pod",
+    description:
+      "Sleep through long absences. Your survivor keeps working for longer while you are away.",
+    maxLevel: 5,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { alloy_plate: 10, circuit_scrap: 8, lumina_crystal: 2 },
+      { alloy_plate: 15, circuit_scrap: 10, lumina_crystal: 4 },
+      { alloy_plate: 25, lumina_crystal: 8, resonance_coil: 1 },
+      { alloy_plate: 40, resonance_coil: 3, void_lens: 1 },
+      { resonance_coil: 6, void_lens: 3, aether_cell: 1 },
+    ],
+    levelCredits: [0, 0, 400, 1200, 3000],
+    levelNotes: [1, 2, 3, 4, 5].map(
+      (l) => `Away progress counts for up to ${12 + l * OFFLINE_BONUS_HOURS} hours.`,
+    ),
+    requires: { skill: "engineering", level: 10 },
   },
   {
     id: "bounty_board",

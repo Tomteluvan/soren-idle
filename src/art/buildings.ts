@@ -500,6 +500,82 @@ const ART: Record<BuildingId, Draw> = {
     ].join("");
   },
 
+  storage: () => {
+    // a stack of crates under a gantry: two on the floor, one on top, a hatch on the big one
+    const crate = (x: number, y: number, w: number, h: number) =>
+      rect(x, y, w, h, INK.ore, INK.bg, 1.5) +
+      stroke(`M${x} ${y}L${x + w} ${y + h}M${x + w} ${y}L${x} ${y + h}`, INK.bg, 1) +
+      rect(x + w / 2 - 4, y + h / 2 - 3, 8, 6, INK.white, INK.bg, 1);
+    return [
+      shadow(240),
+      crate(84, 108, 50, 50),
+      crate(140, 120, 38, 38),
+      crate(184, 100, 56, 58),
+      crate(100, 66, 42, 42),
+      crate(194, 70, 36, 30),
+      // gantry rail and hook
+      rect(72, 30, 176, 6, INK.white, INK.bg, 1),
+      rect(76, 36, 4, 122, INK.dim),
+      rect(240, 36, 4, 122, INK.dim),
+      stroke("M160 36V54", INK.white, 2),
+      stroke("M152 54H168V62", INK.glow, 3),
+      rect(124, 22, 8, 6, INK.glow),
+    ].join("");
+  },
+
+  stasis_pod: () => {
+    // an upright capsule with a lit window, a status panel and cables to the floor
+    return [
+      shadow(160),
+      poly(
+        [
+          [112, GROUND],
+          [112, 70],
+          [130, 40],
+          [190, 40],
+          [208, 70],
+          [208, GROUND],
+        ],
+        INK.ore,
+      ),
+      poly(
+        [
+          [126, 132],
+          [126, 76],
+          [138, 56],
+          [182, 56],
+          [194, 76],
+          [194, 132],
+        ],
+        "#000",
+        INK.ui,
+        2,
+      ),
+      // the sleeper's outline and a glow behind it
+      circle(160, 76, 9, INK.dim, "none", 0),
+      poly(
+        [
+          [148, 120],
+          [150, 90],
+          [170, 90],
+          [172, 120],
+        ],
+        INK.dim,
+        "none",
+        0,
+      ),
+      stroke("M134 70L134 120", INK.glow, 1),
+      rect(132, 140, 56, 8, "#000", INK.ui, 1),
+      rect(136, 143, 10, 2, INK.glow),
+      rect(150, 143, 10, 2, INK.white),
+      rect(164, 143, 20, 2, INK.glow),
+      // cables
+      stroke("M112 150C90 150 84 156 70 156M208 150C230 150 236 156 250 156", INK.glow, 2),
+      rect(122, 32, 76, 6, INK.white, INK.bg, 1),
+      glint(160, 24, 4),
+    ].join("");
+  },
+
   bounty_board: () => {
     // a wide board on two posts, covered in pinned requests, with a lamp over it
     const note = (x: number, y: number, w: number, h: number, hot = false) =>

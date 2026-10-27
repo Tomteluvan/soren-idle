@@ -25,12 +25,15 @@ import {
 import {
   build,
   buildingCost,
+  buildingCredits,
   buildingLevel,
+  storageCap,
   contactRemainingMs,
   count,
   eat,
   firstContact,
   fightDamage,
+  isGear,
   levelOf,
   maxHp,
   playerArmor,
@@ -662,7 +665,10 @@ function Inventory(props: {
     );
   }
   return (
-    <List.Section title="Inventory">
+    <List.Section
+      title="Inventory"
+      subtitle={`Each item holds up to ${storageCap(state).toLocaleString("en-US")}`}
+    >
       {owned.map((id) => {
         const item = ITEMS[id];
         const keep = keepCount(state, id);
@@ -674,7 +680,12 @@ function Inventory(props: {
             icon={Icon.Box}
             accessories={[
               ...(keep > 0 ? [{ tag: `Keep ${keep}` }] : []),
-              { text: `×${Math.floor(count(state, id))}` },
+              {
+                text: `×${Math.floor(count(state, id))}`,
+                tooltip: isGear(id)
+                  ? undefined
+                  : `Holds up to ${storageCap(state).toLocaleString("en-US")}`,
+              },
             ]}
             detail={
               <List.Item.Detail
@@ -770,10 +781,18 @@ function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
                 ? `${BUILDING_BY_ID[needed.id].name} ${needed.level}`
                 : undefined;
         const cost = buildingCost(state, def.id);
-        const costLines = (Object.entries(cost) as [ItemId, number][]).map(([id, n]) => {
-          const have = Math.floor(count(state, id));
-          return `- ${have >= n ? "✅" : "❌"} ${ITEMS[id].name}: ${have}/${n}`;
-        });
+        const credits = buildingCredits(state, def.id);
+        const costLines = [
+          ...(Object.entries(cost) as [ItemId, number][]).map(([id, n]) => {
+            const have = Math.floor(count(state, id));
+            return `- ${have >= n ? "✅" : "❌"} ${ITEMS[id].name}: ${have}/${n}`;
+          }),
+          ...(credits
+            ? [
+                `- ${state.credits >= credits ? "✅" : "❌"} Credits: ${Math.floor(state.credits)}/${credits}`,
+              ]
+            : []),
+        ];
         return (
           <List.Item
             key={def.id}

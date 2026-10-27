@@ -1,5 +1,5 @@
-import { levelOf, maxHp } from "./engine";
-import { GameState, SkillId } from "./types";
+import { isGear, levelOf, maxHp, storageCap } from "./engine";
+import { GameState, ItemId, SkillId } from "./types";
 
 export interface Hint {
   id: string;
@@ -41,6 +41,14 @@ export const HINTS: Hint[] = [
     id: "beacon",
     text: "Engineering 12 lets you build a Signal Beacon to call the locals.",
     when: (s) => levelOf(s, "engineering") >= 10,
+  },
+  {
+    id: "storage",
+    text: "Some stacks are nearly full and the task feeding one will stop. Sell, use items, or build a Storage Depot.",
+    when: (s) =>
+      Object.entries(s.inventory).some(
+        ([id, n]) => n >= storageCap(s) * 0.8 && !isGear(id as ItemId),
+      ),
   },
   {
     id: "bounties",

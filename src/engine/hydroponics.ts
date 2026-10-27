@@ -1,5 +1,14 @@
 import { CROP_BY_ID } from "./data";
-import { buildingLevel, canAfford, count, emptyReport, gainXp, levelOf } from "./engine";
+import {
+  buildingLevel,
+  canAfford,
+  count,
+  emptyReport,
+  gainXp,
+  levelOf,
+  overflowing,
+} from "./engine";
+import { ITEMS } from "./data";
 import { Bundle, GameState, ItemId, Plot, Report } from "./types";
 
 /** One plot per Hydroponic Bay level. */
@@ -47,6 +56,8 @@ export function harvest(
   if (!plot) return { state: s, error: "Nothing is planted there" };
   if (!isRipe(s, plot)) return { state: s, error: "Not ripe yet" };
   const crop = CROP_BY_ID[plot.crop];
+  const full = overflowing(s, crop.yield);
+  if (full) return { state: s, error: `Storage full: ${ITEMS[full].name}` };
   const next = structuredClone(s);
   const report = emptyReport();
   for (const [id, n] of Object.entries(crop.yield) as [ItemId, number][]) {
