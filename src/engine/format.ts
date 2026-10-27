@@ -1,5 +1,6 @@
 import { ITEMS, SKILL_BY_ID } from "./data";
-import { Bundle, ItemId, Report } from "./types";
+import { activeBuff } from "./engine";
+import { BuffKind, Bundle, GameState, ItemId, Report } from "./types";
 
 export function formatDuration(ms: number): string {
   const total = Math.round(ms / 1000);
@@ -60,4 +61,14 @@ export function formatRates(bundle: Bundle = {}): string {
     ([id, n]) => `${formatRate(n)} ${ITEMS[id].name}`,
   );
   return parts.length ? parts.join(", ") : "nothing";
+}
+
+/** One line per running potion: "Swift Tonic, 12m 3s left". */
+export function formatBuffs(s: GameState): string[] {
+  return (Object.keys(s.buffs) as BuffKind[]).flatMap((kind) => {
+    const buff = activeBuff(s, kind);
+    return buff
+      ? [`${ITEMS[buff.item].name}, ${formatDuration(buff.expiresAt - s.lastTick)} left`]
+      : [];
+  });
 }

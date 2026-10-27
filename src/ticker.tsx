@@ -3,7 +3,13 @@ import { usePromise } from "@raycast/utils";
 import { bountyTarget } from "./engine/bounty";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
 import { contactRemainingMs, count, levelOf, maxHp, stopTask } from "./engine/engine";
-import { formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
+import {
+  formatBuffs,
+  formatBundle,
+  formatCredits,
+  formatDuration,
+  formatReport,
+} from "./engine/format";
 import { ripeCount } from "./engine/hydroponics";
 import { update } from "./engine/storage";
 import { notify } from "./notify";
@@ -47,6 +53,9 @@ export default function Command() {
             <MenuBarExtra.Item title={`HP ${Math.floor(state.hp)}/${maxHp(state)}`} />
             <MenuBarExtra.Item title={`Rations ${count(state, "ration")}`} />
             <MenuBarExtra.Item title={`Credits ${formatCredits(state.credits)}`} />
+            {formatBuffs(state).map((line) => (
+              <MenuBarExtra.Item key={line} title={line} />
+            ))}
             {state.board.active && (
               <MenuBarExtra.Item
                 title={`Bounty ${state.board.active.progress}/${state.board.active.bounty.count} ${bountyTarget(state.board.active.bounty).monster?.name}`}

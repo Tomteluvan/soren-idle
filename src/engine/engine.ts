@@ -16,6 +16,7 @@ import { onKill, refillBoard, refreshBoardIfDue } from "./bounty";
 import { levelFromXp, xpForLevel } from "./levels";
 import { nextRandom } from "./rng";
 import {
+  BuffKind,
   BuildingId,
   Bundle,
   FoodPriority,
@@ -47,6 +48,7 @@ export function newGame(now = Date.now()): GameState {
     bountyXp: 0,
     board: { offers: [], active: null, refreshAt: 0, nextId: 1 },
     contactAt: null,
+    buffs: {},
     buildings: {},
     passive: {},
     keep: {},
@@ -187,41 +189,61 @@ export function build(s: GameState, id: BuildingId): { state: GameState; error?:
 
 // --- derived stats ----------------------------------------------------------
 
-export function taskDurationMs(s: GameState, task: TaskDef): number {
-  let mult = 1;
-  for (const item of Object.values(ITEMS)) {
-    if (item.tool?.skill === task.skill && count(s, item.id) > 0)
-      mult = Math.min(mult, item.tool.speed);
-  }
+/** A potion buff that is still running at time `at`. */
+export const activeBuff = (s: GameState, kind: BuffKind, at = s.lastTick) => {
+  const buff = s.buffs[kind];
+  return buff && at < buff.expiresAt ? buff : undefined;
+};
+
+/**
+ * Everything that changes how fast, how strong or how lucky the survivor is, in one place:
+ * the gear you carry and the potions you are under. `at` is the moment to evaluate buffs at.
+ */
+export function modifiers(s: GameState, at = s.lastTick) {
+  const owned = Object.values(ITEMS).filter((i) => count(s, i.id) > 0);
+  const toolSpeed = (skill: SkillId) =>
+    Math.min(1, ...owned.filter((i) => i.tool?.skill === skill).map((i) => i.tool?.speed ?? 1));
+  return {
+    speed: (skill: SkillId) => (activeBuff(s, "speed", at)?.power ?? 1) * toolSpeed(skill),
+    damage:
+      owned.reduce((sum, i) => sum + (i.weaponDamage ?? 0), 0) +
+      (activeBuff(s, "damage", at)?.power ?? 0),
+    armor: owned.reduce((sum, i) => sum + (i.armor ?? 0), 0),
+    yield: activeBuff(s, "yield", at)?.power ?? 1,
+    rare: owned.reduce((m, i) => m * (i.rareBonus ?? 1), 1),
+  };
+}
+
+export const rareChanceMult = (s: GameState) => modifiers(s).rare;
+
+export function taskDurationMs(s: GameState, task: TaskDef, at = s.lastTick): number {
+  let mult = modifiers(s, at).speed(task.skill);
   if (task.skill === "engineering") mult *= 1 - 0.08 * buildingLevel(s, "workshop");
   return Math.max(1000, Math.round(task.durationMs * mult));
 }
 
-/** How much likelier rare drops are, from the gear you carry. */
-export const rareChanceMult = (s: GameState) =>
-  Object.values(ITEMS).reduce((m, i) => (count(s, i.id) > 0 ? m * (i.rareBonus ?? 1) : m), 1);
+export const playerDamage = (s: GameState, at = s.lastTick) =>
+  3 + levelOf(s, "combat") + modifiers(s, at).damage;
 
-export function playerDamage(s: GameState): number {
-  const bonus = Object.values(ITEMS).reduce(
-    (sum, i) => sum + (count(s, i.id) > 0 ? (i.weaponDamage ?? 0) : 0),
-    0,
-  );
-  return 3 + levelOf(s, "combat") + bonus;
-}
-
-export function playerArmor(s: GameState): number {
-  return Object.values(ITEMS).reduce(
-    (sum, i) => sum + (count(s, i.id) > 0 ? (i.armor ?? 0) : 0),
-    0,
-  );
-}
+export const playerArmor = (s: GameState, at = s.lastTick) => modifiers(s, at).armor;
 
 /** Expected damage taken in a fight against this task's monster. */
-export function fightDamage(s: GameState, task: TaskDef): number {
+export function fightDamage(s: GameState, task: TaskDef, at = s.lastTick): number {
   const m = task.monster;
   if (!m) return 0;
-  const rounds = Math.ceil(m.hp / playerDamage(s));
-  return Math.ceil(rounds * Math.max(1, m.damage - playerArmor(s)) * 0.4);
+  const rounds = Math.ceil(m.hp / playerDamage(s, at));
+  return Math.ceil(rounds * Math.max(1, m.damage - playerArmor(s, at)) * 0.4);
+}
+
+/** A yield potion's bonus: whole extras, plus a chance of one more for the fraction. */
+function boostYield(s: GameState, bundle: Bundle = {}, mult: number): Bundle {
+  if (mult <= 1) return bundle;
+  const boosted: Bundle = {};
+  for (const [id, n] of Object.entries(bundle) as [ItemId, number][]) {
+    const exact = n * mult;
+    boosted[id] = Math.floor(exact) + (nextRandom(s) < exact - Math.floor(exact) ? 1 : 0);
+  }
+  return boosted;
 }
 
 export interface TaskRates {
@@ -306,6 +328,26 @@ export function eat(
   return { state: next };
 }
 
+/** Drinks a potion. One buff of each kind runs at a time, and a weaker one cannot replace a stronger. */
+export function drink(s: GameState, id: ItemId): { state: GameState; error?: string } {
+  const potion = ITEMS[id].potion;
+  if (!potion || count(s, id) < 1) return { state: s, error: "Nothing to drink" };
+  const current = activeBuff(s, potion.kind);
+  const weaker =
+    current &&
+    (potion.kind === "speed" ? potion.power > current.power : potion.power < current.power);
+  if (current && weaker)
+    return { state: s, error: `A stronger ${ITEMS[current.item].name} is already working` };
+  const next = structuredClone(s);
+  next.inventory[id] = count(s, id) - 1;
+  next.buffs[potion.kind] = {
+    item: id,
+    power: potion.power,
+    expiresAt: s.lastTick + potion.durationMs,
+  };
+  return { state: next };
+}
+
 // --- simulation -------------------------------------------------------------
 
 export function gainXp(s: GameState, skill: SkillId, amount: number, report: Report) {
@@ -318,8 +360,8 @@ export function gainXp(s: GameState, skill: SkillId, amount: number, report: Rep
 }
 
 /** Rolls the task's rare drops for one cycle. */
-function rollRareDrops(s: GameState, task: TaskDef, report: Report) {
-  const mult = rareChanceMult(s);
+function rollRareDrops(s: GameState, task: TaskDef, report: Report, at: number) {
+  const mult = modifiers(s, at).rare;
   for (const drop of task.rareDrops ?? []) {
     if (nextRandom(s) >= drop.chance * mult) continue;
     const before = count(s, drop.item);
@@ -328,10 +370,11 @@ function rollRareDrops(s: GameState, task: TaskDef, report: Report) {
   }
 }
 
-/** Runs one cycle of a task. Returns a reason string if the task cannot continue. */
-function runCycle(s: GameState, task: TaskDef, report: Report): string | undefined {
+/** Runs one cycle of a task that starts at time `at`. Returns a reason if the task cannot continue. */
+function runCycle(s: GameState, task: TaskDef, report: Report, at: number): string | undefined {
+  const yieldMult = task.once ? 1 : modifiers(s, at).yield;
   if (task.monster) {
-    const damage = fightDamage(s, task);
+    const damage = fightDamage(s, task, at);
     const wantsFood = () =>
       s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);
     for (let food = foodOwned(s); food && wantsFood() && s.hp < maxHp(s); food = foodOwned(s)) {
@@ -340,20 +383,22 @@ function runCycle(s: GameState, task: TaskDef, report: Report): string | undefin
     }
     if (s.hp <= damage)
       return `Retreated from ${task.monster.name}: too wounded and out of rations`;
-    const full = overflowing(s, task.monster.drops);
+    const drops = boostYield(s, task.monster.drops, yieldMult);
+    const full = overflowing(s, drops);
     if (full) return `Storage full: ${ITEMS[full].name}. Sell or use some to continue`;
     s.hp -= damage;
     s.stats.kills++;
-    addItems(s, task.monster.drops, 1, report);
+    addItems(s, drops, 1, report);
     onKill(s, task, report);
   } else {
     if (!canAfford(s, task.inputs)) return `Out of materials for ${task.name}`;
-    const full = overflowing(s, task.outputs);
+    const outputs = boostYield(s, task.outputs, yieldMult);
+    const full = overflowing(s, outputs);
     if (full) return `Storage full: ${ITEMS[full].name}. Sell or use some to continue`;
     addItems(s, task.inputs, -1);
-    addItems(s, task.outputs, 1, report);
+    addItems(s, outputs, 1, report);
   }
-  rollRareDrops(s, task, report);
+  rollRareDrops(s, task, report, at);
   gainXp(s, task.skill, task.xp, report);
   s.stats.cycles++;
   report.cycles++;
@@ -403,17 +448,22 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
 
   if (task.once && s.taskRemaining === null) s.taskRemaining = 1;
   let remaining = s.taskProgressMs + elapsed;
+  // Potions run out partway through a long absence, so each cycle knows when it started.
+  const windowStart = prev.lastTick - s.taskProgressMs;
+  let done = 0;
   // Tool crafted mid-run changes duration, so recompute each cycle.
   while (s.activeTask) {
-    const duration = taskDurationMs(s, task);
+    const at = windowStart + done;
+    const duration = taskDurationMs(s, task, at);
     if (remaining < duration) break;
-    const stopReason = runCycle(s, task, report);
+    const stopReason = runCycle(s, task, report, at);
     if (stopReason) {
       report.stoppedReason = stopReason;
       s.activeTask = null;
       break;
     }
     remaining -= duration;
+    done += duration;
     if (s.taskRemaining !== null && --s.taskRemaining <= 0) {
       report.completed = `Finished ${task.name}`;
       s.activeTask = null;
@@ -428,6 +478,8 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
 /** Folds what the report gained into the lifetime totals. */
 function finish(s: GameState, report: Report): { state: GameState; report: Report } {
   refreshBoardIfDue(s);
+  for (const kind of Object.keys(s.buffs) as BuffKind[])
+    if (!activeBuff(s, kind)) delete s.buffs[kind];
   for (const [id, n] of Object.entries(report.items) as [ItemId, number][])
     s.stats.produced[id] = (s.stats.produced[id] ?? 0) + n;
   return { state: s, report };

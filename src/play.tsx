@@ -30,6 +30,7 @@ import {
   storageCap,
   contactRemainingMs,
   count,
+  drink,
   eat,
   firstContact,
   fightDamage,
@@ -49,6 +50,7 @@ import {
 } from "./engine/engine";
 import {
   bar,
+  formatBuffs,
   formatBundle,
   formatCredits,
   formatDuration,
@@ -108,6 +110,7 @@ const SKILL_ICON: Record<SkillId, Icon> = {
   engineering: Icon.Gear,
   combat: Icon.Shield,
   hydroponics: Icon.Raindrop,
+  xenochemistry: Icon.Pill,
 };
 
 export default function Command() {
@@ -274,6 +277,12 @@ export default function Command() {
         <Inventory
           state={state}
           onEat={(id) => act((s) => eat(s, id))}
+          onDrink={(id) =>
+            act(
+              (s) => drink(s, id),
+              () => `Drank ${ITEMS[id].name}`,
+            )
+          }
           onSell={(id, qty) =>
             act(
               (s) => sell(s, id, qty),
@@ -435,6 +444,7 @@ function Overview(props: {
                 `HP  ${bar(hpFraction)} ${Math.floor(state.hp)}/${maxHp(state)}`,
                 "```",
                 `Rations: **${count(state, "ration")}** · Credits: **${formatCredits(state.credits)}**${state.board.refreshAt ? ` · ${formatMarks(state.marks)}` : ""}`,
+                ...formatBuffs(state).map((line) => `Buff: **${line}**`),
                 ...(state.board.active
                   ? [
                       "",
@@ -657,6 +667,7 @@ const KEEP_CHOICES = [0, 10, 25, 50, 100];
 function Inventory(props: {
   state: GameState;
   onEat: (id: ItemId) => void;
+  onDrink: (id: ItemId) => void;
   onSell: (id: ItemId, qty: number | "all") => void;
   onSellEverything: () => void;
   onKeep: (id: ItemId, n: number) => void;
@@ -708,6 +719,9 @@ function Inventory(props: {
                     icon={Icon.Heart}
                     onAction={() => props.onEat(id)}
                   />
+                )}
+                {item.potion && (
+                  <Action title="Drink" icon={Icon.Pill} onAction={() => props.onDrink(id)} />
                 )}
                 {canTrade(state) && sellable > 0 && (
                   <>

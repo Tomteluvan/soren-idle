@@ -1,5 +1,12 @@
 export type SkillId =
-  "salvaging" | "mining" | "foraging" | "cooking" | "engineering" | "combat" | "hydroponics";
+  | "salvaging"
+  | "mining"
+  | "foraging"
+  | "cooking"
+  | "engineering"
+  | "combat"
+  | "hydroponics"
+  | "xenochemistry";
 
 export type ItemId =
   | "scrap_metal"
@@ -34,7 +41,13 @@ export type ItemId =
   | "flight_recorder"
   | "golden_spore"
   | "amber_bulb"
-  | "prospector_charm";
+  | "prospector_charm"
+  | "swift_tonic"
+  | "fortune_draught"
+  | "fury_serum"
+  | "quicksilver_tonic"
+  | "windfall_elixir"
+  | "berserker_extract";
 
 export type Bundle = Partial<Record<ItemId, number>>;
 
@@ -54,6 +67,8 @@ export interface ItemDef {
   armor?: number;
   /** Owning this item multiplies the chance of rare drops by this much. */
   rareBonus?: number;
+  /** Drinking this gives a timed buff. */
+  potion?: Potion;
   /** The locals do not buy this: it cannot be sold. */
   unsellable?: boolean;
 }
@@ -65,6 +80,22 @@ export interface ShopEntry {
   cost: number;
   /** Bounty level needed before you can buy it. */
   levelReq: number;
+}
+
+/** What a potion improves. */
+export type BuffKind = "speed" | "yield" | "damage";
+
+export interface Potion {
+  kind: BuffKind;
+  /** Speed: share of the usual time a task takes. Yield: output multiplier. Damage: bonus per round. */
+  power: number;
+  durationMs: number;
+}
+
+export interface ActiveBuff {
+  item: ItemId;
+  power: number;
+  expiresAt: number;
 }
 
 export interface SkillDef {
@@ -226,6 +257,8 @@ export interface GameState {
   buildings: Partial<Record<BuildingId, number>>;
   /** Fractional output of passive buildings, carried between ticks. */
   passive: Partial<Record<BuildingId, number>>;
+  /** Potion effects that are running, one per kind. */
+  buffs: Partial<Record<BuffKind, ActiveBuff>>;
   /** Items to keep back when selling, per item. */
   keep: Partial<Record<ItemId, number>>;
   settings: Settings;

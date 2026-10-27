@@ -1,3 +1,4 @@
+import { ITEMS } from "./data";
 import { isGear, levelOf, maxHp, storageCap } from "./engine";
 import { GameState, ItemId, SkillId } from "./types";
 
@@ -41,6 +42,11 @@ export const HINTS: Hint[] = [
     id: "beacon",
     text: "Engineering 12 lets you build a Signal Beacon to call the locals.",
     when: (s) => levelOf(s, "engineering") >= 10,
+  },
+  {
+    id: "potions",
+    text: "Potions give timed buffs. Open Inventory and choose Drink; they keep running while you are away.",
+    when: (s) => Object.values(ITEMS).some((i) => i.potion && (s.inventory[i.id] ?? 0) > 0),
   },
   {
     id: "storage",
