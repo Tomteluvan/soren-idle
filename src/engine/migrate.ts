@@ -54,7 +54,7 @@ export function importSave(text: string): { state?: GameState; error?: string } 
   )
     return { error: "The clipboard does not contain a save" };
   if ((o.version ?? 1) > SAVE_VERSION)
-    return { error: "This save is from a newer version of Braven Idle" };
+    return { error: "This save is from a newer version of Soren Idle" };
   const state = migrateSave(o);
   if (state.activeTask && !TASK_BY_ID[state.activeTask]) state.activeTask = null;
   return { state };

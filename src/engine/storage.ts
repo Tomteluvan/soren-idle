@@ -3,9 +3,9 @@ import { advance, newGame } from "./engine";
 import { importSave } from "./migrate";
 import { GameState, Report } from "./types";
 
-const KEY = "braven-idle-save";
-const CORRUPT_KEY = "braven-idle-save-corrupt";
-const NOTICE_KEY = "braven-idle-save-notice";
+const KEY = "soren-idle-save";
+const CORRUPT_KEY = "soren-idle-save-corrupt";
+const NOTICE_KEY = "soren-idle-save-notice";
 /** How many times an update is redone because the other command saved in the middle of it. */
 const MAX_ATTEMPTS = 4;
 

@@ -8,7 +8,7 @@ vi.mock("@raycast/api", () => ({
   LocalStorage: {
     getItem: async (key: string) => {
       const value = store.get(key);
-      if (key === "braven-idle-save" && betweenReads) {
+      if (key === "soren-idle-save" && betweenReads) {
         const hook = betweenReads;
         betweenReads = undefined;
         queueMicrotask(hook);
@@ -30,7 +30,7 @@ beforeEach(() => {
 
 describe("a save that cannot be read", () => {
   it("is set aside instead of being overwritten", async () => {
-    store.set("braven-idle-save", "{not json");
+    store.set("soren-idle-save", "{not json");
     const state = await loadState();
     expect(state.stats.cycles).toBe(0);
     expect(await corruptSave()).toBe("{not json");
@@ -39,9 +39,9 @@ describe("a save that cannot be read", () => {
   });
 
   it("keeps the broken save even after the next update writes a fresh one", async () => {
-    store.set("braven-idle-save", "garbage");
+    store.set("soren-idle-save", "garbage");
     await update();
-    expect(JSON.parse(store.get("braven-idle-save") ?? "{}").version).toBeTruthy();
+    expect(JSON.parse(store.get("soren-idle-save") ?? "{}").version).toBeTruthy();
     expect(await corruptSave()).toBe("garbage");
   });
 
@@ -65,8 +65,8 @@ describe("overlapping updates", () => {
   it("redo the change when the other command saved in the middle", async () => {
     await saveState({ ...newGame(Date.now()), credits: 0 });
     betweenReads = () => {
-      const other = JSON.parse(store.get("braven-idle-save") ?? "{}");
-      store.set("braven-idle-save", JSON.stringify({ ...other, credits: other.credits + 100 }));
+      const other = JSON.parse(store.get("soren-idle-save") ?? "{}");
+      store.set("soren-idle-save", JSON.stringify({ ...other, credits: other.credits + 100 }));
     };
     await update((s) => ({ ...s, credits: s.credits + 1 }));
     expect((await loadState()).credits).toBe(101);

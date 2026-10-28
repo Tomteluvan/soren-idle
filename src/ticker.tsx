@@ -28,7 +28,7 @@ export default function Command() {
       (stoppedReason || completed || bounty) &&
       getPreferenceValues<{ notifications: boolean }>().notifications
     )
-      notify("Braven Idle", stoppedReason ?? completed ?? bounty ?? "");
+      notify("Soren Idle", stoppedReason ?? completed ?? bounty ?? "");
     return result;
   });
 
@@ -45,7 +45,7 @@ export default function Command() {
       isLoading={isLoading}
       icon="extension-icon.png"
       title={title}
-      tooltip="Braven Idle"
+      tooltip="Soren Idle"
     >
       {state && (
         <>
@@ -95,7 +95,7 @@ export default function Command() {
           )}
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
-              title="Open Braven Idle"
+              title="Open Soren Idle"
               icon={Icon.Rocket}
               onAction={() => launchCommand({ name: "play", type: LaunchType.UserInitiated })}
             />

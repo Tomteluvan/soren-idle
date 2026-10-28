@@ -597,7 +597,7 @@ export const TASKS: TaskDef[] = [
     id: "craft_honey_ration",
     skill: "cooking",
     name: "Cook Honey Ration",
-    description: "Star Honey from the locals makes this the best meal on the planet.",
+    description: "Star Honey from the Sorenians makes this the best meal on Soren.",
     levelReq: 5,
     durationMs: 4000,
     xp: 28,
