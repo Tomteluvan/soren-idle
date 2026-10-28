@@ -25,7 +25,7 @@ function trader(
     credits,
     inventory,
     buildings: { hub, translator },
-    xp: { ...newGame().xp, engineering: xpForLevel(30) },
+    xp: { ...newGame().xp, engineering: xpForLevel(88) },
   };
 }
 

@@ -22,7 +22,7 @@ function withBoard(patch: Partial<GameState> = {}): GameState {
     contactAt: 0,
     buildings: { translator: 1 },
     inventory: { ration: 400, alloy_plate: 12, circuit_scrap: 10, scrap_metal: 30 },
-    xp: { ...base.xp, combat: xpForLevel(30), engineering: xpForLevel(20) },
+    xp: { ...base.xp, combat: xpForLevel(88), engineering: xpForLevel(58) },
     hp: 1000,
     ...patch,
   };
@@ -52,7 +52,7 @@ describe("the Bounty Board", () => {
       contactAt: 0,
       buildings: { translator: 1 },
       inventory: { alloy_plate: 12, circuit_scrap: 10, scrap_metal: 30 },
-      xp: { ...newGame(0).xp, engineering: xpForLevel(15) },
+      xp: { ...newGame(0).xp, engineering: xpForLevel(43) },
     } as GameState;
     expect(build(ready, "bounty_board").error).toBeUndefined();
     expect(build({ ...ready, contactAt: null }, "bounty_board").error).toBeTruthy();
@@ -72,7 +72,7 @@ describe("the Bounty Board", () => {
   });
 
   it("only asks for creatures you can fight", () => {
-    const s = withBoard({ xp: { ...newGame(0).xp, combat: 0, engineering: xpForLevel(20) } });
+    const s = withBoard({ xp: { ...newGame(0).xp, combat: 0, engineering: xpForLevel(58) } });
     expect(s.board.offers.length).toBeGreaterThan(0);
     for (const offer of s.board.offers) expect(bountyTarget(offer).levelReq).toBe(1);
   });

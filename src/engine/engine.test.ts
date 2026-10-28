@@ -4,6 +4,7 @@ import {
   advance,
   build,
   buildingCost,
+  combatTier,
   count,
   eat,
   equip,
@@ -42,6 +43,17 @@ describe("levels", () => {
       expect(xpForLevel(level + 1)).toBeGreaterThan(xpForLevel(level));
     }
     expect(levelFromXp(1e12)).toBe(MAX_LEVEL);
+  });
+
+  it("follow the Melvor curve: 99 is 13,034,431 XP and 92 is about half of it", () => {
+    expect(MAX_LEVEL).toBe(99);
+    expect(xpForLevel(99)).toBe(13_034_431);
+    expect(xpForLevel(92)).toBe(6_517_253);
+    expect(xpForLevel(10)).toBe(1_154);
+  });
+
+  it("scale combat in tiers of three levels, so old balance holds", () => {
+    expect([1, 3, 4, 7, 28].map(combatTier)).toEqual([1, 1, 2, 3, 10]);
   });
 
   it("round-trips levels and xp", () => {
@@ -112,7 +124,7 @@ describe("advance: crafting", () => {
   it("one-off crafts stop after a single cycle", () => {
     const state = withItems(
       { alloy_plate: 10, circuit_scrap: 10 },
-      { xp: { ...newGame().xp, engineering: xpForLevel(5) } },
+      { xp: { ...newGame().xp, engineering: xpForLevel(13) } },
     );
     const { state: after } = run(state, "craft_torch", 10 * MINUTE);
     expect(count(after, "cutting_torch")).toBe(1);
@@ -138,7 +150,7 @@ describe("startTask", () => {
     expect(startTask(newGame(0), "craft_ration").error).toMatch(/materials/);
     const owner = withItems(
       { cutting_torch: 1, alloy_plate: 9, circuit_scrap: 9 },
-      { xp: { ...newGame().xp, engineering: xpForLevel(5) } },
+      { xp: { ...newGame().xp, engineering: xpForLevel(13) } },
     );
     expect(startTask(owner, "craft_torch").error).toMatch(/already own/);
   });
@@ -196,7 +208,7 @@ describe("eat", () => {
 
 describe("base", () => {
   const engineer = (items: Partial<Record<ItemId, number>>) =>
-    withItems(items, { xp: { ...newGame().xp, engineering: xpForLevel(30) } });
+    withItems(items, { xp: { ...newGame().xp, engineering: xpForLevel(88) } });
 
   it("scales costs with level and consumes materials", () => {
     let s = engineer({ scrap_metal: 1000, alloy_plate: 1000 });

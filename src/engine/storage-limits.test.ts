@@ -77,7 +77,7 @@ describe("storage limits", () => {
       buildings: { storage: 2 },
       credits: 10,
       inventory: { alloy_plate: 99, circuit_scrap: 99 },
-      xp: { ...newGame(0).xp, engineering: xpForLevel(10) },
+      xp: { ...newGame(0).xp, engineering: xpForLevel(28) },
     });
     expect(buildingCredits(s, "storage")).toBe(300);
     expect(build(s, "storage").error).toMatch(/Credits/);

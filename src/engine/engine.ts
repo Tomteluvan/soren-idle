@@ -79,8 +79,14 @@ export { levelFromXp, xpForLevel };
 
 export const levelOf = (s: GameState, skill: SkillId) => levelFromXp(s.xp[skill]);
 
+/**
+ * Combat strength as a tier. Levels run to 99 but the creatures were built for a 30-level climb,
+ * so health and damage grow one step per three levels, starting at level 1.
+ */
+export const combatTier = (level: number) => Math.floor((level - 1) / 3) + 1;
+
 export function maxHpFor(combatXp: number): number {
-  return 30 + 5 * levelFromXp(combatXp);
+  return 30 + 5 * combatTier(levelFromXp(combatXp));
 }
 
 export const maxHp = (s: GameState) => maxHpFor(s.xp.combat) + 10 * buildingLevel(s, "shelter");
@@ -291,7 +297,7 @@ export function taskDurationMs(s: GameState, task: TaskDef, at = s.lastTick): nu
 }
 
 export const playerDamage = (s: GameState, at = s.lastTick) =>
-  3 + levelOf(s, "combat") + modifiers(s, at).damage;
+  3 + combatTier(levelOf(s, "combat")) + modifiers(s, at).damage;
 
 export const playerArmor = (s: GameState, at = s.lastTick) => modifiers(s, at).armor;
 
@@ -443,7 +449,8 @@ export function gainXp(s: GameState, skill: SkillId, amount: number, report: Rep
   report.xp[skill] = (report.xp[skill] ?? 0) + amount;
   const after = levelFromXp(s.xp[skill]);
   for (let level = before + 1; level <= after; level++) report.levelUps.push({ skill, level });
-  if (skill === "combat" && after > before) s.hp = Math.min(maxHp(s), s.hp + 5 * (after - before));
+  if (skill === "combat" && after > before)
+    s.hp = Math.min(maxHp(s), s.hp + 5 * (combatTier(after) - combatTier(before)));
 }
 
 /** Rolls the task's rare drops for one cycle. */

@@ -51,7 +51,7 @@ describe("areas", () => {
 
   it("counts kills per hunt, offline too", () => {
     const { state } = advance(
-      startTask(withItems({}, strong(10)), "fight_skitter").state,
+      startTask(withItems({}, strong(28)), "fight_skitter").state,
       10 * MINUTE,
     );
     expect(state.stats.hunts.fight_skitter).toBe(state.stats.kills);
@@ -60,7 +60,7 @@ describe("areas", () => {
 
   it("counts a retreat when the survivor is too wounded to keep fighting", () => {
     const { state, report } = advance(
-      startTask(withItems({}, strong(10)), "fight_skitter").state,
+      startTask(withItems({}, strong(28)), "fight_skitter").state,
       MINUTE,
     );
     expect(state.stats.retreats).toBe(0);
@@ -77,7 +77,7 @@ describe("bosses", () => {
   const area = AREAS[0];
 
   it("stay hidden until the area has been thinned out", () => {
-    const s = withItems({}, strong(30));
+    const s = withItems({}, strong(88));
     expect(bossLockReason(s, boss)).toMatch(/Canyon Floor/);
     expect(startTask(s, boss.id).error).toMatch(/Canyon Floor/);
     const ready = { ...s, stats: { ...s.stats, hunts: { fight_skitter: area.bossKills } } };
@@ -88,7 +88,7 @@ describe("bosses", () => {
   it("refuse a survivor who is too wounded to start", () => {
     const s = withItems(
       {},
-      { ...strong(30), hp: 1, stats: { ...newGame(0).stats, hunts: { fight_skitter: 99 } } },
+      { ...strong(88), hp: 1, stats: { ...newGame(0).stats, hunts: { fight_skitter: 99 } } },
     );
     expect(startTask(s, boss.id).error).toMatch(/Too wounded/);
   });
@@ -97,7 +97,7 @@ describe("bosses", () => {
     const base = withItems(
       { ration: 50 },
       {
-        ...strong(12),
+        ...strong(34),
         stats: { ...newGame(0).stats, hunts: { fight_skitter: 99 } },
       },
     );
@@ -151,7 +151,7 @@ describe("the combat triangle", () => {
 
   it("makes the right weapon matter", () => {
     const skitter = TASK_BY_ID.fight_skitter; // bio
-    const wield = (id: ItemId) => equip(withItems({ [id]: 1 }, strong(10)), id).state;
+    const wield = (id: ItemId) => equip(withItems({ [id]: 1 }, strong(28)), id).state;
     const kinetic = damageAgainst(wield("shard_cleaver"), skitter);
     const energy = damageAgainst(wield("pulse_blade"), skitter);
     expect(kinetic).toBeGreaterThan(energy);
@@ -162,7 +162,7 @@ describe("the combat triangle", () => {
 
   it("makes the right armor matter", () => {
     const stalker = TASK_BY_ID.fight_stalker; // energy: bio armor beats it, kinetic armor loses to it
-    const wear = (id: ItemId) => equip(withItems({ [id]: 1 }, strong(20)), id).state;
+    const wear = (id: ItemId) => equip(withItems({ [id]: 1 }, strong(58)), id).state;
     expect(counterTo("energy")).toBe("bio");
     expect(hitDamage(wear("skyweave_suit"), stalker)).toBeLessThan(
       hitDamage(wear("composite_armor"), stalker),

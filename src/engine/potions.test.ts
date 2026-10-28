@@ -113,7 +113,7 @@ describe("potions", () => {
   it("do not boost one-off crafts", () => {
     const base = withItems(
       { fortune_draught: 1, alloy_plate: 2, circuit_scrap: 2 },
-      { xp: { ...newGame(0).xp, engineering: xpForLevel(10) } },
+      { xp: { ...newGame(0).xp, engineering: xpForLevel(28) } },
     );
     const s = startTask(drink(base, "fortune_draught").state, "craft_torch").state;
     expect(advance(s, 10 * MINUTE).state.inventory.cutting_torch).toBe(1);

@@ -7,7 +7,7 @@ import { GameState } from "./types";
 function readyToBuild(): GameState {
   return {
     ...newGame(1000),
-    xp: { ...newGame().xp, engineering: xpForLevel(20) },
+    xp: { ...newGame().xp, engineering: xpForLevel(58) },
     inventory: { alloy_plate: 50, circuit_scrap: 50, lumina_crystal: 50 },
   };
 }

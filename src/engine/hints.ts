@@ -36,12 +36,12 @@ export const HINTS: Hint[] = [
   {
     id: "engineering",
     text: "Engineering 10 opens the Workshop in Base, and drones follow at level 19.",
-    when: (s) => levelOf(s, "engineering") >= 3,
+    when: (s) => levelOf(s, "engineering") >= 7,
   },
   {
     id: "beacon",
     text: "Engineering 34 lets you build a Signal Beacon to call the locals.",
-    when: (s) => levelOf(s, "engineering") >= 10,
+    when: (s) => levelOf(s, "engineering") >= 28,
   },
   {
     id: "equipment",

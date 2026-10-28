@@ -9,7 +9,7 @@ function state(items: Partial<Record<ItemId, number>>, contact = true): GameStat
   return {
     ...newGame(1000),
     contactAt: contact ? 0 : null,
-    xp: { ...newGame().xp, engineering: xpForLevel(30) },
+    xp: { ...newGame().xp, engineering: xpForLevel(88) },
     inventory: items,
   };
 }

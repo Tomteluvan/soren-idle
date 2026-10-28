@@ -4,16 +4,18 @@
  *   npm run balance
  *
  * Assumes you do nothing but train one skill with its best repeatable task, bare-handed and with
- * every input already in the bag. Skills with no repeatable task (engineering crafts are one-offs,
- * hydroponics grows crops) show n/a. It is a pacing yardstick, not a play-through: real runs are slower
+ * every input already in the bag. Hydroponics assumes four plots. It is a pacing yardstick, not a play-through: real runs are slower
  * (gathering inputs, eating, trading) and faster (tools, potions, drones).
  */
-import { MAX_LEVEL, SKILLS, TASKS } from "../src/engine/data";
+import { CROPS, MAX_LEVEL, SKILLS, TASKS } from "../src/engine/data";
 import { newGame, taskRates } from "../src/engine/engine";
 import { xpForLevel } from "../src/engine/levels";
 import { GameState, SkillId, TaskDef } from "../src/engine/types";
 
-const MILESTONES = [5, 10, 20, 30, 40, MAX_LEVEL];
+const MILESTONES = [10, 25, 50, 75, 92, MAX_LEVEL];
+
+/** Hydroponic Bays top out at four plots. */
+const PLOTS = 4;
 
 const stateAt = (skill: SkillId, level: number): GameState => {
   const s = newGame(0);
@@ -21,20 +23,24 @@ const stateAt = (skill: SkillId, level: number): GameState => {
   return s;
 };
 
-/** The repeatable task that gives the most XP per hour at this level, if any is open. */
-function bestTask(skill: SkillId, level: number): TaskDef | undefined {
+/** XP per hour of the best open source at this level: a repeatable task, or crops on every plot. */
+function bestRate(skill: SkillId, level: number): number {
   const s = stateAt(skill, level);
-  return TASKS.filter((t) => t.skill === skill && !t.once && t.levelReq <= level).sort(
-    (a, b) => taskRates(s, b).xpPerHour - taskRates(s, a).xpPerHour,
-  )[0];
+  const tasks = TASKS.filter((t) => t.skill === skill && !t.once && t.levelReq <= level).map(
+    (t) => taskRates(s, t).xpPerHour,
+  );
+  const crops =
+    skill === "hydroponics"
+      ? CROPS.filter((c) => c.levelReq <= level).map((c) => (c.xp / c.growMs) * 3_600_000 * PLOTS)
+      : [];
+  return Math.max(0, ...tasks, ...crops);
 }
 
 /** Hours to climb from level 1 to each level in turn, index = level. */
 function hoursToLevel(skill: SkillId): number[] {
   const hours = [0, 0];
   for (let level = 1; level < MAX_LEVEL; level++) {
-    const task = bestTask(skill, level);
-    const xpPerHour = task ? taskRates(stateAt(skill, level), task).xpPerHour : 0;
+    const xpPerHour = bestRate(skill, level);
     const step = xpPerHour ? (xpForLevel(level + 1) - xpForLevel(level)) / xpPerHour : Infinity;
     hours.push(hours[level] + step);
   }
@@ -72,7 +78,9 @@ table([
 console.log("\nTime to unlock each task, training its own skill nonstop\n");
 table([
   ["task", "skill", "lv", "unlocks after", "xp/h when it opens"],
-  ...TASKS.filter((t) => t.levelReq > 1 && Number.isFinite(byHours.get(t.skill)![t.levelReq]))
+  ...TASKS.filter(
+    (t) => t.levelReq > 1 && !t.once && Number.isFinite(byHours.get(t.skill)![t.levelReq]),
+  )
     .sort((a, b) => a.skill.localeCompare(b.skill) || a.levelReq - b.levelReq)
     .map((t) => [
       t.name,

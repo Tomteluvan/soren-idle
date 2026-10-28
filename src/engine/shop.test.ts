@@ -60,7 +60,7 @@ describe("the Bounty Shop", () => {
   it("unlocks harder bounty tiers with bounty level", () => {
     const strong = (bountyXp: number) => ({
       ...newGame(0),
-      xp: { ...newGame(0).xp, combat: xpForLevel(30) },
+      xp: { ...newGame(0).xp, combat: xpForLevel(88) },
       bountyXp,
     });
     const tiers = (s: GameState) =>

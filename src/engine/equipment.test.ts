@@ -23,8 +23,14 @@ const MINUTE = 60_000;
 const withItems = (items: Partial<Record<ItemId, number>>, patch: Partial<GameState> = {}) =>
   ({ ...newGame(0), inventory: { ...items }, ...patch }) as GameState;
 
+/** Levels given as tiers (1, 10, 20): the real level is three times that, less two. */
+const tier = (n: number) => (n <= 1 ? n : 3 * n - 2);
 const levelled = (combat: number, engineering = 0) => ({
-  xp: { ...newGame(0).xp, combat: xpForLevel(combat), engineering: xpForLevel(engineering) },
+  xp: {
+    ...newGame(0).xp,
+    combat: xpForLevel(tier(combat)),
+    engineering: xpForLevel(tier(engineering)),
+  },
 });
 
 describe("gear data", () => {
@@ -106,7 +112,7 @@ describe("equipping", () => {
     expect(equip(newGame(0), "pulse_blade").error).toMatch(/do not have/);
     expect(equip(withItems({ ration: 1 }), "ration").error).toMatch(/cannot be equipped/);
     const saber = withItems({ arc_saber: 1 }, levelled(5));
-    expect(equipError(saber, "arc_saber")).toMatch(/Combat level 12/);
+    expect(equipError(saber, "arc_saber")).toMatch(/Combat level 34/);
     expect(equip(saber, "arc_saber").state.equipped.weapon).toBeUndefined();
     expect(equip({ ...saber, ...levelled(12) }, "arc_saber").error).toBeUndefined();
   });

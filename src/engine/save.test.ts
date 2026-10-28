@@ -24,7 +24,7 @@ describe("save versioning", () => {
       ...newGame(0),
       version: 1,
       stats: { cycles: 500, kills: 0, retreats: 0 },
-      xp: { ...newGame().xp, engineering: xpForLevel(11) },
+      xp: { ...newGame().xp, engineering: xpForLevel(31) },
     } as Partial<GameState>;
     delete veteran.hints;
     const migrated = migrateSave(veteran);
