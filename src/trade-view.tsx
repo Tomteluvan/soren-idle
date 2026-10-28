@@ -81,13 +81,19 @@ export function Trade(props: {
                   <Action
                     title="Sell 10"
                     icon={Icon.Coins}
-                    shortcut={{ modifiers: ["cmd"], key: "1" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "1" },
+                      Windows: { modifiers: ["ctrl"], key: "1" },
+                    }}
                     onAction={() => props.onSell(id, 10)}
                   />
                   <Action
                     title="Sell All"
                     icon={Icon.Coins}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "a" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+                    }}
                     onAction={() => props.onSell(id, "all")}
                   />
                 </ActionPanel>
@@ -147,13 +153,19 @@ export function Trade(props: {
                   <Action
                     title="Buy 5"
                     icon={Icon.Cart}
-                    shortcut={{ modifiers: ["cmd"], key: "1" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "1" },
+                      Windows: { modifiers: ["ctrl"], key: "1" },
+                    }}
                     onAction={() => props.onBuy(entry.item, 5)}
                   />
                   <Action
                     title="Buy Max"
                     icon={Icon.Cart}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "m" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+                    }}
                     onAction={() =>
                       props.onBuy(entry.item, Math.max(1, Math.floor(state.credits / price)))
                     }

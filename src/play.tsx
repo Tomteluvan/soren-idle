@@ -902,7 +902,10 @@ function Inventory(props: {
                     <Action
                       title={`Sell All (${sellable})`}
                       icon={Icon.Coins}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "a" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+                      }}
                       onAction={() => props.onSell(id, "all")}
                     />
                   </>
