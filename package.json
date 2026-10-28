@@ -9,6 +9,10 @@
     "Fun"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "play",
@@ -23,6 +27,9 @@
       "subtitle": "Soren Idle",
       "description": "Menu bar status that keeps your survivor working in the background.",
       "mode": "menu-bar",
+      "platforms": [
+        "macOS"
+      ],
       "interval": "1m",
       "preferences": [
         {
