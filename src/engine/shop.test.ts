@@ -22,35 +22,35 @@ describe("the Bounty Shop", () => {
   it("enforces the bounty level", () => {
     const s = withShop({ marks: 9999, bountyXp: 0 });
     expect(shopStatus(s, BOUNTY_SHOP[1])).toBe("locked");
-    expect(buyFromShop(s, "veyari_lance").error).toMatch(/Bounty level 4/);
+    expect(buyFromShop(s, "sorenian_lance").error).toMatch(/Bounty level 4/);
   });
 
   it("enforces the mark cost", () => {
     const s = withShop({ marks: 10, bountyXp: 9999 });
-    const entry = BOUNTY_SHOP.find((e) => e.item === "veyari_lance")!;
+    const entry = BOUNTY_SHOP.find((e) => e.item === "sorenian_lance")!;
     expect(shopStatus(s, entry)).toBe("poor");
-    expect(buyFromShop(s, "veyari_lance").error).toMatch(/Not enough/);
+    expect(buyFromShop(s, "sorenian_lance").error).toMatch(/Not enough/);
   });
 
   it("takes the Marks and hands over the item", () => {
     const s = withShop({ marks: 700, bountyXp: 9999 });
-    const bought = buyFromShop(s, "veyari_lance");
+    const bought = buyFromShop(s, "sorenian_lance");
     expect(bought.error).toBeUndefined();
     expect(bought.state.marks).toBe(100);
-    expect(count(bought.state, "veyari_lance")).toBe(1);
+    expect(count(bought.state, "sorenian_lance")).toBe(1);
   });
 
   it("sells gear once but consumables again", () => {
     const rich = withShop({ marks: 5000, bountyXp: 9999 });
-    const gear = buyFromShop(rich, "veyari_lance").state;
-    expect(buyFromShop(gear, "veyari_lance").error).toMatch(/already own/);
+    const gear = buyFromShop(rich, "sorenian_lance").state;
+    expect(buyFromShop(gear, "sorenian_lance").error).toMatch(/already own/);
     const first = buyFromShop(rich, "stim_pack").state;
     const second = buyFromShop(first, "stim_pack");
     expect(count(second.state, "stim_pack")).toBe(2);
   });
 
   it("sells only things the Hub will not buy back", () => {
-    const s = withShop({ inventory: { veyari_lance: 1, stim_pack: 3 } });
+    const s = withShop({ inventory: { sorenian_lance: 1, stim_pack: 3 } });
     expect(canTrade(s)).toBe(true);
     expect(sellableCount(s, "stim_pack")).toBe(0);
     expect(sell(s, "stim_pack", "all").error).toMatch(/will not buy/);

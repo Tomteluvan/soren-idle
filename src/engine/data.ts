@@ -217,8 +217,8 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     slot: "body",
     tier: 2,
   },
-  veyari_lance: {
-    id: "veyari_lance",
+  sorenian_lance: {
+    id: "sorenian_lance",
     name: "Sorenian Lance",
     description:
       "+14 damage per combat round. A hunter's lance, made by the locals and given to those they trust.",
@@ -229,8 +229,8 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     tier: 3,
     combatReq: 20,
   },
-  veyari_warplate: {
-    id: "veyari_warplate",
+  sorenian_warplate: {
+    id: "sorenian_warplate",
     name: "Sorenian Warplate",
     description: "Take 7 less damage per enemy hit. Grown, not forged.",
     value: 0,
@@ -1112,8 +1112,8 @@ export const EQUIP_SLOTS: { id: EquipSlot; name: string }[] = [
 export const BOUNTY_SHOP: ShopEntry[] = [
   { item: "stim_pack", cost: 8, levelReq: 2 },
   { item: "prospector_charm", cost: 400, levelReq: 3 },
-  { item: "veyari_lance", cost: 600, levelReq: 4 },
-  { item: "veyari_warplate", cost: 900, levelReq: 5 },
+  { item: "sorenian_lance", cost: 600, levelReq: 4 },
+  { item: "sorenian_warplate", cost: 900, levelReq: 5 },
 ];
 
 /** Bounty level needed before the board offers a tier (index 0 is tier 1). */
