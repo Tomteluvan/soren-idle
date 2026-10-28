@@ -65,7 +65,7 @@ export function newGame(now = Date.now()): GameState {
       cycles: 0,
       kills: 0,
       hunts: {},
-      deaths: 0,
+      retreats: 0,
       produced: {},
       creditsEarned: 0,
       bounties: 0,
@@ -487,8 +487,10 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
       s.inventory[food] = count(s, food) - 1;
       s.hp = Math.min(maxHp(s), s.hp + (ITEMS[food].heal ?? 0));
     }
-    if (s.hp <= damage)
+    if (s.hp <= damage) {
+      s.stats.retreats++;
       return `Retreated from ${task.monster.name}: too wounded and out of rations`;
+    }
     const drops = boostYield(s, task.monster.drops, yieldMult);
     const full = overflowing(s, drops);
     if (full) return `Storage full: ${ITEMS[full].name}. Sell or use some to continue`;

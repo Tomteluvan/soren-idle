@@ -29,6 +29,7 @@ export function migrateSave(saved: Partial<GameState>): GameState {
     settings: { ...base.settings, ...saved.settings },
     equipped: { ...saved.equipped },
   };
+  delete (state.stats as Partial<typeof state.stats> & { deaths?: number }).deaths;
   for (let v = saved.version ?? 1; v < SAVE_VERSION; v++) STEPS[v]?.(state);
   state.version = SAVE_VERSION;
   return state;

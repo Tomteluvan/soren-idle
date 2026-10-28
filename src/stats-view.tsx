@@ -14,6 +14,7 @@ export function Stats({ state }: { state: GameState }) {
     ["Time stranded", formatDuration(state.lastTick - state.createdAt)],
     ["Tasks completed", state.stats.cycles.toLocaleString("en-US")],
     ["Creatures defeated", state.stats.kills.toLocaleString("en-US")],
+    ["Retreats", state.stats.retreats.toLocaleString("en-US")],
     ["Credits earned", formatCredits(state.stats.creditsEarned)],
     ["Bounties completed", state.stats.bounties.toLocaleString("en-US")],
   ];

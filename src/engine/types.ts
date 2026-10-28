@@ -320,7 +320,8 @@ export interface GameState {
     kills: number;
     /** Kills by hunt task id. */
     hunts: Record<string, number>;
-    deaths: number;
+    /** Times a fight was abandoned because the survivor was too wounded. */
+    retreats: number;
     /** Everything ever gained, by item. */
     produced: Bundle;
     creditsEarned: number;

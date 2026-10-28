@@ -23,7 +23,7 @@ describe("save versioning", () => {
     const veteran = {
       ...newGame(0),
       version: 1,
-      stats: { cycles: 500, kills: 0, deaths: 0 },
+      stats: { cycles: 500, kills: 0, retreats: 0 },
       xp: { ...newGame().xp, engineering: xpForLevel(11) },
     } as Partial<GameState>;
     delete veteran.hints;

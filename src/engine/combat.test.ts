@@ -57,6 +57,19 @@ describe("areas", () => {
     expect(state.stats.hunts.fight_skitter).toBe(state.stats.kills);
     expect(areaKills(state, areaOf("fight_skitter")!)).toBe(state.stats.kills);
   });
+
+  it("counts a retreat when the survivor is too wounded to keep fighting", () => {
+    const { state, report } = advance(
+      startTask(withItems({}, strong(10)), "fight_skitter").state,
+      MINUTE,
+    );
+    expect(state.stats.retreats).toBe(0);
+    const hurt = { ...startTask(withItems({}, { hp: 1 }), "fight_skitter").state };
+    const after = advance(hurt, 10 * MINUTE);
+    expect(after.report.stoppedReason).toMatch(/Retreated/);
+    expect(after.state.stats.retreats).toBe(1);
+    expect(report.stoppedReason).toBeUndefined();
+  });
 });
 
 describe("bosses", () => {
