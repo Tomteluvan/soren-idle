@@ -21,13 +21,30 @@ export const SKILL_ICON: Record<SkillId, Icon> = {
   xenochemistry: Icon.Pill,
 };
 
-export type View =
-  | "overview"
-  | SkillId
-  | "base"
-  | "bounties"
-  | "shop"
-  | "equipment"
-  | "trade"
-  | "inventory"
-  | "stats";
+export type Place = "base" | "equipment" | "trade" | "bounties" | "shop" | "inventory" | "stats";
+
+/** The screens besides the skills, as they are listed on the main menu. */
+export const PLACES: { id: Place; title: string; icon: Icon; blurb: string }[] = [
+  { id: "base", title: "Base", icon: Icon.House, blurb: "Build and upgrade your camp." },
+  {
+    id: "equipment",
+    title: "Equipment",
+    icon: Icon.Shield,
+    blurb: "Choose what you wear and wield.",
+  },
+  { id: "trade", title: "Trade", icon: Icon.Coins, blurb: "Buy and sell with the Sorenians." },
+  {
+    id: "bounties",
+    title: "Bounties",
+    icon: Icon.Flag,
+    blurb: "Take hunting contracts for Marks.",
+  },
+  { id: "shop", title: "Bounty Shop", icon: Icon.Cart, blurb: "Spend your Marks on rare gear." },
+  {
+    id: "inventory",
+    title: "Inventory",
+    icon: Icon.Box,
+    blurb: "Eat, wear, drink and sell what you carry.",
+  },
+  { id: "stats", title: "Stats", icon: Icon.BarChart, blurb: "Lifetime numbers." },
+];

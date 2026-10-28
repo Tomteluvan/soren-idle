@@ -13,7 +13,7 @@ closed, and you collect the haul when you come back.
 
 ## How to play
 
-- Start with **Salvaging** and pick *Scavenge Hull Scrap*. Levels unlock new tasks.
+- Open **Salvaging** from the main menu and pick *Scavenge Hull Scrap*. Levels unlock new tasks.
 - Eight skills run to level 99: Salvaging, Mining, Foraging, Cooking, Engineering, Combat,
   Hydroponics and Xenochemistry. They use the same XP curve as Melvor Idle, so the last levels take
   most of the time.
@@ -40,7 +40,8 @@ npm run lint
 
 - `src/engine`: the game logic. It has no Raycast dependencies, so it is fully unit tested.
   `src/engine/data` holds the game content (items, tasks, buildings, areas, bounties, trade).
-- `src/play.tsx`: the Play command. It owns the state and ticking, and hands off to a view.
-- `src/views`: one file per screen (overview, tasks, inventory, base, equipment, trade, ...).
+- `src/play.tsx`: the Play command, a main menu. `src/screens.tsx` holds the screens it pushes.
+- `src/hooks/use-game.ts`: loads the game and keeps it ticking. Every screen calls it itself.
+- `src/views`: the content of each screen (tasks, inventory, base, equipment, trade, ...).
 - `src/art`: the terminal-style scene art.
 - `scripts`: tooling such as the balance simulation.
