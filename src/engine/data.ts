@@ -219,7 +219,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   },
   veyari_lance: {
     id: "veyari_lance",
-    name: "Veyari Lance",
+    name: "Sorenian Lance",
     description:
       "+14 damage per combat round. A hunter's lance, made by the locals and given to those they trust.",
     value: 0,
@@ -231,7 +231,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   },
   veyari_warplate: {
     id: "veyari_warplate",
-    name: "Veyari Warplate",
+    name: "Sorenian Warplate",
     description: "Take 7 less damage per enemy hit. Grown, not forged.",
     value: 0,
     armor: 7,
@@ -1125,7 +1125,7 @@ export const HUB_SELL_RATES = [0.6, 0.7, 0.8, 0.9, 1];
 export const TRANSLATOR_DISCOUNTS = [0, 0, 0.05, 0.1, 0.15];
 
 /** The locals' working name. Rename freely. */
-export const LOCALS = "the Veyari";
+export const LOCALS = "the Sorenians";
 
 /** What the locals sell: things you cannot get yourself. Expensive on purpose. */
 export const STOCK: StockItem[] = [
