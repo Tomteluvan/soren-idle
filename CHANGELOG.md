@@ -11,4 +11,5 @@
 - Combat health and damage still grow in the same steps as before, one per three levels.
 - The stats screen counts retreats. The unused deaths stat is gone.
 - `npm run balance` prints how long each skill takes to level and each task takes to unlock.
+- Internal: the game data and the Play views are split into folders, one file per topic.
 - Windows support for the Play command. The menu bar ticker stays macOS-only.

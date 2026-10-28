@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { buildingMarkdown } from "./art";
-import { CROP_BY_ID, CROPS, ITEMS } from "./engine/data";
-import { count, levelOf, xpForLevel } from "./engine/engine";
-import { bar, formatBundle, formatDuration } from "./engine/format";
-import { growRemainingMs, isRipe, plotAt, plotCount, ripeCount } from "./engine/hydroponics";
-import { GameState, ItemId } from "./engine/types";
+import { buildingMarkdown } from "../art";
+import { CROP_BY_ID, CROPS, ITEMS } from "../engine/data";
+import { count, levelOf, xpForLevel } from "../engine/engine";
+import { bar, formatBundle, formatDuration } from "../engine/format";
+import { growRemainingMs, isRipe, plotAt, plotCount, ripeCount } from "../engine/hydroponics";
+import { GameState, ItemId } from "../engine/types";
 
 export function Hydroponics(props: {
   state: GameState;

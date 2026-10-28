@@ -38,5 +38,9 @@ npm run balance    # time-to-level and time-to-unlock table
 npm run lint
 ```
 
-The game logic lives in `src/engine` and has no Raycast dependencies, so it is fully unit tested.
-The views are in `src/*.tsx`, and the terminal art is in `src/art`.
+- `src/engine`: the game logic. It has no Raycast dependencies, so it is fully unit tested.
+  `src/engine/data` holds the game content (items, tasks, buildings, areas, bounties, trade).
+- `src/play.tsx`: the Play command. It owns the state and ticking, and hands off to a view.
+- `src/views`: one file per screen (overview, tasks, inventory, base, equipment, trade, ...).
+- `src/art`: the terminal-style scene art.
+- `scripts`: tooling such as the balance simulation.

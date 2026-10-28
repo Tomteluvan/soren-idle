@@ -1,8 +1,8 @@
 import { Icon, List } from "@raycast/api";
-import { ITEMS, SKILLS } from "./engine/data";
-import { levelOf } from "./engine/engine";
-import { formatCredits, formatDate, formatDuration } from "./engine/format";
-import { GameState, ItemId } from "./engine/types";
+import { ITEMS, SKILLS } from "../engine/data";
+import { levelOf } from "../engine/engine";
+import { formatCredits, formatDate, formatDuration } from "../engine/format";
+import { GameState, ItemId } from "../engine/types";
 
 export function Stats({ state }: { state: GameState }) {
   const produced = (Object.entries(state.stats.produced) as [ItemId, number][])

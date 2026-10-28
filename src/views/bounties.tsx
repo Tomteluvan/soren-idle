@@ -1,15 +1,15 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { ABANDON_COST, BOARD_BONUS, REROLL_COST } from "./engine/data";
+import { ABANDON_COST, BOARD_BONUS, REROLL_COST } from "../engine/data";
 import {
   boardCapacity,
   boardLevel,
   bountyLevel,
   bountyTarget,
   xpForBountyLevel,
-} from "./engine/bounty";
-import { bar, formatDuration, formatMarks } from "./engine/format";
-import { taskDurationMs } from "./engine/engine";
-import { Bounty, GameState } from "./engine/types";
+} from "../engine/bounty";
+import { bar, formatDuration, formatMarks } from "../engine/format";
+import { taskDurationMs } from "../engine/engine";
+import { Bounty, GameState } from "../engine/types";
 
 const TIER_NAMES = ["Easy", "Hard", "Deadly"];
 

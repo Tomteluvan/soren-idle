@@ -10,7 +10,7 @@
 import { CROPS, MAX_LEVEL, SKILLS, TASKS } from "../src/engine/data";
 import { newGame, taskRates } from "../src/engine/engine";
 import { xpForLevel } from "../src/engine/levels";
-import { GameState, SkillId, TaskDef } from "../src/engine/types";
+import { GameState, SkillId } from "../src/engine/types";
 
 const MILESTONES = [10, 25, 50, 75, 92, MAX_LEVEL];
 

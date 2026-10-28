@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { ITEMS, LOCALS } from "./engine/data";
-import { firstContact } from "./engine/engine";
-import { formatCredits } from "./engine/format";
+import { ITEMS, LOCALS } from "../engine/data";
+import { firstContact } from "../engine/engine";
+import { formatCredits } from "../engine/format";
 import {
   buyDiscount,
   buyPrice,
@@ -13,8 +13,8 @@ import {
   sellRate,
   stockFor,
   translatorLevel,
-} from "./engine/trade";
-import { GameState, ItemId } from "./engine/types";
+} from "../engine/trade";
+import { GameState, ItemId } from "../engine/types";
 
 const MAX_TRANSLATOR_LEVEL = 5;
 

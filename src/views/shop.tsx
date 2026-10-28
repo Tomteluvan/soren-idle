@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { BUILDING_BY_ID, BOUNTY_SHOP, ITEMS } from "./engine/data";
-import { bountyLevel } from "./engine/bounty";
-import { count } from "./engine/engine";
-import { formatMarks } from "./engine/format";
-import { shopOpen, shopStatus } from "./engine/shop";
-import { GameState, ItemId } from "./engine/types";
+import { BUILDING_BY_ID, BOUNTY_SHOP, ITEMS } from "../engine/data";
+import { bountyLevel } from "../engine/bounty";
+import { count } from "../engine/engine";
+import { formatMarks } from "../engine/format";
+import { shopOpen, shopStatus } from "../engine/shop";
+import { GameState, ItemId } from "../engine/types";
 
 export function BountyShop(props: { state: GameState; onBuy: (id: ItemId) => void }) {
   const { state } = props;

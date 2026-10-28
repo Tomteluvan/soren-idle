@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { EQUIP_SLOTS, ITEMS } from "./engine/data";
+import { EQUIP_SLOTS, ITEMS } from "../engine/data";
 import {
   count,
   equipError,
@@ -9,8 +9,8 @@ import {
   modifiers,
   playerArmor,
   playerDamage,
-} from "./engine/engine";
-import { EquipSlot, GameState, ItemId } from "./engine/types";
+} from "../engine/engine";
+import { EquipSlot, GameState, ItemId } from "../engine/types";
 
 /** The effect of a piece of gear, in words. */
 export function gearStats(id: ItemId): string {
