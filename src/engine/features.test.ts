@@ -65,7 +65,8 @@ describe("task rates", () => {
   it("scale a cycle up to an hour", () => {
     const task = TASK_BY_ID["salvage_hull"];
     const rates = taskRates(newGame(0), task);
-    const cycles = 3_600_000 / task.durationMs;
+    // a node's wait for respawn is spread over its hits
+    const cycles = 3_600_000 / (task.durationMs + task.node!.respawnMs / task.node!.hp);
     expect(rates.xpPerHour).toBeCloseTo(task.xp * cycles);
     expect(rates.itemsPerHour.scrap_metal).toBeCloseTo((task.outputs?.scrap_metal ?? 0) * cycles);
   });

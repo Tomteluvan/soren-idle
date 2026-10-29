@@ -15,6 +15,15 @@ import {
 import { bossLockReason, matchup } from "./areas";
 import { onKill, refillBoard, refreshBoardIfDue } from "./bounty";
 import { levelFromXp, xpForLevel } from "./levels";
+import {
+  averageCycleMs,
+  masteryLevel,
+  masterySpeed,
+  masteryXpPerCycle,
+  masteryYield,
+  hasMastery,
+  nodeMaxHp,
+} from "./mastery";
 import { emptyReport, mergeReports } from "./report";
 import { nextRandom } from "./rng";
 import {
@@ -59,6 +68,8 @@ export function newGame(now = Date.now()): GameState {
     passive: {},
     keep: {},
     settings: { eatBelow: 0, foodPriority: "weakest" },
+    mastery: {},
+    nodes: {},
     plots: [],
     hints: [],
     stats: {
@@ -293,6 +304,7 @@ export const rareChanceMult = (s: GameState) => modifiers(s).rare;
 export function taskDurationMs(s: GameState, task: TaskDef, at = s.lastTick): number {
   let mult = modifiers(s, at).speed(task.skill);
   if (task.skill === "engineering") mult *= 1 - 0.08 * buildingLevel(s, "workshop");
+  if (hasMastery(task)) mult *= masterySpeed(masteryLevel(s, task));
   return Math.max(1000, Math.round(task.durationMs * mult));
 }
 
@@ -352,7 +364,7 @@ const scaleBundle = (bundle: Bundle = {}, k: number): Bundle =>
 
 /** What doing this task nonstop would give per hour, at your current gear. */
 export function taskRates(s: GameState, task: TaskDef): TaskRates {
-  const perHour = 3_600_000 / taskDurationMs(s, task);
+  const perHour = 3_600_000 / averageCycleMs(s, task, taskDurationMs(s, task));
   const level = levelOf(s, task.skill);
   const xpPerHour = task.xp * perHour;
   return {
@@ -464,6 +476,24 @@ function rollRareDrops(s: GameState, task: TaskDef, report: Report, at: number) 
   }
 }
 
+/** One cycle is one hit on a resource node. A spent node comes back after its respawn time. */
+function hitNode(s: GameState, task: TaskDef, endsAt: number) {
+  if (!task.node) return;
+  const node = (s.nodes[task.id] ??= { hp: nodeMaxHp(s, task) });
+  if (--node.hp <= 0) node.respawnAt = endsAt + task.node.respawnMs;
+}
+
+/** How long until the task's node can be worked again, as seen at time `at`. A node that is back is reset. */
+function nodeWaitMs(s: GameState, task: TaskDef, at: number): number {
+  const respawnAt = s.nodes[task.id]?.respawnAt;
+  if (respawnAt === undefined) return 0;
+  if (at >= respawnAt) {
+    delete s.nodes[task.id];
+    return 0;
+  }
+  return respawnAt - at;
+}
+
 /** Runs one cycle of a task that starts at time `at`. Returns a reason if the task cannot continue. */
 function runCycle(s: GameState, task: TaskDef, report: Report, at: number): string | undefined {
   const cycle = emptyReport();
@@ -480,7 +510,7 @@ function runCycle(s: GameState, task: TaskDef, report: Report, at: number): stri
 }
 
 function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): string | undefined {
-  const yieldMult = task.once ? 1 : modifiers(s, at).yield;
+  const yieldMult = task.once ? 1 : modifiers(s, at).yield + masteryYield(masteryLevel(s, task));
   if (task.monster) {
     const damage = fightDamage(s, task, at);
     const wantsFood = () =>
@@ -517,6 +547,8 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
   }
   rollRareDrops(s, task, report, at);
   gainXp(s, task.skill, task.xp, report);
+  hitNode(s, task, at + taskDurationMs(s, task, at));
+  if (hasMastery(task)) s.mastery[task.id] = (s.mastery[task.id] ?? 0) + masteryXpPerCycle(task);
   s.stats.cycles++;
   report.cycles++;
   return undefined;
@@ -565,6 +597,15 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
   let done = 0;
   // Tool crafted mid-run changes duration, so recompute each cycle.
   while (s.activeTask) {
+    const wait = nodeWaitMs(s, task, windowStart + done);
+    if (wait > 0) {
+      // The node is spent: the rest of the time passes waiting for it to come back.
+      const waited = Math.min(wait, remaining);
+      remaining -= waited;
+      done += waited;
+      if (waited < wait) break;
+      delete s.nodes[task.id];
+    }
     const at = windowStart + done;
     const duration = taskDurationMs(s, task, at);
     if (remaining < duration) break;

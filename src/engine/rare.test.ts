@@ -15,8 +15,10 @@ function runCycles(taskId: string, cycles: number, patch: Partial<GameState> = {
   const task = TASKS.find((t) => t.id === taskId)!;
   const base = { ...newGame(0), ...patch };
   base.inventory = { ration: 0, ...patch.inventory };
-  const s = startTask(base, taskId).state;
-  return advance(s, cycles * task.durationMs + 1);
+  // A fixed number of runs, and enough time for them even with waits for the node to respawn.
+  const s = startTask(base, taskId, cycles).state;
+  const cycleMs = task.durationMs + (task.node ? task.node.respawnMs / task.node.hp : 0);
+  return advance(s, cycles * cycleMs + 1);
 }
 
 describe("rare drops", () => {

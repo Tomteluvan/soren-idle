@@ -168,6 +168,8 @@ export interface TaskDef {
   rareDrops?: RareDrop[];
   /** A boss fight, see `areas`. */
   boss?: boolean;
+  /** A resource node: every cycle is a hit, and when it runs out it takes `respawnMs` to come back. */
+  node?: { hp: number; respawnMs: number };
 }
 
 /** A stretch of wilderness: a few creatures, and a boss that appears once you have thinned them out. */
@@ -312,6 +314,10 @@ export interface GameState {
   /** Items to keep back when selling, per item. */
   keep: Partial<Record<ItemId, number>>;
   settings: Settings;
+  /** Mastery XP per task id. */
+  mastery: Record<string, number>;
+  /** Resource nodes that have been hit: health left, and when a spent one comes back. */
+  nodes: Record<string, { hp: number; respawnAt?: number }>;
   /** One entry per hydroponic plot; null is an empty plot. */
   plots: (Plot | null)[];
   /** What happened while the menu bar ticker ran and the game was not open, until you look. */

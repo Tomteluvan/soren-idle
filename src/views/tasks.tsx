@@ -14,6 +14,18 @@ import {
   taskDurationMs,
 } from "../engine/engine";
 import { bar, formatBundle, formatDuration, formatRates } from "../engine/format";
+import {
+  hasMastery,
+  masteryLevel,
+  masterySpeed,
+  masteryXp,
+  masteryXpForLevel,
+  masteryYield,
+  MASTERY_MAX,
+  nodeHp,
+  nodeMaxHp,
+  nodeRespawnMs,
+} from "../engine/mastery";
 import { areaKills, areaOf, bossLockReason, counterTo, huntsOf, matchup } from "../engine/areas";
 import { GameState, DamageType, ItemId, SkillId, TaskDef } from "../engine/types";
 import { SKILL_ICON, RUN_CHOICES } from "./constants";
@@ -24,8 +36,18 @@ export function taskProgress(state: GameState, task: TaskDef): string {
     "```",
     `${bar(state.taskProgressMs / duration)} ${formatDuration(duration - state.taskProgressMs)} left`,
     ...(runs !== null && !task.once ? [`${runs} run${runs === 1 ? "" : "s"} to go`] : []),
+    ...nodeLines(state, task),
     "```",
   ].join("\n");
+}
+
+/** A resource node's health bar, or how long it takes to come back. */
+function nodeLines(state: GameState, task: TaskDef): string[] {
+  if (!task.node) return [];
+  const wait = nodeRespawnMs(state, task);
+  if (wait > 0) return [`Node spent, back in ${formatDuration(wait)}`];
+  const max = nodeMaxHp(state, task);
+  return [`Node ${bar(nodeHp(state, task) / max)} ${nodeHp(state, task)}/${max} HP`];
 }
 
 export function Tasks(props: {
@@ -69,6 +91,9 @@ export function Tasks(props: {
         accessories={[
           ...(active ? [{ icon: { source: Icon.Play, tintColor: Color.Green } }] : []),
           ...(task.boss ? [{ tag: { value: "Boss", color: Color.Red } }] : []),
+          ...(!locked && hasMastery(task)
+            ? [{ tag: { value: `M${masteryLevel(state, task)}`, color: Color.Purple } }]
+            : []),
           ...(levelLocked ? [{ tag: `Lv ${task.levelReq}` }] : []),
           ...(bossLock && !levelLocked ? [{ tag: "Locked" }] : []),
           ...(owned ? [{ tag: { value: "Owned", color: Color.Green } }] : []),
@@ -129,6 +154,23 @@ function matchupNote(
   return good ? " (good matchup)" : " (bad matchup)";
 }
 
+function masteryLines(state: GameState, task: TaskDef): string[] {
+  const level = masteryLevel(state, task);
+  const xp = masteryXp(state, task);
+  const floor = masteryXpForLevel(level);
+  const next = masteryXpForLevel(level + 1);
+  const bonuses = [
+    ...(task.node ? [`+${level - 1} node HP`] : []),
+    ...(masterySpeed(level) < 1
+      ? [`${Math.round((1 - masterySpeed(level)) * 1000) / 10}% faster`]
+      : []),
+    ...(masteryYield(level) > 0 ? [`${Math.round(masteryYield(level) * 100)}% bonus yield`] : []),
+  ];
+  return [
+    `- **Mastery ${level}:** ${level >= MASTERY_MAX ? "maxed" : `${Math.floor(xp - floor).toLocaleString("en-US")} / ${(next - floor).toLocaleString("en-US")} XP`}${bonuses.length ? ` (${bonuses.join(", ")})` : ""}`,
+  ];
+}
+
 function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: number): string {
   const lines = [artMarkdown(task.id, frame, active), `# ${task.name}`, task.description, ""];
   if (active) lines.push(taskProgress(state, task), "");
@@ -141,6 +183,13 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
   if (task.inputs) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
   if (rates.nextLevelMs !== null)
     lines.push(`- **Next level in:** ${formatDuration(rates.nextLevelMs)} nonstop`);
+  if (task.node) {
+    const max = nodeMaxHp(state, task);
+    lines.push(
+      `- **Node:** ${max} HP, one per cycle, then ${formatDuration(task.node.respawnMs)} to respawn`,
+    );
+  }
+  if (hasMastery(task)) lines.push(...masteryLines(state, task));
   if (task.rareDrops) {
     const mult = rareChanceMult(state);
     lines.push(

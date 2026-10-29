@@ -17,6 +17,11 @@ closed, and you collect the haul when you come back.
 - Eight skills run to level 99: Salvaging, Mining, Foraging, Cooking, Engineering, Combat,
   Hydroponics and Xenochemistry. They use the same XP curve as Melvor Idle, so the last levels take
   most of the time.
+- **Resource nodes:** gathering tasks (Salvaging, Mining, Foraging) work a node with health. Every
+  cycle is a hit, and when it runs out you wait for it to respawn before the task goes on.
+- **Mastery:** every repeatable task (not combat or one-off crafts) has its own mastery level, which
+  grows as you repeat it. Each level adds one node health, every ten levels make the task faster, and
+  milestones at 25, 50, 75 and 99 add bonus yield. Mastery 99 takes about as long as skill level 99.
 - **Engineering** builds your Base: a Workshop, drones, a Hydroponic Bay, and a Signal Beacon that
   calls the Sorenians. Once they arrive you can trade with them and take Bounties.
 - **Combat** has areas, bosses and a damage triangle (kinetic beats bio, bio beats energy, energy
