@@ -171,7 +171,7 @@ export function arm(tip: Pt, fromAbove = false): string {
   return out;
 }
 
-function sparks(tip: Pt, f: number): string {
+export function sparks(tip: Pt, f: number): string {
   let out = `<circle cx="${tip[0]}" cy="${tip[1]}" r="${(14 + f * 2).toFixed(1)}" fill="url(#flare)"/>`;
   for (let i = 0; i < 11; i++) {
     const ang = rad(-150 + i * 22 + hash(i, f, 7) * 16);
