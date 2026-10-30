@@ -35,12 +35,13 @@ export const HUD_SCENES: Record<string, SceneSvg> = {
   brew_quicksilver: (frame) => renderHud(quicksilver, frame, 71),
   brew_windfall: (frame) => renderHud(windfall, frame, 73),
   brew_berserker: (frame) => renderHud(berserker, frame, 79),
+  ...Object.fromEntries(
+    Object.entries(COMBAT_SCENES).map(([id, draw], i) => [
+      id,
+      (frame: number) => renderHud(draw, frame, 83 + i * 2),
+    ]),
+  ),
 };
 
 /** Drawn but not shown in the game yet, for review. Moves into HUD_SCENES once approved. */
-export const PREVIEW_SCENES: Record<string, SceneSvg> = Object.fromEntries(
-  Object.entries(COMBAT_SCENES).map(([id, draw], i) => [
-    id,
-    (frame: number) => renderHud(draw, frame, 83 + i * 2),
-  ]),
-);
+export const PREVIEW_SCENES: Record<string, SceneSvg> = {};
