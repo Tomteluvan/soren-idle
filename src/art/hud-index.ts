@@ -1,4 +1,5 @@
 import { renderHud } from "./hud";
+import { COMBAT_SCENES } from "./hud-combat";
 import {
   berserker,
   fortune,
@@ -37,4 +38,9 @@ export const HUD_SCENES: Record<string, SceneSvg> = {
 };
 
 /** Drawn but not shown in the game yet, for review. Moves into HUD_SCENES once approved. */
-export const PREVIEW_SCENES: Record<string, SceneSvg> = {};
+export const PREVIEW_SCENES: Record<string, SceneSvg> = Object.fromEntries(
+  Object.entries(COMBAT_SCENES).map(([id, draw], i) => [
+    id,
+    (frame: number) => renderHud(draw, frame, 83 + i * 2),
+  ]),
+);
