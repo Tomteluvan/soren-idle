@@ -42,12 +42,13 @@ export const HUD_SCENES: Record<string, SceneSvg> = {
       (frame: number) => renderHud(draw, frame, 83 + i * 2),
     ]),
   ),
+  ...Object.fromEntries(
+    Object.entries(FORGE_SCENES).map(([id, draw], i) => [
+      id,
+      (frame: number) => renderHud(draw, frame, 101 + i * 2),
+    ]),
+  ),
 };
 
 /** Drawn but not shown in the game yet, for review. Moves into HUD_SCENES once approved. */
-export const PREVIEW_SCENES: Record<string, SceneSvg> = Object.fromEntries(
-  Object.entries(FORGE_SCENES).map(([id, draw], i) => [
-    id,
-    (frame: number) => renderHud(draw, frame, 101 + i * 2),
-  ]),
-);
+export const PREVIEW_SCENES: Record<string, SceneSvg> = {};
