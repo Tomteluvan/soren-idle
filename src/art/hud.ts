@@ -11,13 +11,13 @@ export const HW = 640;
 export const HH = 400;
 
 export const BLUE = {
-  bg: "#030814",
-  line: "#2f8cff",
-  mid: "#4aa3ff",
-  light: "#6fc3ff",
-  pale: "#cdeaff",
-  dim: "#123a78",
-  deep: "#082250",
+  bg: "#0a1a3d",
+  line: "#4a9dff",
+  mid: "#6cb4ff",
+  light: "#8fd3ff",
+  pale: "#e2f3ff",
+  dim: "#2a5ea8",
+  deep: "#14387a",
 } as const;
 
 export type Pt = [number, number];
@@ -143,15 +143,15 @@ function furniture(f: number, seed: number): string {
 }
 
 const DEFS = `<defs>
-<filter id="glow" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="glow" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 <filter id="bloom" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6"/></filter>
-<radialGradient id="vignette" cx="50%" cy="50%" r="70%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".55"/></radialGradient>
+<radialGradient id="vignette" cx="50%" cy="50%" r="70%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".22"/></radialGradient>
 <radialGradient id="flare"><stop offset="0%" stop-color="#fff" stop-opacity="1"/><stop offset="35%" stop-color="${BLUE.light}" stop-opacity=".7"/><stop offset="100%" stop-color="${BLUE.line}" stop-opacity="0"/></radialGradient>
-<linearGradient id="hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a5fc0" stop-opacity=".55"/><stop offset="100%" stop-color="#061a40" stop-opacity=".7"/></linearGradient>
+<linearGradient id="hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2d78dc" stop-opacity=".7"/><stop offset="100%" stop-color="#0d2a62" stop-opacity=".8"/></linearGradient>
 <linearGradient id="plate" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a6dcff" stop-opacity=".95"/><stop offset="100%" stop-color="#3a98ff" stop-opacity=".9"/></linearGradient>
-<linearGradient id="rock" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0d3578" stop-opacity=".55"/><stop offset="100%" stop-color="#051432" stop-opacity=".8"/></linearGradient>
+<linearGradient id="rock" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1b4f9e" stop-opacity=".7"/><stop offset="100%" stop-color="#0c2858" stop-opacity=".85"/></linearGradient>
 <linearGradient id="crystal" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d8f1ff" stop-opacity=".95"/><stop offset="100%" stop-color="#3a98ff" stop-opacity=".8"/></linearGradient>
-<pattern id="scan" width="4" height="3" patternUnits="userSpaceOnUse"><rect width="4" height="1" y="2" fill="#000" opacity=".28"/></pattern>
+<pattern id="scan" width="4" height="3" patternUnits="userSpaceOnUse"><rect width="4" height="1" y="2" fill="#000" opacity=".12"/></pattern>
 </defs>`;
 
 /** Wraps a scene body in the screen: background, glow, frame, scanlines and vignette. */

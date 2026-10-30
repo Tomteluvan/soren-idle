@@ -20,7 +20,7 @@ const hull = (x: number, y: number): Pt => {
 
 function moon(f: number): string {
   const c: Pt = [506, 84];
-  let out = circle(c, 26, BLUE.light, 1.2, "#0a2a5e");
+  let out = circle(c, 26, BLUE.light, 1.2, "#173f86");
   for (const k of [0.25, 0.6, 0.92]) {
     const rx = 26 * Math.abs(Math.cos(rad(f * 7 + k * 80)) * k + 0.08);
     out += `<ellipse cx="${c[0]}" cy="${c[1]}" rx="${rx.toFixed(1)}" ry="26" fill="none" stroke="${BLUE.mid}" stroke-width=".8"/>`;
@@ -45,7 +45,7 @@ function ground(): string {
     ),
     "V292H18Z",
   ].join("");
-  let out = path(ridge, "none", 0, "#1a62c4", 'opacity=".55"');
+  let out = path(ridge, "none", 0, "#2b78d8", 'opacity=".55"');
   // the foreground that buries the hull
   const top: string[] = [];
   for (let x = 18; x <= 622; x += 22) {
@@ -110,7 +110,7 @@ function hullBody(): string {
     [136, 70],
     [146, 44],
   ];
-  out += poly(hole, "#020510", BLUE.pale, 1.5);
+  out += poly(hole, "#0b1e44", BLUE.pale, 1.5);
   for (let i = 0; i < 6; i++) {
     const x = 150 + i * 13;
     out += path(`M${x} 10Q${x + 8} 50 ${x - 4} 96`, BLUE.line, 1, "none", 'opacity=".8"');
@@ -271,7 +271,7 @@ function strata(): string {
         hash(x, k, 9) * 2;
       d += `${d ? "L" : "M"}${x} ${y.toFixed(1)}`;
     }
-    out += path(d, BLUE.light, 0.9, "none", `opacity="${(0.28 + (k % 4) * 0.12).toFixed(2)}"`);
+    out += path(d, BLUE.light, 0.9, "none", `opacity="${(0.4 + (k % 4) * 0.12).toFixed(2)}"`);
   }
   return out;
 }
@@ -430,7 +430,7 @@ export function wiring(f: number): string {
       [116, 312],
       [464, 312],
     ].map(([x, y]) => circle([x, y], 3, BLUE.mid, 1)),
-    `<rect x="128" y="116" width="324" height="184" rx="4" fill="#020510" stroke="${BLUE.pale}" stroke-width="1.4"/>`,
+    `<rect x="128" y="116" width="324" height="184" rx="4" fill="#0b1e44" stroke="${BLUE.pale}" stroke-width="1.4"/>`,
     path("M140 128H440M140 288H440", BLUE.dim, 1, "none", 'opacity=".9"'),
     box(140),
     box(404),
@@ -477,7 +477,7 @@ export function cargo(f: number): string {
     `<rect x="150" y="128" width="340" height="168" rx="26" fill="url(#hull)" stroke="${BLUE.light}" stroke-width="1.6"/>`,
     path("M168 146H472M168 280H472", BLUE.mid, 1, "none", 'opacity=".6"'),
     ribs,
-    `<rect x="${hatch.x}" y="${hatch.y}" width="${hatch.w}" height="${hatch.h}" rx="6" fill="#06204a" stroke="${BLUE.pale}" stroke-width="1.6"/>`,
+    `<rect x="${hatch.x}" y="${hatch.y}" width="${hatch.w}" height="${hatch.h}" rx="6" fill="#143572" stroke="${BLUE.pale}" stroke-width="1.6"/>`,
     circle([hatch.x + hatch.w / 2, hatch.y + hatch.h / 2], 20, BLUE.light, 1.4),
     path(
       `M${hatch.x + hatch.w / 2 - 20} ${hatch.y + hatch.h / 2}h40M${hatch.x + hatch.w / 2} ${hatch.y + hatch.h / 2 - 20}v40`,
@@ -544,7 +544,7 @@ export function ferrite(f: number): string {
       const y = 100 + k * 11 + Math.sin(x * 0.04 + k * 0.9) * 3 + hash(x, k, 31) * 2;
       d += `${d ? "L" : "M"}${x} ${y.toFixed(1)}`;
     }
-    layers += path(d, BLUE.light, 0.9, "none", `opacity="${(0.25 + (k % 3) * 0.12).toFixed(2)}"`);
+    layers += path(d, BLUE.light, 0.9, "none", `opacity="${(0.38 + (k % 3) * 0.12).toFixed(2)}"`);
   }
   let seam = "";
   for (let row = 0; row < 2; row++) {
