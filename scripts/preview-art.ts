@@ -1,13 +1,15 @@
 // Writes the HUD scenes to dist/art-preview as SVG frames plus an index.html that animates them.
 import { mkdirSync, writeFileSync } from "node:fs";
-import { HUD_SCENES } from "../src/art/hud-scenes";
+import { HUD_SCENES, PREVIEW_SCENES } from "../src/art/hud-index";
+
+const ALL = { ...HUD_SCENES, ...PREVIEW_SCENES };
 
 const out = "dist/art-preview";
 mkdirSync(out, { recursive: true });
 
-const names = Object.keys(HUD_SCENES) as (keyof typeof HUD_SCENES)[];
+const names = Object.keys(PREVIEW_SCENES);
 for (const name of names) {
-  for (let f = 0; f < 4; f++) writeFileSync(`${out}/${name}-${f}.svg`, HUD_SCENES[name](f));
+  for (let f = 0; f < 4; f++) writeFileSync(`${out}/${name}-${f}.svg`, ALL[name](f));
 }
 
 const cards = names

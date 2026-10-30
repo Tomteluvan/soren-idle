@@ -15,7 +15,7 @@ import {
   wraith,
 } from "./subjects";
 import { INK, Pt, renderScene, TerminalScene, rect, stroke } from "./terminal";
-import { HUD_SCENES } from "./hud-scenes";
+import { HUD_SCENES } from "./hud-index";
 import { hash } from "./util";
 
 export interface Scene {

@@ -1,4 +1,4 @@
-import { BLUE, circle, line, P, path, poly, Pt, reticle, renderHud, text } from "./hud";
+import { BLUE, circle, line, P, path, poly, Pt, reticle, text } from "./hud";
 import { hash } from "./util";
 
 const rad = (deg: number) => (deg * Math.PI) / 180;
@@ -18,7 +18,7 @@ const hull = (x: number, y: number): Pt => {
   ];
 };
 
-function moon(f: number): string {
+export function moon(f: number): string {
   const c: Pt = [506, 84];
   let out = circle(c, 26, BLUE.light, 1.2, "#173f86");
   for (const k of [0.25, 0.6, 0.92]) {
@@ -36,7 +36,7 @@ function moon(f: number): string {
   return out;
 }
 
-function ground(): string {
+export function ground(): string {
   const ridge = [
     "M18 262",
     ...Array.from(
@@ -149,7 +149,7 @@ function cables(f: number): string {
   return out;
 }
 
-function arm(tip: Pt, fromAbove = false): string {
+export function arm(tip: Pt, fromAbove = false): string {
   const base: Pt = fromAbove ? [tip[0] + 96, 52] : [tip[0] + 132, tip[1] + 20];
   const shoulder: Pt = fromAbove ? [tip[0] + 96, tip[1] - 104] : [tip[0] + 100, tip[1] - 62];
   const elbow: Pt = fromAbove ? [tip[0] + 52, tip[1] - 62] : [tip[0] + 48, tip[1] - 36];
@@ -231,7 +231,7 @@ const ROCK: Pt[] = [
 const HIT: Pt = [336, 224];
 const BEAM_FROM: Pt = [18, 142];
 
-function crystal(x: number, y: number, h: number, w: number, tilt: number): string {
+export function crystal(x: number, y: number, h: number, w: number, tilt: number): string {
   const pts: Pt[] = [
     [-w, 0],
     [w, 0],
@@ -351,7 +351,7 @@ export function mining(f: number): string {
 }
 
 /** A leader line from a point on the subject to a bracketed label. */
-function callout(from: Pt, at: Pt, label: string): string {
+export function callout(from: Pt, at: Pt, label: string): string {
   const w = label.length * 8.2 + 22;
   return [
     path(`M${P(from)}L${P([at[0] - 14, at[1] + 8])}H${at[0] - 6}`, BLUE.pale, 1.2),
@@ -619,12 +619,3 @@ export function ferrite(f: number): string {
     gauge(f, FERRITE_HIT),
   ].join("");
 }
-
-/** The HUD scene for each task that has one. Tasks not listed here still use the older art. */
-export const HUD_SCENES: Record<string, (frame: number) => string> = {
-  salvage_hull: (frame) => renderHud(salvaging, frame, 11),
-  salvage_wiring: (frame) => renderHud(wiring, frame, 13),
-  salvage_cargo: (frame) => renderHud(cargo, frame, 17),
-  mine_ferrite: (frame) => renderHud(ferrite, frame, 19),
-  mine_lumina: (frame) => renderHud(mining, frame, 23),
-};
