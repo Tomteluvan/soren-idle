@@ -5,7 +5,14 @@ import { hash } from "./util";
 const rad = (deg: number) => (deg * Math.PI) / 180;
 
 /** A glowcap: a domed, gilled cap on a stem, with a halo and glowing spots. */
-function mushroom(cx: number, by: number, w: number, h: number, f: number, halo = true): string {
+export function mushroom(
+  cx: number,
+  by: number,
+  w: number,
+  h: number,
+  f: number,
+  halo = true,
+): string {
   const capY = by - h * 0.5;
   let out = "";
   if (halo)
@@ -55,7 +62,7 @@ function mushroom(cx: number, by: number, w: number, h: number, f: number, halo 
 }
 
 /** A leaf: a pointed oval from a base, bending toward a tip. */
-function leaf(base: Pt, tip: Pt, width: number): string {
+export function leaf(base: Pt, tip: Pt, width: number): string {
   const mid: Pt = [(base[0] + tip[0]) / 2, (base[1] + tip[1]) / 2];
   const nx = -(tip[1] - base[1]);
   const ny = tip[0] - base[0];

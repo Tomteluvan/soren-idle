@@ -1,4 +1,14 @@
 import { renderHud } from "./hud";
+import {
+  berserker,
+  fortune,
+  fury,
+  honeyRation,
+  quicksilver,
+  ration,
+  swift,
+  windfall,
+} from "./hud-lab";
 import { glowcap, hydroGlowcap, hydroLumina, hydroSweetroot, sweetroot } from "./hud-grow";
 import { cargo, ferrite, mining, salvaging, wiring } from "./hud-scenes";
 
@@ -19,4 +29,13 @@ export const HUD_SCENES: Record<string, SceneSvg> = {
 };
 
 /** Drawn but not shown in the game yet, for review. Moves into HUD_SCENES once approved. */
-export const PREVIEW_SCENES: Record<string, SceneSvg> = {};
+export const PREVIEW_SCENES: Record<string, SceneSvg> = {
+  craft_ration: (frame) => renderHud(ration, frame, 47),
+  craft_honey_ration: (frame) => renderHud(honeyRation, frame, 53),
+  brew_swift: (frame) => renderHud(swift, frame, 59),
+  brew_fortune: (frame) => renderHud(fortune, frame, 61),
+  brew_fury: (frame) => renderHud(fury, frame, 67),
+  brew_quicksilver: (frame) => renderHud(quicksilver, frame, 71),
+  brew_windfall: (frame) => renderHud(windfall, frame, 73),
+  brew_berserker: (frame) => renderHud(berserker, frame, 79),
+};
