@@ -149,10 +149,10 @@ function cables(f: number): string {
   return out;
 }
 
-function arm(tip: Pt): string {
-  const base: Pt = [tip[0] + 132, tip[1] + 20];
-  const shoulder: Pt = [tip[0] + 100, tip[1] - 62];
-  const elbow: Pt = [tip[0] + 48, tip[1] - 36];
+function arm(tip: Pt, fromAbove = false): string {
+  const base: Pt = fromAbove ? [tip[0] + 96, 52] : [tip[0] + 132, tip[1] + 20];
+  const shoulder: Pt = fromAbove ? [tip[0] + 96, tip[1] - 104] : [tip[0] + 100, tip[1] - 62];
+  const elbow: Pt = fromAbove ? [tip[0] + 52, tip[1] - 62] : [tip[0] + 48, tip[1] - 36];
   const head: Pt = [tip[0] + 10, tip[1] - 12];
   let out = "";
   out += path(`M${P(base)}L${P(shoulder)}L${P(elbow)}L${P(head)}L${P(tip)}`, BLUE.pale, 3, "none");
@@ -276,7 +276,7 @@ function strata(): string {
   return out;
 }
 
-function gauge(f: number): string {
+function gauge(f: number, hit: Pt = HIT): string {
   const top = 68;
   const bottom = 336;
   let out = `<rect x="524" y="${top}" width="48" height="${bottom - top}" fill="none" stroke="${BLUE.pale}" stroke-width="1.4"/>`;
@@ -289,17 +289,17 @@ function gauge(f: number): string {
   // the marker follows the beam
   out += poly(
     [
-      [524, HIT[1]],
-      [538, HIT[1] - 6],
-      [538, HIT[1] + 6],
+      [524, hit[1]],
+      [538, hit[1] - 6],
+      [538, hit[1] + 6],
     ],
     BLUE.pale,
     BLUE.pale,
     1,
   );
   out += line(
-    [HIT[0] + 70, HIT[1]],
-    [524, HIT[1]],
+    [hit[0] + 70, hit[1]],
+    [524, hit[1]],
     BLUE.mid,
     0.8,
     `stroke-dasharray="3 5" stroke-dashoffset="${f * 4}" opacity=".7"`,
@@ -350,7 +350,241 @@ export function mining(f: number): string {
   ].join("");
 }
 
-export const HUD_SCENES = {
-  salvaging: (frame: number) => renderHud(salvaging, frame, 11),
-  mining: (frame: number) => renderHud(mining, frame, 23),
-} as const;
+/** A leader line from a point on the subject to a bracketed label. */
+function callout(from: Pt, at: Pt, label: string): string {
+  const w = label.length * 8.2 + 22;
+  return [
+    path(`M${P(from)}L${P([at[0] - 14, at[1] + 8])}H${at[0] - 6}`, BLUE.pale, 1.2),
+    circle(from, 2.5, BLUE.pale, 1, BLUE.pale),
+    path(`M${at[0] + 6} ${at[1] - 18}h-10v34h10`, BLUE.pale, 1.6),
+    path(`M${at[0] + w} ${at[1] - 18}h10v34h-10`, BLUE.pale, 1.6),
+    text(at[0] + 14, at[1] + 5, 13, label, BLUE.pale, 'letter-spacing="1"'),
+  ].join("");
+}
+
+// --- strip wiring ------------------------------------------------------------------
+
+type Cubic = [Pt, Pt, Pt, Pt];
+
+function bez([a, b, c, d]: Cubic, t: number): Pt {
+  const u = 1 - t;
+  return [
+    u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * d[0],
+    u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * d[1],
+  ];
+}
+
+function cubicPath(curve: Cubic, t0: number, t1: number): string {
+  let d = "";
+  for (let i = 0; i <= 18; i++) {
+    d += `${i ? "L" : "M"}${P(bez(curve, t0 + ((t1 - t0) * i) / 18))}`;
+  }
+  return d;
+}
+
+export function wiring(f: number): string {
+  const sway = Math.sin(rad(f * 90)) * 3;
+  const cutIndex = 3;
+  const gap = 0.02 + f * 0.012;
+  let tip: Pt = [300, 240];
+  let cables = "";
+  for (let i = 0; i < 8; i++) {
+    const y = 176 + i * 11;
+    const sag = 34 + i * 5 + (i % 2 ? sway : -sway);
+    const curve: Cubic = [
+      [176, y],
+      [230, y + sag],
+      [350, y + sag + 10],
+      [404, y],
+    ];
+    if (i === cutIndex) {
+      tip = bez(curve, 0.5);
+      cables += path(cubicPath(curve, 0, 0.5 - gap), BLUE.pale, 2.6);
+      cables += path(cubicPath(curve, 0.5 + gap, 1), BLUE.pale, 2.6, "none", 'opacity=".9"');
+    } else {
+      cables += path(
+        cubicPath(curve, 0, 1),
+        BLUE.light,
+        1.5,
+        "none",
+        `opacity="${0.55 + (i % 3) * 0.15}"`,
+      );
+    }
+  }
+  const box = (x: number) =>
+    [
+      `<rect x="${x}" y="156" width="36" height="104" rx="4" fill="url(#hull)" stroke="${BLUE.light}" stroke-width="1.4"/>`,
+      ...Array.from({ length: 8 }, (_, i) =>
+        circle([x + (x < 200 ? 36 : 0), 176 + i * 11], 2.4, BLUE.pale, 1, BLUE.bg),
+      ),
+      line([x + 8, 166], [x + 28, 166], BLUE.mid, 1),
+      line([x + 8, 250], [x + 28, 250], BLUE.mid, 1),
+    ].join("");
+  return [
+    moon(f),
+    // the bulkhead, with its panel torn off
+    `<rect x="104" y="92" width="372" height="232" rx="8" fill="url(#hull)" stroke="${BLUE.light}" stroke-width="1.6"/>`,
+    ...[
+      [116, 104],
+      [464, 104],
+      [116, 312],
+      [464, 312],
+    ].map(([x, y]) => circle([x, y], 3, BLUE.mid, 1)),
+    `<rect x="128" y="116" width="324" height="184" rx="4" fill="#020510" stroke="${BLUE.pale}" stroke-width="1.4"/>`,
+    path("M140 128H440M140 288H440", BLUE.dim, 1, "none", 'opacity=".9"'),
+    box(140),
+    box(404),
+    cables,
+    arm(tip, true),
+    sparks(tip, f),
+    reticle([422, 208], 36 + (f % 2) * 2, f),
+    callout(tip, [492, 150], "CONDUIT"),
+  ].join("");
+}
+
+// --- breach cargo pod --------------------------------------------------------------
+
+/** A point a fraction t of the way round a rectangle's outline, clockwise from its top left. */
+function outline(x: number, y: number, w: number, h: number, t: number): Pt {
+  const per = 2 * (w + h);
+  let d = (((t % 1) + 1) % 1) * per;
+  if (d <= w) return [x + d, y];
+  d -= w;
+  if (d <= h) return [x + w, y + d];
+  d -= h;
+  if (d <= w) return [x + w - d, y + h];
+  return [x, y + h - (d - w)];
+}
+
+export function cargo(f: number): string {
+  const hatch = { x: 262, y: 168, w: 116, h: 96 };
+  const t = [0.2, 0.3, 0.4, 0.3][f];
+  const tip = outline(hatch.x, hatch.y, hatch.w, hatch.h, t);
+  let cut = `M${P(outline(hatch.x, hatch.y, hatch.w, hatch.h, 0))}`;
+  for (let i = 1; i <= 24; i++) {
+    cut += `L${P(outline(hatch.x, hatch.y, hatch.w, hatch.h, (t * i) / 24))}`;
+  }
+  let ribs = "";
+  for (let i = 0; i < 6; i++) {
+    const x = 186 + i * 46;
+    if (x > hatch.x - 14 && x < hatch.x + hatch.w + 14) continue;
+    ribs += path(`M${x} 148V282`, BLUE.mid, 1.1, "none", 'opacity=".75"');
+  }
+  return [
+    moon(f),
+    ground(),
+    // the pod: a ribbed container half sunk into the ground
+    `<rect x="150" y="128" width="340" height="168" rx="26" fill="url(#hull)" stroke="${BLUE.light}" stroke-width="1.6"/>`,
+    path("M168 146H472M168 280H472", BLUE.mid, 1, "none", 'opacity=".6"'),
+    ribs,
+    `<rect x="${hatch.x}" y="${hatch.y}" width="${hatch.w}" height="${hatch.h}" rx="6" fill="#06204a" stroke="${BLUE.pale}" stroke-width="1.6"/>`,
+    circle([hatch.x + hatch.w / 2, hatch.y + hatch.h / 2], 20, BLUE.light, 1.4),
+    path(
+      `M${hatch.x + hatch.w / 2 - 20} ${hatch.y + hatch.h / 2}h40M${hatch.x + hatch.w / 2} ${hatch.y + hatch.h / 2 - 20}v40`,
+      BLUE.light,
+      1.4,
+    ),
+    // light leaking out of the seam
+    path(cut, "#ffffff", 2.6),
+    path(cut, BLUE.light, 7, "none", 'opacity=".35"'),
+    arm(tip, true),
+    sparks(tip, f),
+    reticle([hatch.x + hatch.w / 2, hatch.y + hatch.h / 2], 62 + (f % 2) * 2, f),
+    callout([hatch.x + hatch.w, hatch.y + 14], [492, 138], "SEALED"),
+  ].join("");
+}
+
+// --- mine ferrite ------------------------------------------------------------------
+
+const TERRACE: Pt[] = [
+  [110, 336],
+  [110, 196],
+  [186, 196],
+  [186, 148],
+  [262, 148],
+  [262, 98],
+  [508, 98],
+  [508, 336],
+];
+const FERRITE_HIT: Pt = [318, 244];
+const FERRITE_BEAM: Pt = [18, 52];
+
+function cube(cx: number, cy: number, s: number, shade = 1): string {
+  const top: Pt[] = [
+    [cx, cy - s],
+    [cx + s, cy - s / 2],
+    [cx, cy],
+    [cx - s, cy - s / 2],
+  ];
+  const left: Pt[] = [
+    [cx - s, cy - s / 2],
+    [cx, cy],
+    [cx, cy + s],
+    [cx - s, cy + s / 2],
+  ];
+  const right: Pt[] = [
+    [cx, cy],
+    [cx + s, cy - s / 2],
+    [cx + s, cy + s / 2],
+    [cx, cy + s],
+  ];
+  return [
+    poly(left, "#2a78d8", BLUE.pale, 1, `fill-opacity="${0.75 * shade}"`),
+    poly(right, "#1a52a4", BLUE.pale, 1, `fill-opacity="${0.8 * shade}"`),
+    poly(top, "url(#crystal)", BLUE.pale, 1),
+  ].join("");
+}
+
+export function ferrite(f: number): string {
+  const flick = [1, 1.2, 0.9, 1.15][f];
+  let layers = "";
+  for (let k = 0; k < 24; k++) {
+    let d = "";
+    for (let x = 100; x <= 520; x += 24) {
+      const y = 100 + k * 11 + Math.sin(x * 0.04 + k * 0.9) * 3 + hash(x, k, 31) * 2;
+      d += `${d ? "L" : "M"}${x} ${y.toFixed(1)}`;
+    }
+    layers += path(d, BLUE.light, 0.9, "none", `opacity="${(0.25 + (k % 3) * 0.12).toFixed(2)}"`);
+  }
+  let seam = "";
+  for (let row = 0; row < 2; row++) {
+    for (let i = 0; i < 11; i++) {
+      const cx = 232 + i * 25 + (row ? 12 : 0);
+      const cy = 232 + row * 22 + Math.sin(i * 1.3) * 4;
+      const near = Math.abs(cx - FERRITE_HIT[0]) < 30 && row === 0;
+      seam += cube(cx, cy + (near ? (f % 2) * 1.5 : 0), 13 + (i % 3) * 2, near ? 1.2 : 1);
+    }
+  }
+  let falling = "";
+  for (let i = 0; i < 22; i++) {
+    const phase = ((f + hash(i, 1, 33) * 4) % 4) / 4;
+    const vx = (hash(i, 2, 33) - 0.5) * 120;
+    const vy = 20 + hash(i, 3, 33) * 60;
+    const p: Pt = [FERRITE_HIT[0] + vx * phase, FERRITE_HIT[1] - vy * phase + 150 * phase * phase];
+    const r = 1.6 + hash(i, 4, 33) * 3.4;
+    falling += `<rect x="${(p[0] - r).toFixed(1)}" y="${(p[1] - r).toFixed(1)}" width="${(r * 2).toFixed(1)}" height="${(r * 2).toFixed(1)}" transform="rotate(${Math.round(hash(i, 5, 33) * 90 + phase * 90)} ${p[0].toFixed(1)} ${p[1].toFixed(1)})" fill="none" stroke="${BLUE.light}" stroke-width="1" opacity="${(1 - phase * 0.8).toFixed(2)}"/>`;
+  }
+  return [
+    `<clipPath id="terraceClip"><polygon points="${TERRACE.map(P).join(" ")}"/></clipPath>`,
+    poly(TERRACE, "url(#rock)", BLUE.pale, 1.6),
+    `<g clip-path="url(#terraceClip)">${layers}</g>`,
+    seam,
+    `<circle cx="${FERRITE_HIT[0]}" cy="${FERRITE_HIT[1]}" r="${(30 * flick).toFixed(1)}" fill="url(#flare)"/>`,
+    line(FERRITE_BEAM, FERRITE_HIT, BLUE.line, 9 * flick, 'opacity=".35"'),
+    line(FERRITE_BEAM, FERRITE_HIT, BLUE.light, 4 * flick),
+    line(FERRITE_BEAM, FERRITE_HIT, "#ffffff", 1.6),
+    `<circle cx="${FERRITE_BEAM[0] + 8}" cy="${FERRITE_BEAM[1]}" r="10" fill="url(#flare)"/>`,
+    falling,
+    reticle(FERRITE_HIT, 46 + (f % 2) * 2, f),
+    gauge(f, FERRITE_HIT),
+  ].join("");
+}
+
+/** The HUD scene for each task that has one. Tasks not listed here still use the older art. */
+export const HUD_SCENES: Record<string, (frame: number) => string> = {
+  salvage_hull: (frame) => renderHud(salvaging, frame, 11),
+  salvage_wiring: (frame) => renderHud(wiring, frame, 13),
+  salvage_cargo: (frame) => renderHud(cargo, frame, 17),
+  mine_ferrite: (frame) => renderHud(ferrite, frame, 19),
+  mine_lumina: (frame) => renderHud(mining, frame, 23),
+};

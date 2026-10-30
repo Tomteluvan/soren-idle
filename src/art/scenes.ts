@@ -15,6 +15,7 @@ import {
   wraith,
 } from "./subjects";
 import { INK, Pt, renderScene, TerminalScene, rect, stroke } from "./terminal";
+import { HUD_SCENES } from "./hud-scenes";
 import { hash } from "./util";
 
 export interface Scene {
@@ -182,7 +183,10 @@ function wrap(scene: TerminalScene, poster: number): Scene {
   return { frames: 4, poster, svg: (frame) => renderScene(scene, frame) };
 }
 
-export const sceneFor = (taskId: string | null | undefined): Scene =>
-  taskId && SCENES[taskId] ? wrap(SCENES[taskId], 2) : wrap(IDLE, 0);
+export const sceneFor = (taskId: string | null | undefined): Scene => {
+  const hud = taskId ? HUD_SCENES[taskId] : undefined;
+  if (hud) return { frames: 4, poster: 2, svg: hud };
+  return taskId && SCENES[taskId] ? wrap(SCENES[taskId], 2) : wrap(IDLE, 0);
+};
 
-export const SCENE_IDS = [...Object.keys(SCENES)];
+export const SCENE_IDS = [...new Set([...Object.keys(SCENES), ...Object.keys(HUD_SCENES)])];
