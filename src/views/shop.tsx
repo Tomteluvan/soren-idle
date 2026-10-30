@@ -5,13 +5,14 @@ import { count } from "../engine/engine";
 import { formatMarks } from "../engine/format";
 import { shopOpen, shopStatus } from "../engine/shop";
 import { GameState, ItemId } from "../engine/types";
+import { Notice } from "./notice";
 
 export function BountyShop(props: { state: GameState; onBuy: (id: ItemId) => void }) {
   const { state } = props;
 
   if (!shopOpen(state)) {
     return (
-      <List.EmptyView
+      <Notice
         icon={Icon.Cart}
         title="No Bounty Board"
         description={`The shop opens with the ${BUILDING_BY_ID.bounty_board.name}. Build it in Base.`}

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { artMarkdown, preloadMarkdown } from "../art";
+import { artMarkdown } from "../art";
 import { AREAS, ITEMS, SKILL_BY_ID, TASK_BY_ID, TASKS } from "../engine/data";
 import {
   count,
@@ -230,7 +230,6 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
       lines.push(`- **Area:** ${area.name}`);
     }
   }
-  if (active) lines.push("", preloadMarkdown(task.id));
   return lines.join("\n");
 }
 

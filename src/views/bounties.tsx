@@ -10,6 +10,7 @@ import {
 import { bar, formatDuration, formatMarks } from "../engine/format";
 import { taskDurationMs } from "../engine/engine";
 import { Bounty, GameState } from "../engine/types";
+import { Notice } from "./notice";
 
 const TIER_NAMES = ["Easy", "Hard", "Deadly"];
 
@@ -49,7 +50,7 @@ export function Bounties(props: {
 
   if (level === 0) {
     return (
-      <List.EmptyView
+      <Notice
         icon={Icon.Flag}
         title="No Bounty Board"
         description="Build a Bounty Board in Base once you can talk to the locals."

@@ -5,6 +5,7 @@ import { count, levelOf, xpForLevel } from "../engine/engine";
 import { bar, formatBundle, formatDuration } from "../engine/format";
 import { growRemainingMs, isRipe, plotAt, plotCount, ripeCount } from "../engine/hydroponics";
 import { GameState, ItemId } from "../engine/types";
+import { Notice } from "./notice";
 
 export function Hydroponics(props: {
   state: GameState;
@@ -18,7 +19,7 @@ export function Hydroponics(props: {
 
   if (plots === 0) {
     return (
-      <List.EmptyView
+      <Notice
         icon={Icon.Raindrop}
         title="No Hydroponic Bay"
         description="Build a Hydroponic Bay in Base to grow crops."

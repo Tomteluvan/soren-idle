@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { ComponentProps } from "react";
-import { artMarkdown, preloadMarkdown } from "../art";
+import { artMarkdown } from "../art";
 import { TASK_BY_ID } from "../engine/data";
 import { count, maxHp } from "../engine/engine";
 import { bar, formatBuffs, formatCredits, formatMarks } from "../engine/format";
@@ -53,7 +53,6 @@ export function Survivor(props: {
                   ]
                 : []),
               `Auto-eat: **${EAT_LEVELS.find(([v]) => v === state.settings.eatBelow)?.[1] ?? "Custom"}**, **${state.settings.foodPriority}** food first`,
-              ...(task ? ["", preloadMarkdown(state.activeTask)] : []),
             ].join("\n")}
           />
         }

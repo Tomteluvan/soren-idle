@@ -15,6 +15,7 @@ import {
   translatorLevel,
 } from "../engine/trade";
 import { GameState, ItemId } from "../engine/types";
+import { Notice } from "./notice";
 
 const MAX_TRANSLATOR_LEVEL = 5;
 
@@ -27,7 +28,7 @@ export function Trade(props: {
 
   if (!canTrade(state)) {
     return (
-      <List.EmptyView
+      <Notice
         icon={Icon.Coins}
         title="No Trading Hub"
         description={

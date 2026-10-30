@@ -5,6 +5,7 @@ import { formatCredits } from "../engine/format";
 import { canTrade, keepCount, sellPrice, sellableCount } from "../engine/trade";
 import { gearStats } from "./equipment";
 import { GameState, ItemId } from "../engine/types";
+import { Notice } from "./notice";
 
 const KEEP_CHOICES = [0, 10, 25, 50, 100];
 
@@ -21,11 +22,7 @@ export function Inventory(props: {
   const owned = (Object.keys(ITEMS) as ItemId[]).filter((id) => count(state, id) > 0);
   if (!owned.length) {
     return (
-      <List.EmptyView
-        title="Nothing yet"
-        description="Salvage something from the wreck."
-        icon={Icon.Box}
-      />
+      <Notice title="Nothing yet" description="Salvage something from the wreck." icon={Icon.Box} />
     );
   }
   return (
