@@ -1,25 +1,10 @@
 # Soren Idle Changelog
 
-## [Unreleased]
+## [Initial Release] - {PR_MERGE_DATE}
 
-- New art: every task, every Base building and the idle camp are redrawn as animated blue targeting-screen scenes, each unique. Base buildings show their level, and an unbuilt one shows as a dim blueprint.
-- Locked screens, such as Trade before you build the hub, tell you what to build instead of showing nothing.
-- The animation frame previews under each task are gone.
-- The game is now called Soren Idle. The planet is Soren and its people are the Sorenians.
-- Every skill now runs to level 99 on the Melvor Idle XP curve, up from 50. Level 99 takes about
-  120 hours of nonstop play with bare hands. Level requirements across tasks, buildings and gear
-  were spread out to match, and XP rates were retuned per skill.
-- Engineering has repeatable crafts now (Circuit Board, Servo Unit, Power Core, Fusion Cell), so it
-  can be levelled like the other skills.
-- Combat health and damage still grow in the same steps as before, one per three levels.
-- The stats screen counts retreats. The unused deaths stat is gone.
-- `npm run balance` prints how long each skill takes to level and each task takes to unlock.
-- Gathering tasks are now resource nodes with health, like Melvor's rocks. Each cycle is a hit; when
-  the node is spent it takes a few seconds to respawn. The task list shows the node's health and the
-  respawn time.
-- Mastery per task: repeating a task levels its mastery (up to 99). Each level adds one node health,
-  every ten levels cut the task's time by 2.5%, and levels 25, 50, 75 and 99 add bonus yield. Combat
-  and one-off crafts have none. XP rates were retuned for the time spent waiting on nodes.
-- Play is now a main menu. Skills, Base, Equipment, Trade, Bounties, Bounty Shop, Inventory and Stats open as their own screens (Esc goes back), replacing the section dropdown. Your survivor's task and health stay at the top of every screen. Typing in the search bar on the menu still finds any task, item or building.
-- Internal: the game data and the Play views are split into folders, one file per topic.
-- Windows support for the Play command. The menu bar ticker stays macOS-only.
+- A sci-fi idle game in Raycast. You crashed on the alien world Soren: salvage the wreck, mine, forage, cook, brew, build and fight.
+- Eight skills that level to 99, with per-task mastery and resource nodes that deplete and respawn.
+- A Base with drones, a Hydroponic Bay, a Trading Hub, a Bounty Board and more, plus gear to craft and wear.
+- Trade with the Sorenians, take bounties and fight bosses.
+- Every task, building and the idle camp has its own animated blue targeting-screen art.
+- A menu bar ticker keeps the game running while Raycast is closed and notifies you when a task stops (macOS).

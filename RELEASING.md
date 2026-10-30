@@ -14,9 +14,9 @@ see is the changelog, and each release is a pull request to
 ## Steps
 
 1. Make sure `main` is clean and green: `npm test`, `npm run lint`, `npm run build`.
-2. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [<title>] - {PR_MERGE_DATE}`. Keep the
-   `{PR_MERGE_DATE}` placeholder literally: Raycast fills in the date when the PR merges. Start a new
-   empty `## [Unreleased]` section above it.
+2. In `CHANGELOG.md`, add a section at the top: `## [<title>] - {PR_MERGE_DATE}`, with a short,
+   player-facing list of what changed. Keep the `{PR_MERGE_DATE}` placeholder literally: Raycast fills
+   in the date when the PR merges.
 3. Bump the version: `npm version <patch|minor|major> --no-git-tag-version`.
 4. Commit the changelog, `package.json` and `package-lock.json`: `Release vX.Y.Z`.
 5. Tag and push: `git tag vX.Y.Z && git push && git push --tags`.
