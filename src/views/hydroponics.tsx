@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { buildingMarkdown } from "../art";
+import { artMarkdown, buildingMarkdown } from "../art";
 import { CROP_BY_ID, CROPS, ITEMS } from "../engine/data";
 import { count, levelOf, xpForLevel } from "../engine/engine";
 import { bar, formatBundle, formatDuration } from "../engine/format";
@@ -9,6 +9,7 @@ import { Notice } from "./notice";
 
 export function Hydroponics(props: {
   state: GameState;
+  frame: number;
   onPlant: (index: number, crop: string) => void;
   onHarvest: (index: number) => void;
   onHarvestAll: () => void;
@@ -39,7 +40,9 @@ export function Hydroponics(props: {
         const crop = plot ? CROP_BY_ID[plot.crop] : undefined;
         const ripe = plot ? isRipe(state, plot) : false;
         const header = [
-          buildingMarkdown("hydroponic_bay", plots),
+          crop
+            ? artMarkdown(`hydro_${crop.id}`, props.frame, true)
+            : buildingMarkdown("hydroponic_bay", plots),
           `# Plot ${index + 1}`,
           "```",
           `Lv ${level}  ${bar(next > floor ? (xp - floor) / (next - floor) : 1)}  ${Math.floor(xp)} XP`,

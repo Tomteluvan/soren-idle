@@ -43,6 +43,7 @@ export const tasksView = (g: ReadyGame, skill: SkillId) => (
 export const hydroponicsView = (g: ReadyGame) => (
   <Hydroponics
     state={g.state}
+    frame={g.frame}
     onPlant={(index, crop) =>
       g.act(
         (s) => plant(s, index, crop),
