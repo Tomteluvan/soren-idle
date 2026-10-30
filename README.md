@@ -21,7 +21,7 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
 
 | Command | Platforms | What it does |
 | --- | --- | --- |
-| **Play Soren Idle** | macOS, Windows | The game: pick tasks, craft gear, manage your base, trade and hunt. |
+| **Play Soren Idle** | macOS | The game: pick tasks, craft gear, manage your base, trade and hunt. |
 | **Soren Idle Ticker** | macOS | A menu bar status that keeps the game ticking and notifies you when a task stops. |
 
 ## Getting started
@@ -68,6 +68,10 @@ npm run lint
 | `src/art` | The terminal-style scene art. |
 | `src/ticker.tsx` | The menu bar command. |
 | `scripts` | Tooling such as the balance simulation. |
+
+## Releasing
+
+See [RELEASING.md](RELEASING.md).
 
 ## Contributing
 
