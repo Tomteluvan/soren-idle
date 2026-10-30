@@ -65,7 +65,7 @@ npm run lint
 | `src/play.tsx`, `src/screens.tsx` | The Play command: a main menu and the screens it pushes. |
 | `src/hooks/use-game.ts` | Loads the game and keeps it ticking. |
 | `src/views` | The content of each screen (tasks, inventory, base, equipment, trade, ...). |
-| `src/art` | The terminal-style scene art. |
+| `src/art` | The blue HUD scene art: one scene per task, a camp, and every Base building. |
 | `src/ticker.tsx` | The menu bar command. |
 | `scripts` | Tooling such as the balance simulation. |
 

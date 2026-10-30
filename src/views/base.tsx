@@ -35,7 +35,11 @@ function effectLine(def: BuildingDef, level: number, state: GameState): string {
   return level ? "Built" : "Not built";
 }
 
-export function Base(props: { state: GameState; onBuild: (id: BuildingId) => void }) {
+export function Base(props: {
+  state: GameState;
+  frame: number;
+  onBuild: (id: BuildingId) => void;
+}) {
   const { state } = props;
   const contact = firstContact(state);
   return (
@@ -88,7 +92,7 @@ export function Base(props: { state: GameState; onBuild: (id: BuildingId) => voi
             detail={
               <List.Item.Detail
                 markdown={[
-                  buildingMarkdown(def.id, level),
+                  buildingMarkdown(def.id, level, props.frame, level > 0),
                   `# ${def.name}`,
                   def.description,
                   "",

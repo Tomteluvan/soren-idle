@@ -42,7 +42,7 @@ export function Hydroponics(props: {
         const header = [
           crop
             ? artMarkdown(`hydro_${crop.id}`, props.frame, true)
-            : buildingMarkdown("hydroponic_bay", plots),
+            : buildingMarkdown("hydroponic_bay", plots, props.frame, true),
           `# Plot ${index + 1}`,
           "```",
           `Lv ${level}  ${bar(next > floor ? (xp - floor) / (next - floor) : 1)}  ${Math.floor(xp)} XP`,

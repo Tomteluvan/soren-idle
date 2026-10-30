@@ -64,7 +64,7 @@ export function ground(): string {
   return out;
 }
 
-function hullBody(): string {
+export function hullBody(): string {
   const L = (x: number, y: number) => `${x},${y}`;
   let out = "";
   // main shell and nozzle

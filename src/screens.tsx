@@ -27,7 +27,7 @@ type Children = ComponentProps<typeof List>["children"];
 // them for search results, and the pushed screens wrap them in a list of their own.
 
 export const baseView = (g: ReadyGame) => (
-  <Base state={g.state} onBuild={(id) => g.act((s) => build(s, id))} />
+  <Base state={g.state} frame={g.frame} onBuild={(id) => g.act((s) => build(s, id))} />
 );
 
 export const tasksView = (g: ReadyGame, skill: SkillId) => (

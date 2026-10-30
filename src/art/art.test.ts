@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS, TASKS } from "../engine/data";
-import { BUILDING_ART_IDS, buildingSvg } from "./buildings";
+import { BUILDING_ART_IDS, buildingSvg } from "./hud-base";
 import { SCENE_IDS, sceneFor } from "./scenes";
 
 describe("terminal art", () => {

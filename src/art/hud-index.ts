@@ -1,4 +1,5 @@
 import { renderHud } from "./hud";
+import { camp } from "./hud-base";
 import { COMBAT_SCENES } from "./hud-combat";
 import { FORGE_SCENES } from "./hud-forge";
 import {
@@ -18,6 +19,7 @@ type SceneSvg = (frame: number) => string;
 
 /** The HUD scene for each task that has one. Tasks not listed here still use the older art. */
 export const HUD_SCENES: Record<string, SceneSvg> = {
+  camp: (frame) => renderHud(camp, frame, 127),
   salvage_hull: (frame) => renderHud(salvaging, frame, 11),
   salvage_wiring: (frame) => renderHud(wiring, frame, 13),
   salvage_cargo: (frame) => renderHud(cargo, frame, 17),

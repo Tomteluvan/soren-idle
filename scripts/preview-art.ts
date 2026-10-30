@@ -1,13 +1,27 @@
 // Writes the HUD scenes to dist/art-preview as SVG frames plus an index.html that animates them.
 import { mkdirSync, writeFileSync } from "node:fs";
+import { BUILDING_ART_IDS, buildingSvg } from "../src/art/hud-base";
 import { HUD_SCENES, PREVIEW_SCENES } from "../src/art/hud-index";
 
-const ALL = { ...HUD_SCENES, ...PREVIEW_SCENES };
+const buildings = Object.fromEntries(
+  BUILDING_ART_IDS.map((id) => [`building_${id}`, (f: number) => buildingSvg(id, 3, f)]),
+);
+const ALL: Record<string, (frame: number) => string> = {
+  ...HUD_SCENES,
+  ...PREVIEW_SCENES,
+  ...buildings,
+  building_shelter_unbuilt: (f) => buildingSvg("shelter", 0, f),
+};
 
 const out = "dist/art-preview";
 mkdirSync(out, { recursive: true });
 
-const names = Object.keys(PREVIEW_SCENES);
+const names = [
+  "camp",
+  ...Object.keys(PREVIEW_SCENES),
+  ...Object.keys(buildings),
+  "building_shelter_unbuilt",
+];
 for (const name of names) {
   for (let f = 0; f < 4; f++) writeFileSync(`${out}/${name}-${f}.svg`, ALL[name](f));
 }

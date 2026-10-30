@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- New art: every task, every Base building and the idle camp are redrawn as animated blue targeting-screen scenes, each unique. Base buildings show their level, and an unbuilt one shows as a dim blueprint.
+- Locked screens, such as Trade before you build the hub, tell you what to build instead of showing nothing.
+- The animation frame previews under each task are gone.
 - The game is now called Soren Idle. The planet is Soren and its people are the Sorenians.
 - Every skill now runs to level 99 on the Melvor Idle XP curve, up from 50. Level 99 takes about
   120 hours of nonstop play with bare hands. Level requirements across tasks, buildings and gear
