@@ -509,30 +509,45 @@ const TERRACE: Pt[] = [
 const FERRITE_HIT: Pt = [318, 244];
 const FERRITE_BEAM: Pt = [18, 52];
 
-function cube(cx: number, cy: number, s: number, shade = 1): string {
-  const top: Pt[] = [
-    [cx, cy - s],
-    [cx + s, cy - s / 2],
-    [cx, cy],
-    [cx - s, cy - s / 2],
+/** A rugged lump of ore: a jagged outline split into facets, lit from the top left. */
+function chunk(cx: number, cy: number, r: number, seed: number, bright = 1): string {
+  const n = 6 + Math.floor(hash(seed, 1, 41) * 3);
+  const rim: Pt[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = ((i + hash(seed, i, 42) * 0.6) / n) * Math.PI * 2;
+    const d = r * (0.62 + hash(seed, i, 43) * 0.6);
+    rim.push([cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.82]);
+  }
+  const core: Pt = [
+    cx + (hash(seed, 7, 44) - 0.5) * r * 0.5,
+    cy + (hash(seed, 8, 44) - 0.5) * r * 0.4,
   ];
-  const left: Pt[] = [
-    [cx - s, cy - s / 2],
-    [cx, cy],
-    [cx, cy + s],
-    [cx - s, cy + s / 2],
-  ];
-  const right: Pt[] = [
-    [cx, cy],
-    [cx + s, cy - s / 2],
-    [cx + s, cy + s / 2],
-    [cx, cy + s],
-  ];
-  return [
-    poly(left, "#2a78d8", BLUE.pale, 1, `fill-opacity="${0.75 * shade}"`),
-    poly(right, "#1a52a4", BLUE.pale, 1, `fill-opacity="${0.8 * shade}"`),
-    poly(top, "url(#crystal)", BLUE.pale, 1),
-  ].join("");
+  const fills = ["#a9dcff", "#6cb4ff", "#3f8fe8", "#2160b8"];
+  const facets = ["", "", "", ""];
+  for (let i = 0; i < n; i++) {
+    const a = rim[i];
+    const b = rim[(i + 1) % n];
+    const mx = (a[0] + b[0]) / 2 - core[0];
+    const my = (a[1] + b[1]) / 2 - core[1];
+    // facets facing the light (up and left) are bright
+    const lit = (-mx - my) / (Math.hypot(mx, my) * 1.414 || 1);
+    const tone = lit > 0.55 ? 0 : lit > 0.1 ? 1 : lit > -0.4 ? 2 : 3;
+    facets[tone] += `M${P(core)}L${P(a)}L${P(b)}Z`;
+  }
+  let out = "";
+  facets.forEach((d, tone) => {
+    if (d)
+      out += path(d, BLUE.pale, 0.9, fills[tone], `fill-opacity="${(0.9 * bright).toFixed(2)}"`);
+  });
+  // a glint on the brightest face
+  out += line(
+    [cx - r * 0.5, cy - r * 0.3],
+    [cx - r * 0.15, cy - r * 0.5],
+    "#ffffff",
+    1.2,
+    'opacity=".8"',
+  );
+  return out;
 }
 
 export function ferrite(f: number): string {
@@ -546,14 +561,39 @@ export function ferrite(f: number): string {
     }
     layers += path(d, BLUE.light, 0.9, "none", `opacity="${(0.38 + (k % 3) * 0.12).toFixed(2)}"`);
   }
+  // a ragged seam of ore lumps, two rows deep, with loose chips around it
   let seam = "";
   for (let row = 0; row < 2; row++) {
-    for (let i = 0; i < 11; i++) {
-      const cx = 232 + i * 25 + (row ? 12 : 0);
-      const cy = 232 + row * 22 + Math.sin(i * 1.3) * 4;
-      const near = Math.abs(cx - FERRITE_HIT[0]) < 30 && row === 0;
-      seam += cube(cx, cy + (near ? (f % 2) * 1.5 : 0), 13 + (i % 3) * 2, near ? 1.2 : 1);
+    for (let i = 0; i < 10; i++) {
+      const seed = row * 20 + i;
+      const cx = 228 + i * 27 + (row ? 13 : 0) + (hash(seed, 1, 45) - 0.5) * 8;
+      const cy = 230 + row * 24 + (hash(seed, 2, 45) - 0.5) * 12;
+      const near = Math.abs(cx - FERRITE_HIT[0]) < 32 && row === 0;
+      seam += chunk(
+        cx,
+        cy + (near ? (f % 2) * 1.5 : 0),
+        12 + hash(seed, 3, 45) * 9,
+        seed,
+        near ? 1.1 : 1,
+      );
     }
+  }
+  for (let i = 0; i < 9; i++) {
+    const cx = 220 + hash(i, 4, 46) * 280;
+    const cy = 214 + hash(i, 5, 46) * 70;
+    seam += chunk(cx, cy, 3 + hash(i, 6, 46) * 3, 100 + i, 0.8);
+  }
+  // cracks spreading from the strike
+  for (let i = 0; i < 5; i++) {
+    const a = rad(-30 + i * 55 + hash(i, f, 47) * 12);
+    const d = 14 + hash(i, 9, 47) * 16;
+    seam += line(
+      FERRITE_HIT,
+      [FERRITE_HIT[0] + Math.cos(a) * d, FERRITE_HIT[1] + Math.sin(a) * d],
+      "#ffffff",
+      1,
+      'opacity=".85"',
+    );
   }
   let falling = "";
   for (let i = 0; i < 22; i++) {
