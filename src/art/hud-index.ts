@@ -26,10 +26,6 @@ export const HUD_SCENES: Record<string, SceneSvg> = {
   hydro_glowcap_bed: (frame) => renderHud(hydroGlowcap, frame, 37),
   hydro_sweetroot_bed: (frame) => renderHud(hydroSweetroot, frame, 41),
   hydro_lumina_bloom: (frame) => renderHud(hydroLumina, frame, 43),
-};
-
-/** Drawn but not shown in the game yet, for review. Moves into HUD_SCENES once approved. */
-export const PREVIEW_SCENES: Record<string, SceneSvg> = {
   craft_ration: (frame) => renderHud(ration, frame, 47),
   craft_honey_ration: (frame) => renderHud(honeyRation, frame, 53),
   brew_swift: (frame) => renderHud(swift, frame, 59),
@@ -39,3 +35,6 @@ export const PREVIEW_SCENES: Record<string, SceneSvg> = {
   brew_windfall: (frame) => renderHud(windfall, frame, 73),
   brew_berserker: (frame) => renderHud(berserker, frame, 79),
 };
+
+/** Drawn but not shown in the game yet, for review. Moves into HUD_SCENES once approved. */
+export const PREVIEW_SCENES: Record<string, SceneSvg> = {};
