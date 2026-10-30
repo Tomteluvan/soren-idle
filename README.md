@@ -1,39 +1,54 @@
 # Soren Idle
 
-A sci-fi idle game for Raycast. You crashed on **Soren**, an alien world. Salvage the wreck, build a
-base, call the **Sorenians** who live here, and learn to survive. Tasks keep running while Raycast is
-closed, and you collect the haul when you come back.
+An idle game that lives in Raycast. You crashed on **Soren**, an alien world. Salvage the wreck,
+build a base, make contact with the **Sorenians**, and learn to survive.
+
+Pick a task and it keeps running, even with Raycast closed. Come back later and collect the haul.
+
+## Features
+
+- **Eight skills, level 1 to 99:** Salvaging, Mining, Foraging, Cooking, Engineering, Combat,
+  Hydroponics and Xenochemistry, on the same XP curve as Melvor Idle.
+- **Resource nodes and mastery:** gathering works a node that runs out and respawns, and every
+  repeatable task builds its own mastery for more yield and speed.
+- **A base to build:** Workshop, drones, a Hydroponic Bay and a Signal Beacon that calls the locals.
+- **Trade and Bounties:** the Sorenians buy what you produce and sell what you can't make yourself.
+- **Combat:** areas, bosses, a damage triangle and gear that only counts while worn.
+- **Menu bar ticker (macOS):** keeps the game running in the background and notifies you when a task
+  stops.
 
 ## Commands
 
 | Command | Platforms | What it does |
 | --- | --- | --- |
 | **Play Soren Idle** | macOS, Windows | The game: pick tasks, craft gear, manage your base, trade and hunt. |
-| **Soren Idle Ticker** | macOS | A menu bar status that keeps the game ticking in the background and notifies you when a task stops. |
+| **Soren Idle Ticker** | macOS | A menu bar status that keeps the game ticking and notifies you when a task stops. |
 
-## How to play
+## Getting started
 
-- Open **Salvaging** from the main menu and pick *Scavenge Hull Scrap*. Levels unlock new tasks.
-- Eight skills run to level 99: Salvaging, Mining, Foraging, Cooking, Engineering, Combat,
-  Hydroponics and Xenochemistry. They use the same XP curve as Melvor Idle, so the last levels take
-  most of the time.
-- **Resource nodes:** gathering tasks (Salvaging, Mining, Foraging) work a node with health. Every
-  cycle is a hit, and when it runs out you wait for it to respawn before the task goes on.
-- **Mastery:** every repeatable task (not combat or one-off crafts) has its own mastery level, which
-  grows as you repeat it. Each level adds one node health, every ten levels make the task faster, and
-  milestones at 25, 50, 75 and 99 add bonus yield. Mastery 99 takes about as long as skill level 99.
-- **Engineering** builds your Base: a Workshop, drones, a Hydroponic Bay, and a Signal Beacon that
-  calls the Sorenians. Once they arrive you can trade with them and take Bounties.
-- **Combat** has areas, bosses and a damage triangle (kinetic beats bio, bio beats energy, energy
-  beats kinetic). Gear only counts while it is worn.
-- Progress is saved in Raycast's local storage. Use *Copy Save to Clipboard* to back it up.
+1. Open **Play Soren Idle** in Raycast.
+2. Pick **Salvaging**, then *Scavenge Hull Scrap*. Levels unlock new tasks.
+3. Use Engineering to build your Base, and the Signal Beacon to call the Sorenians.
+4. Optional: enable **Soren Idle Ticker** so the game keeps ticking in the menu bar.
 
-## Pacing
+### Tips
 
-Reaching level 99 in one skill takes roughly 120 hours of nonstop play with bare hands, less with
-tools and potions. Run `npm run balance` for the full table.
+- **Gathering** (Salvaging, Mining, Foraging) hits a node with health. When it runs out you wait for
+  it to respawn before the task goes on.
+- **Mastery** adds one node health per level, makes a task faster every ten levels, and gives bonus
+  yield at 25, 50, 75 and 99.
+- **Combat** damage triangle: kinetic beats bio, bio beats energy, energy beats kinetic.
+- Reaching level 99 in one skill takes roughly 120 hours of nonstop play with bare hands, less with
+  tools and potions.
+
+## Your save
+
+Progress is stored in Raycast's local storage, on your machine only. Nothing is sent anywhere. Use
+*Copy Save to Clipboard* to back it up.
 
 ## Development
+
+Requires Node.js and [Raycast](https://www.raycast.com).
 
 ```
 npm install
@@ -43,10 +58,22 @@ npm run balance    # time-to-level and time-to-unlock table
 npm run lint
 ```
 
-- `src/engine`: the game logic. It has no Raycast dependencies, so it is fully unit tested.
-  `src/engine/data` holds the game content (items, tasks, buildings, areas, bounties, trade).
-- `src/play.tsx`: the Play command, a main menu. `src/screens.tsx` holds the screens it pushes.
-- `src/hooks/use-game.ts`: loads the game and keeps it ticking. Every screen calls it itself.
-- `src/views`: the content of each screen (tasks, inventory, base, equipment, trade, ...).
-- `src/art`: the terminal-style scene art.
-- `scripts`: tooling such as the balance simulation.
+| Path | What it holds |
+| --- | --- |
+| `src/engine` | The game logic. No Raycast dependencies, so it is fully unit tested. |
+| `src/engine/data` | Game content: items, tasks, buildings, areas, bounties, trade. |
+| `src/play.tsx`, `src/screens.tsx` | The Play command: a main menu and the screens it pushes. |
+| `src/hooks/use-game.ts` | Loads the game and keeps it ticking. |
+| `src/views` | The content of each screen (tasks, inventory, base, equipment, trade, ...). |
+| `src/art` | The terminal-style scene art. |
+| `src/ticker.tsx` | The menu bar command. |
+| `scripts` | Tooling such as the balance simulation. |
+
+## Contributing
+
+Issues and pull requests are welcome. Please run `npm test` and `npm run lint` before opening a PR.
+Game content lives in `src/engine/data`, and `npm run balance` shows how a change affects pacing.
+
+## License
+
+[MIT](LICENSE)
