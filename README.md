@@ -8,7 +8,7 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
 ## Features
 
 - **Eight skills, level 1 to 99:** Salvaging, Mining, Foraging, Cooking, Engineering, Combat,
-  Hydroponics and Xenochemistry, on the same XP curve as Melvor Idle.
+  Hydroponics and Xenochemistry, on a RuneScape-style XP curve.
 - **Resource nodes and mastery:** gathering works a node that runs out and respawns, and every
   repeatable task builds its own mastery for more yield and speed.
 - **A base to build:** Workshop, drones, a Hydroponic Bay and a Signal Beacon that calls the locals.

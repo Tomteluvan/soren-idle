@@ -42,7 +42,7 @@ describe("levels", () => {
     expect(levelFromXp(1e12)).toBe(MAX_LEVEL);
   });
 
-  it("follow the Melvor curve: 99 is 13,034,431 XP and 92 is about half of it", () => {
+  it("follow the RuneScape XP curve: 99 is 13,034,431 XP and 92 is about half of it", () => {
     expect(MAX_LEVEL).toBe(99);
     expect(xpForLevel(99)).toBe(13_034_431);
     expect(xpForLevel(92)).toBe(6_517_253);
