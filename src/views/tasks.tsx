@@ -190,7 +190,7 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
     `- **Per hour:** ${formatRates(rates.itemsPerHour)} · ${Math.round(rates.xpPerHour).toLocaleString("en-US")} XP`,
   );
   if (task.monster) lines.push(`- **HP lost per hour:** ~${Math.round(rates.hpLossPerHour)}`);
-  if (task.inputs) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
+  if (Object.keys(rates.inputsPerHour).length) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
   if (rates.nextLevelMs !== null) lines.push(`- **Next level in:** ${formatDuration(rates.nextLevelMs)} nonstop`);
   if (task.node) {
     const max = nodeMaxHp(state, task);

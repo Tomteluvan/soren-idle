@@ -379,12 +379,16 @@ const scaleBundle = (bundle: Bundle = {}, k: number): Bundle =>
 /** What doing this task nonstop would give per hour, at your current gear. */
 export function taskRates(s: GameState, task: TaskDef): TaskRates {
   const perHour = 3_600_000 / averageCycleMs(s, task, taskDurationMs(s, task));
+  const ammo = modifiers(s).ammo;
   const level = levelOf(s, task.skill);
   const xpPerHour = task.xp * xpBonus(s) * perHour;
   return {
     xpPerHour,
     itemsPerHour: scaleBundle(task.monster ? task.monster.drops : task.outputs, perHour),
-    inputsPerHour: scaleBundle(task.inputs, perHour),
+    inputsPerHour: scaleBundle(
+      { ...task.inputs, ...(task.monster && ammo ? { [ammo]: (task.inputs?.[ammo] ?? 0) + 1 } : {}) },
+      perHour,
+    ),
     hpLossPerHour: task.monster ? fightDamage(s, task) * perHour : 0,
     nextLevelMs:
       level >= MAX_LEVEL ? null : Math.ceil(((xpForLevel(level + 1) - s.xp[task.skill]) / xpPerHour) * 3_600_000),
