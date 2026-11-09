@@ -58,6 +58,7 @@ describe("the Bounty Board", () => {
       {
         ...s,
         inventory: { alloy_plate: 99, glyph_tablet: 99, resonance_coil: 9 },
+        credits: 1e6,
       },
       "bounty_board",
     ).state;

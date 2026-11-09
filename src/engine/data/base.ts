@@ -6,6 +6,10 @@ import { OFFLINE_BONUS_HOURS } from "./game";
 /** How many of one item you can hold, by Storage Depot level (index 0 is no depot). */
 export const STORAGE_CAPS = [1000, 2000, 4000, 8000, 16000, 32000];
 
+/** Credits per level: free until level `from`, since the Trading Hub that earns them comes later, then growing. */
+const ramp = (levels: number, from: number, base: number, growth: number) =>
+  Array.from({ length: levels }, (_, i) => (i < from ? 0 : Math.ceil(base * growth ** (i - from))));
+
 export const BUILDINGS: BuildingDef[] = [
   {
     id: "shelter",
@@ -14,6 +18,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 5,
     baseCost: { scrap_metal: 20, alloy_plate: 2 },
     costGrowth: 2,
+    levelCredits: ramp(5, 2, 1500, 3.5),
   },
   {
     id: "generator",
@@ -22,6 +27,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 5,
     baseCost: { scrap_metal: 15, alloy_plate: 3, circuit_scrap: 4 },
     costGrowth: 1.8,
+    levelCredits: ramp(5, 2, 4000, 3.5),
     requires: { skill: "engineering", level: 13 },
     powerProvided: 3,
   },
@@ -32,6 +38,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 5,
     baseCost: { alloy_plate: 6, circuit_scrap: 5 },
     costGrowth: 1.8,
+    levelCredits: ramp(5, 2, 12_000, 3.5),
     requires: { skill: "engineering", level: 10 },
   },
   {
@@ -41,6 +48,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 10,
     baseCost: { alloy_plate: 3, circuit_scrap: 5 },
     costGrowth: 1.6,
+    levelCredits: ramp(10, 3, 6000, 1.9),
     requires: { skill: "engineering", level: 19 },
     powerUse: 1,
     produces: { item: "scrap_metal", everyMs: 20_000 },
@@ -52,6 +60,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 10,
     baseCost: { alloy_plate: 4, circuit_scrap: 6, ferrite_ore: 10 },
     costGrowth: 1.6,
+    levelCredits: ramp(10, 3, 6000, 1.9),
     requires: { skill: "engineering", level: 19 },
     powerUse: 1,
     produces: { item: "ferrite_ore", everyMs: 30_000 },
@@ -63,6 +72,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 10,
     baseCost: { alloy_plate: 3, circuit_scrap: 4, glowcap: 10 },
     costGrowth: 1.6,
+    levelCredits: ramp(10, 3, 6000, 1.9),
     requires: { skill: "engineering", level: 19 },
     powerUse: 1,
     produces: { item: "glowcap", everyMs: 20_000 },
@@ -98,6 +108,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 5,
     baseCost: {},
     costGrowth: 1,
+    levelCredits: [0, 0, 40_000, 150_000, 500_000],
     levelCosts: [
       { alloy_plate: 20, circuit_scrap: 15, scrap_metal: 50 },
       { alloy_plate: 30, circuit_scrap: 20, glyph_tablet: 4 },
@@ -117,6 +128,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 4,
     baseCost: { alloy_plate: 4, scrap_metal: 20, glowcap: 10 },
     costGrowth: 1.7,
+    levelCredits: ramp(4, 2, 20_000, 3),
     levelNotes: ["1 plot", "2 plots", "3 plots", "4 plots"],
     requires: { skill: "engineering", level: 16 },
     powerUse: 1,
@@ -135,7 +147,7 @@ export const BUILDINGS: BuildingDef[] = [
       { alloy_plate: 40, circuit_scrap: 20, resonance_coil: 1 },
       { alloy_plate: 60, resonance_coil: 3, void_lens: 1 },
     ],
-    levelCredits: [0, 0, 300, 900, 2500],
+    levelCredits: [0, 0, 15_000, 60_000, 250_000],
     levelNotes: STORAGE_CAPS.slice(1).map((n) => `Each item stack holds ${n.toLocaleString("en-US")}.`),
     requires: { skill: "engineering", level: 13 },
   },
@@ -153,7 +165,7 @@ export const BUILDINGS: BuildingDef[] = [
       { alloy_plate: 40, resonance_coil: 3, void_lens: 1 },
       { resonance_coil: 6, void_lens: 3, aether_cell: 1 },
     ],
-    levelCredits: [0, 0, 400, 1200, 3000],
+    levelCredits: [0, 0, 20_000, 80_000, 300_000],
     levelNotes: [1, 2, 3, 4, 5].map((l) => `Away progress counts for up to ${12 + l * OFFLINE_BONUS_HOURS} hours.`),
     requires: { skill: "engineering", level: 28 },
   },
@@ -164,6 +176,7 @@ export const BUILDINGS: BuildingDef[] = [
     maxLevel: 3,
     baseCost: {},
     costGrowth: 1,
+    levelCredits: [0, 25_000, 120_000],
     levelCosts: [
       { alloy_plate: 12, circuit_scrap: 10, scrap_metal: 30 },
       { alloy_plate: 24, glyph_tablet: 5, resonance_coil: 1 },

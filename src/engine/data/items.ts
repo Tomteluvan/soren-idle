@@ -60,19 +60,19 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "servo_unit",
     name: "Servo Unit",
     description: "A small motor with a lot of opinions about torque.",
-    value: 150,
+    value: 253,
   },
   power_core: {
     id: "power_core",
     name: "Power Core",
     description: "A fist of stored lightning in a heavy shell.",
-    value: 360,
+    value: 868,
   },
   fusion_cell: {
     id: "fusion_cell",
     name: "Fusion Cell",
     description: "A star in a jar. Handle like one.",
-    value: 900,
+    value: 2263,
   },
   cutting_torch: {
     id: "cutting_torch",
@@ -498,21 +498,21 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "fish_ration",
     name: "Fish Ration",
     description: "Pan-fried minnow. Crunchy.",
-    value: 12,
+    value: 17,
     heal: 22,
   },
   eel_skewer: {
     id: "eel_skewer",
     name: "Eel Skewer",
     description: "Spark eel on a stick, glowcap on the side.",
-    value: 42,
+    value: 54,
     heal: 50,
   },
   ray_stew: {
     id: "ray_stew",
     name: "Ray Stew",
     description: "Glow ray simmered in Star Honey. The warmth lasts for hours.",
-    value: 110,
+    value: 145,
     heal: 90,
   },
   ferrite_ingot: {
@@ -671,13 +671,13 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "nebula_gas",
     name: "Nebula Gas",
     description: "Bottled colour from the far side of the sky.",
-    value: 60,
+    value: 102,
   },
   pulsar_dust: {
     id: "pulsar_dust",
     name: "Pulsar Dust",
     description: "It ticks, very quickly, in the jar.",
-    value: 200,
+    value: 590,
   },
   the_hunter: {
     id: "the_hunter",
@@ -859,7 +859,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "berry_compote",
     name: "Berry Compote",
     description: "Sweet, thick and warm.",
-    value: 17,
+    value: 32,
     heal: 32,
   },
   thorn_stew: {
@@ -880,7 +880,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "mist_broth",
     name: "Mist Broth",
     description: "It is light, it is clear, and you will feel better in a minute.",
-    value: 581,
+    value: 646,
     heal: 130,
   },
   sunfruit_tart: {
@@ -894,7 +894,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "leviathan_steak",
     name: "Leviathan Steak",
     description: "More meal than you can eat. You will try.",
-    value: 1118,
+    value: 1706,
     heal: 200,
   },
   elder_feast: {
@@ -914,13 +914,13 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "quantum_processor",
     name: "Quantum Processor",
     description: "It is thinking about something. It will not say what.",
-    value: 1989,
+    value: 2809,
   },
   singularity_core: {
     id: "singularity_core",
     name: "Singularity Core",
     description: "Do not drop it.",
-    value: 7612,
+    value: 8967,
   },
   reef_crab: {
     id: "reef_crab",
@@ -962,13 +962,13 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "cobalt_bar",
     name: "Cobalt Bar",
     description: "A deep blue bar, cold in the hand and heavy.",
-    value: 26,
+    value: 55,
   },
   argent_bar: {
     id: "argent_bar",
     name: "Argent Bar",
     description: "It reflects you very well, and a bit too kindly.",
-    value: 250,
+    value: 334,
   },
   voidsteel: {
     id: "voidsteel",
@@ -1195,13 +1195,13 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "gyro_stabiliser",
     name: "Gyro Stabiliser",
     description: "Three rings that spin until the world agrees with them.",
-    value: 572,
+    value: 812,
   },
   plasma_conduit: {
     id: "plasma_conduit",
     name: "Plasma Conduit",
     description: "Rated for a temperature you should not ask about.",
-    value: 2418,
+    value: 4050,
   },
   rivet_pack: {
     id: "rivet_pack",
@@ -1219,7 +1219,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "spring_coil",
     name: "Spring Coil",
     description: "It pushes back. You respect that.",
-    value: 91,
+    value: 147,
   },
   armor_lattice: {
     id: "armor_lattice",
@@ -1267,7 +1267,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "cable_spool",
     name: "Cable Spool",
     description: "Wire enough to wire a whole base, if you are patient.",
-    value: 20,
+    value: 24,
   },
 };
 

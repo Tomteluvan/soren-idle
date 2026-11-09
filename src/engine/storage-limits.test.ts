@@ -76,9 +76,9 @@ describe("storage limits", () => {
       inventory: { alloy_plate: 99, circuit_scrap: 99 },
       xp: { ...newGame(0).xp, engineering: xpForLevel(28) },
     });
-    expect(buildingCredits(s, "storage")).toBe(300);
+    expect(buildingCredits(s, "storage")).toBe(15_000);
     expect(build(s, "storage").error).toMatch(/Credits/);
-    const paid = build({ ...s, credits: 350 }, "storage");
+    const paid = build({ ...s, credits: 15_050 }, "storage");
     expect(paid.error).toBeUndefined();
     expect(paid.state.credits).toBe(50);
     expect(paid.state.buildings.storage).toBe(3);

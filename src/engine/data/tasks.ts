@@ -34,7 +34,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 6000,
     node: { hp: 15, respawnMs: 15000 },
     xp: 213,
-    outputs: { scrap_metal: 3, circuit_scrap: 1 },
+    outputs: { scrap_metal: 10, circuit_scrap: 6 },
     rareDrops: [{ item: "flight_recorder", chance: 0.003 }],
   },
   // Mining

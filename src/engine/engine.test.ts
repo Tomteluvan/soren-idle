@@ -216,7 +216,7 @@ describe("base", () => {
   it("enforces max level, requirements and materials", () => {
     expect(build(newGame(0), "generator").error).toMatch(/Requires/);
     expect(build(engineer({}), "shelter").error).toMatch(/Missing/);
-    let s = engineer({ scrap_metal: 1e6, alloy_plate: 1e6 });
+    let s = { ...engineer({ scrap_metal: 1e6, alloy_plate: 1e6 }), credits: 1e7 };
     for (let i = 0; i < 5; i++) s = build(s, "shelter").state;
     expect(build(s, "shelter").error).toMatch(/max level/);
   });
