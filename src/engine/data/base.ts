@@ -187,6 +187,20 @@ export const BUILDINGS: BuildingDef[] = [
     costGrowth: 1,
     requires: { skill: "engineering", level: 34 },
   },
+  {
+    id: "rescue_ship",
+    name: "Rescue Ship",
+    description: "Everything you have learned, bolted into a hull that can leave Soren. Launching starts a new run.",
+    maxLevel: 1,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [{ singularity_core: 1, quantum_processor: 1, fusion_cell: 2, xeno_alloy: 5 }],
+    levelCredits: [250_000],
+    levelNotes: ["Ready to launch. Each launch earns Starlight for permanent perks."],
+    requires: { skill: "engineering", level: 95 },
+    requiresContact: true,
+    requiresBuilding: { id: "beacon", level: 1 },
+  },
 ];
 
 export const BUILDING_BY_ID: Record<BuildingId, BuildingDef> = Object.fromEntries(

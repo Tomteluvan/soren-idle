@@ -30,6 +30,7 @@ export function migrateSave(saved: Partial<GameState>): GameState {
     ...saved,
     xp: { ...base.xp, ...saved.xp },
     masteryPool: { ...saved.masteryPool },
+    perks: { ...saved.perks },
     stats: { ...base.stats, ...saved.stats, produced: { ...saved.stats?.produced } },
     settings: { ...base.settings, ...saved.settings },
     equipped: { ...saved.equipped },
@@ -46,7 +47,7 @@ const isPlain = (v: unknown): v is Record<string, unknown> => typeof v === "obje
 const isNumber = (v: unknown) => typeof v === "number" && Number.isFinite(v);
 
 /** Records whose every value must be a number. */
-const NUMBER_RECORDS = ["xp", "inventory", "buildings", "passive", "keep", "mastery", "masteryPool"] as const;
+const NUMBER_RECORDS = ["xp", "inventory", "buildings", "passive", "keep", "mastery", "masteryPool", "perks"] as const;
 
 /** The first part of a save that has the wrong shape, if any. Compared against a fresh game. */
 function shapeProblem(state: GameState): string | undefined {

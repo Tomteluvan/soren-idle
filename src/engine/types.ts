@@ -330,7 +330,8 @@ export type BuildingId =
   | "hydroponic_bay"
   | "bounty_board"
   | "storage"
-  | "stasis_pod";
+  | "stasis_pod"
+  | "rescue_ship";
 
 export interface BuildingDef {
   id: BuildingId;
@@ -450,6 +451,10 @@ export interface GameState {
   mastery: Record<string, number>;
   /** Mastery XP banked per skill: a quarter of what its tasks earn. Gives skill-wide bonuses and can be spent. */
   masteryPool: Partial<Record<SkillId, number>>;
+  /** Starlight to spend on perks. It, the perks and the launch count survive a launch. */
+  starlight: number;
+  perks: Record<string, number>;
+  launches: number;
   /** Resource nodes that have been hit: health left, and when a spent one comes back. */
   nodes: Record<string, { hp: number; respawnAt?: number }>;
   /** One entry per hydroponic plot; null is an empty plot. */

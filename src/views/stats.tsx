@@ -12,6 +12,7 @@ export function Stats({ state }: { state: GameState }) {
   const rows: [string, string][] = [
     ["Stranded since", formatDate(state.createdAt)],
     ["Time stranded", formatDuration(state.lastTick - state.createdAt)],
+    ["Launches", state.launches.toLocaleString("en-US")],
     ["Tasks completed", state.stats.cycles.toLocaleString("en-US")],
     ["Creatures defeated", state.stats.kills.toLocaleString("en-US")],
     ["Retreats", state.stats.retreats.toLocaleString("en-US")],

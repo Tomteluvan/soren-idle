@@ -7,10 +7,14 @@ import {
   MAX_LEVEL,
   MAX_OFFLINE_MS,
   OFFLINE_BONUS_HOURS,
+  riftScale,
+  RIFT_YIELD,
+  speedBonus,
   STORAGE_CAPS,
   SAVE_VERSION,
   SKILLS,
   TASK_BY_ID,
+  xpBonus,
 } from "./data";
 import { bossLockReason, matchup } from "./areas";
 import { onKill, refillBoard, refreshBoardIfDue } from "./bounty";
@@ -72,6 +76,9 @@ export function newGame(now = Date.now()): GameState {
     settings: { eatBelow: 0, foodPriority: "weakest" },
     mastery: {},
     masteryPool: {},
+    starlight: 0,
+    perks: {},
+    launches: 0,
     nodes: {},
     plots: [],
     hints: [],
@@ -304,7 +311,7 @@ export const EXPLORATION_SPEED_PER_LEVEL = 0.004;
 const GATHERING: SkillId[] = ["salvaging", "mining", "foraging", "xenofishing"];
 
 export function taskDurationMs(s: GameState, task: TaskDef, at = s.lastTick): number {
-  let mult = modifiers(s, at).speed(task.skill);
+  let mult = modifiers(s, at).speed(task.skill) * speedBonus(s);
   if (task.skill === "engineering") mult *= 1 - 0.08 * buildingLevel(s, "workshop");
   if (GATHERING.includes(task.skill)) mult *= 1 - EXPLORATION_SPEED_PER_LEVEL * (levelOf(s, "exploration") - 1);
   if (hasMastery(task)) mult *= masterySpeed(masteryLevel(s, task)) * (1 - poolBonus(s, task.skill).speed);
@@ -328,14 +335,14 @@ export function hitDamage(s: GameState, task: TaskDef, at = s.lastTick): number 
   const m = task.monster;
   if (!m) return 0;
   const mods = modifiers(s, at);
-  return Math.max(1, Math.round(m.damage * matchup(m.type, mods.armorType)) - mods.armor);
+  return Math.max(1, Math.round(m.damage * riftScale(s) * matchup(m.type, mods.armorType)) - mods.armor);
 }
 
 /** Expected damage taken in a fight against this task's monster. */
 export function fightDamage(s: GameState, task: TaskDef, at = s.lastTick): number {
   const m = task.monster;
   if (!m) return 0;
-  const rounds = Math.ceil(m.hp / damageAgainst(s, task, at));
+  const rounds = Math.ceil((m.hp * riftScale(s)) / damageAgainst(s, task, at));
   return Math.ceil(rounds * hitDamage(s, task, at) * 0.4);
 }
 
@@ -369,7 +376,7 @@ const scaleBundle = (bundle: Bundle = {}, k: number): Bundle =>
 export function taskRates(s: GameState, task: TaskDef): TaskRates {
   const perHour = 3_600_000 / averageCycleMs(s, task, taskDurationMs(s, task));
   const level = levelOf(s, task.skill);
-  const xpPerHour = task.xp * perHour;
+  const xpPerHour = task.xp * xpBonus(s) * perHour;
   return {
     xpPerHour,
     itemsPerHour: scaleBundle(task.monster ? task.monster.drops : task.outputs, perHour),
@@ -440,6 +447,7 @@ export function drink(s: GameState, id: ItemId): { state: GameState; error?: str
 
 export function gainXp(s: GameState, skill: SkillId, amount: number, report: Report) {
   const before = levelFromXp(s.xp[skill]);
+  amount *= xpBonus(s);
   s.xp[skill] += amount;
   report.xp[skill] = (report.xp[skill] ?? 0) + amount;
   const after = levelFromXp(s.xp[skill]);
@@ -495,7 +503,10 @@ function runCycle(s: GameState, task: TaskDef, report: Report, at: number): stri
 function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): string | undefined {
   const yieldMult = task.once
     ? 1
-    : modifiers(s, at).yield + masteryYield(masteryLevel(s, task)) + poolBonus(s, task.skill).yield;
+    : modifiers(s, at).yield +
+      masteryYield(masteryLevel(s, task)) +
+      poolBonus(s, task.skill).yield +
+      RIFT_YIELD * s.launches;
   if (task.monster) {
     const damage = fightDamage(s, task, at);
     const wantsFood = () => s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);

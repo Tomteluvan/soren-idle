@@ -1,10 +1,12 @@
-import { Alert, confirmAlert, List } from "@raycast/api";
+import { Alert, Clipboard, confirmAlert, List, showToast, Toast } from "@raycast/api";
 import { ComponentProps } from "react";
 import { ReadyGame, useGame } from "./hooks/use-game";
 import { abandonBounty, acceptBounty, rerollBoard } from "./engine/bounty";
 import { CROP_BY_ID, ITEMS, SKILL_BY_ID } from "./engine/data";
 import { drink, eat, equip, startTask, stopTask, unequip, build } from "./engine/engine";
 import { spendPool } from "./engine/mastery";
+import { exportSave } from "./engine/migrate";
+import { buyPerk, launch } from "./engine/prestige";
 import { formatBundle, formatCredits, formatMarks } from "./engine/format";
 import { harvest, harvestAll, plant } from "./engine/hydroponics";
 import { buyFromShop } from "./engine/shop";
@@ -21,6 +23,7 @@ import { Stats } from "./views/stats";
 import { Survivor } from "./views/survivor";
 import { Tasks } from "./views/tasks";
 import { Trade } from "./views/trade";
+import { Voyage } from "./views/voyage";
 
 type Children = ComponentProps<typeof List>["children"];
 
@@ -107,7 +110,32 @@ async function sellEverythingConfirmed(g: ReadyGame) {
   );
 }
 
+async function launchShip(g: ReadyGame) {
+  const ok = await confirmAlert({
+    title: "Launch the Rescue Ship?",
+    message:
+      "This resets your skills, items and Base. Starlight, perks and lifetime stats stay. A copy of your save goes to the clipboard.",
+    primaryAction: { title: "Launch", style: Alert.ActionStyle.Destructive },
+  });
+  if (!ok) return;
+  await Clipboard.copy(exportSave(g.state));
+  await g.act(launch, (r) => `Launched: +${r.gain} Starlight`);
+  await showToast({ style: Toast.Style.Success, title: "A save copy is on your clipboard" });
+}
+
 const placeView: Record<Place, (g: ReadyGame) => Children> = {
+  voyage: (g) => (
+    <Voyage
+      state={g.state}
+      onLaunch={() => launchShip(g)}
+      onBuy={(id) =>
+        g.act(
+          (s) => buyPerk(s, id),
+          () => "Perk bought",
+        )
+      }
+    />
+  ),
   base: baseView,
   inventory: inventoryView,
   stats: (g) => <Stats state={g.state} />,

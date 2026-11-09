@@ -14,6 +14,8 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
   repeatable task builds its own mastery for more yield and speed.
 - **A base to build:** Workshop, drones, a Hydroponic Bay and a Signal Beacon that calls the locals.
 - **Trade and Bounties:** the Sorenians buy what you produce and sell what you can't make yourself.
+- **Rescue and Starlight:** build the Rescue Ship, launch off Soren and start over with Starlight
+  for permanent perks. Each run is harder and pays better.
 - **Combat:** areas, bosses, a damage triangle and gear that only counts while worn.
 - **Menu bar ticker (macOS):** keeps the game running in the background and notifies you when a task
   stops.

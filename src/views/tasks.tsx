@@ -31,6 +31,7 @@ import {
   poolXp,
   spendCost,
 } from "../engine/mastery";
+import { riftScale } from "../engine/data";
 import { areaKills, areaOf, bossLockReason, counterTo, huntsOf, matchup } from "../engine/areas";
 import { GameState, DamageType, ItemId, SkillId, TaskDef } from "../engine/types";
 import { SKILL_ICON, RUN_CHOICES } from "./constants";
@@ -214,11 +215,12 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
     const area = areaOf(task.id);
     const mods = modifiers(state);
     const dealt = damageAgainst(state, task);
-    const rounds = Math.ceil(m.hp / dealt);
+    const hp = Math.round(m.hp * riftScale(state));
+    const rounds = Math.ceil(hp / dealt);
     const bossLock = bossLockReason(state, task);
     lines.push(
       `- **Kill time:** ${formatDuration(taskDurationMs(state, task))} (${rounds} round${rounds === 1 ? "" : "s"}), then the next one steps up`,
-      `- **Enemy:** ${m.name}, ${m.type} (${m.hp} HP, ${m.damage} dmg per hit)`,
+      `- **Enemy:** ${m.name}, ${m.type} (${hp} HP, ${Math.round(m.damage * riftScale(state))} dmg per hit)`,
       `- **Your damage:** ${dealt} per round${matchupNote(mods.weaponType, m.type, "deal")}`,
       `- **Armor:** ${playerArmor(state)}, hit for ${hitDamage(state, task)}${matchupNote(m.type, mods.armorType, "take")}`,
       `- **Best against it:** ${counterTo(m.type)} weapon and armor`,
