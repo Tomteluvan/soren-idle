@@ -1,7 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { areaKills, areaOf, bossLockReason, counterTo, matchup } from "./areas";
 import { AREAS, ITEMS, TASK_BY_ID, TASKS } from "./data";
-import { advance, damageAgainst, enemyHitChance, equip, fightDamage, hitDamage, maxHp, newGame, playerHitChance, startTask, xpForLevel } from "./engine";
+import {
+  advance,
+  damageAgainst,
+  enemyHitChance,
+  equip,
+  fightDamage,
+  hitDamage,
+  maxHp,
+  newGame,
+  playerHitChance,
+  startTask,
+  xpForLevel,
+} from "./engine";
 import { GameState, ItemId } from "./types";
 
 const MINUTE = 60_000;

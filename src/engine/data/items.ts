@@ -516,7 +516,8 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   rail_carbine: {
     id: "rail_carbine",
     name: "Rail Carbine",
-    description: "+12 damage per combat round, but it burns a Rail Slug every fight and does nothing without one. Kinetic.",
+    description:
+      "+12 damage per combat round, but it burns a Rail Slug every fight and does nothing without one. Kinetic.",
     value: 1800,
     weaponDamage: 12,
     ammo: "rail_slug",
