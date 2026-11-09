@@ -19,6 +19,12 @@ export const SKILL_ICON: Record<SkillId, Icon> = {
   combat: Icon.Shield,
   hydroponics: Icon.Raindrop,
   xenochemistry: Icon.Pill,
+  xenofishing: Icon.Waveform,
+  smelting: Icon.Bolt,
+  hacking: Icon.Terminal,
+  exploration: Icon.Map,
+  companions: Icon.Heart,
+  stargazing: Icon.Stars,
 };
 
 export type Place = "base" | "equipment" | "trade" | "bounties" | "shop" | "inventory" | "stats";

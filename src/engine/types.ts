@@ -1,5 +1,18 @@
 export type SkillId =
-  "salvaging" | "mining" | "foraging" | "cooking" | "engineering" | "combat" | "hydroponics" | "xenochemistry";
+  | "salvaging"
+  | "mining"
+  | "foraging"
+  | "cooking"
+  | "engineering"
+  | "combat"
+  | "hydroponics"
+  | "xenochemistry"
+  | "xenofishing"
+  | "smelting"
+  | "hacking"
+  | "exploration"
+  | "companions"
+  | "stargazing";
 
 export type ItemId =
   | "scrap_metal"
@@ -61,14 +74,50 @@ export type ItemId =
   | "sovereign_mail"
   | "matriarch_chitin"
   | "broodking_fang"
-  | "sovereign_shard";
+  | "sovereign_shard"
+  | "lake_minnow"
+  | "spark_eel"
+  | "glow_ray"
+  | "mire_lurker"
+  | "tide_leviathan"
+  | "fish_ration"
+  | "eel_skewer"
+  | "ray_stew"
+  | "ferrite_ingot"
+  | "carbon_steel"
+  | "lumina_glass"
+  | "chitin_alloy"
+  | "xeno_alloy"
+  | "relic_fragment"
+  | "vault_cipher"
+  | "data_crystal"
+  | "warden_chip"
+  | "heart_key"
+  | "field_notes"
+  | "canyon_survey"
+  | "cave_atlas"
+  | "lake_charts"
+  | "deep_atlas"
+  | "scrap_hound"
+  | "spark_wisp"
+  | "lantern_moth"
+  | "ward_drone"
+  | "star_familiar"
+  | "star_dust"
+  | "comet_ice"
+  | "nebula_gas"
+  | "pulsar_dust"
+  | "the_hunter"
+  | "the_loom"
+  | "the_crown"
+  | "the_ferryman";
 
 export type Bundle = Partial<Record<ItemId, number>>;
 
 /** Kinetic beats bio, bio beats energy, energy beats kinetic. */
 export type DamageType = "kinetic" | "energy" | "bio";
 
-export type EquipSlot = "weapon" | "body" | "head" | "salvager" | "miner" | "forager" | "charm";
+export type EquipSlot = "weapon" | "body" | "head" | "salvager" | "miner" | "forager" | "charm" | "companion";
 
 export interface ItemDef {
   id: ItemId;
@@ -94,6 +143,8 @@ export interface ItemDef {
   armor?: number;
   /** Equipped, this multiplies the chance of rare drops by this much. */
   rareBonus?: number;
+  /** Owned, this changes you for good: it needs no slot and is never used up. */
+  constellation?: { damage?: number; armor?: number; speed?: number; rare?: number; yield?: number };
   /** Drinking this gives a timed buff. */
   potion?: Potion;
   /** The locals do not buy this: it cannot be sold. */

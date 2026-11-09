@@ -272,24 +272,38 @@ export const activeBuff = (s: GameState, kind: BuffKind, at = s.lastTick) => {
  */
 export function modifiers(s: GameState, at = s.lastTick) {
   const owned = equippedItems(s);
+  const sky = (Object.values(ITEMS) as ItemDef[]).filter((i) => i.constellation && count(s, i.id) > 0);
   const toolSpeed = (skill: SkillId) =>
     Math.min(1, ...owned.filter((i) => i.tool?.skill === skill).map((i) => i.tool?.speed ?? 1));
   return {
-    speed: (skill: SkillId) => (activeBuff(s, "speed", at)?.power ?? 1) * toolSpeed(skill),
-    damage: owned.reduce((sum, i) => sum + (i.weaponDamage ?? 0), 0) + (activeBuff(s, "damage", at)?.power ?? 0),
-    armor: owned.reduce((sum, i) => sum + (i.armor ?? 0), 0),
+    speed: (skill: SkillId) =>
+      (activeBuff(s, "speed", at)?.power ?? 1) *
+      toolSpeed(skill) *
+      sky.reduce((m, i) => m * (i.constellation?.speed ?? 1), 1),
+    damage:
+      owned.reduce((sum, i) => sum + (i.weaponDamage ?? 0), 0) +
+      sky.reduce((sum, i) => sum + (i.constellation?.damage ?? 0), 0) +
+      (activeBuff(s, "damage", at)?.power ?? 0),
+    armor:
+      owned.reduce((sum, i) => sum + (i.armor ?? 0), 0) +
+      sky.reduce((sum, i) => sum + (i.constellation?.armor ?? 0), 0),
     weaponType: s.equipped.weapon && count(s, s.equipped.weapon) > 0 ? ITEMS[s.equipped.weapon].damageType : undefined,
     armorType: s.equipped.body && count(s, s.equipped.body) > 0 ? ITEMS[s.equipped.body].damageType : undefined,
-    yield: activeBuff(s, "yield", at)?.power ?? 1,
-    rare: owned.reduce((m, i) => m * (i.rareBonus ?? 1), 1),
+    yield: (activeBuff(s, "yield", at)?.power ?? 1) * sky.reduce((m, i) => m * (i.constellation?.yield ?? 1), 1),
+    rare: owned.reduce((m, i) => m * (i.rareBonus ?? 1), 1) * sky.reduce((m, i) => m * (i.constellation?.rare ?? 1), 1),
   };
 }
 
 export const rareChanceMult = (s: GameState) => modifiers(s).rare;
 
+/** Share of time each Exploration level takes off the skills that go out and gather. */
+export const EXPLORATION_SPEED_PER_LEVEL = 0.004;
+const GATHERING: SkillId[] = ["salvaging", "mining", "foraging", "xenofishing"];
+
 export function taskDurationMs(s: GameState, task: TaskDef, at = s.lastTick): number {
   let mult = modifiers(s, at).speed(task.skill);
   if (task.skill === "engineering") mult *= 1 - 0.08 * buildingLevel(s, "workshop");
+  if (GATHERING.includes(task.skill)) mult *= 1 - EXPLORATION_SPEED_PER_LEVEL * (levelOf(s, "exploration") - 1);
   if (hasMastery(task)) mult *= masterySpeed(masteryLevel(s, task));
   return Math.max(1000, Math.round(task.durationMs * mult));
 }

@@ -29,7 +29,7 @@ describe("resource nodes", () => {
     const nodes = TASKS.filter((t) => t.node);
     expect(nodes.length).toBeGreaterThanOrEqual(7);
     for (const task of nodes) {
-      expect(["salvaging", "mining", "foraging"], task.id).toContain(task.skill);
+      expect(["salvaging", "mining", "foraging", "xenofishing", "hacking"], task.id).toContain(task.skill);
       expect(task.node!.hp, task.id).toBeGreaterThan(1);
       expect(task.node!.respawnMs, task.id).toBeGreaterThan(0);
     }

@@ -37,6 +37,36 @@ export const SKILLS: SkillDef[] = [
     name: "Xenochemistry",
     blurb: "Brew local compounds into potions that speed you up, fatten your hauls or sharpen your blows.",
   },
+  {
+    id: "xenofishing",
+    name: "Xenofishing",
+    blurb: "Cast a line into the alien lakes. Cook what bites, if it will hold still.",
+  },
+  {
+    id: "smelting",
+    name: "Smelting",
+    blurb: "Melt ore, crystal and shell into ingots that sell far better than the raw stuff.",
+  },
+  {
+    id: "hacking",
+    name: "Hacking",
+    blurb: "Talk the ancient vaults into opening up. Their loot is old and very valuable.",
+  },
+  {
+    id: "exploration",
+    name: "Exploration",
+    blurb: "Chart the wilds. Every level makes Salvaging, Mining, Foraging and Xenofishing 0.4% faster.",
+  },
+  {
+    id: "companions",
+    name: "Companions",
+    blurb: "Build small machine friends that ride along and lend a hand, in a fight or on a haul.",
+  },
+  {
+    id: "stargazing",
+    name: "Stargazing",
+    blurb: "Watch the alien sky. Chart a constellation and it changes you for good.",
+  },
 ];
 
 export const SKILL_BY_ID: Record<SkillId, SkillDef> = Object.fromEntries(SKILLS.map((s) => [s.id, s])) as Record<

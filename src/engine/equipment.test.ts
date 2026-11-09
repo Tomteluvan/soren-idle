@@ -48,7 +48,9 @@ describe("gear data", () => {
   it("puts every tool in the slot for its skill", () => {
     const toolSlot = { salvaging: "salvager", mining: "miner", foraging: "forager" };
     for (const item of gear.filter((i) => i.tool))
-      expect(item.slot, item.id).toBe(toolSlot[item.tool!.skill as keyof typeof toolSlot]);
+      expect(item.slot, item.id).toBe(
+        item.slot === "companion" ? "companion" : toolSlot[item.tool!.skill as keyof typeof toolSlot],
+      );
   });
 
   it("has gear for every slot, and more than one tier in most", () => {
