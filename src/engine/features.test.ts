@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CROP_BY_ID, MAX_LEVEL, TASK_BY_ID } from "./data";
+import { CROP_BY_ID, CROPS, MAX_LEVEL, SKILLS, TASK_BY_ID, TASKS } from "./data";
 import {
   advance,
   build,
@@ -228,5 +228,19 @@ describe("hydroponics", () => {
     const { state, items } = harvestAll(later);
     expect(items?.glowcap).toBe(16);
     expect(ripeCount(state)).toBe(0);
+  });
+});
+
+describe("content pacing", () => {
+  it("opens something new at least every 12 levels in every skill, up to the 90s", () => {
+    for (const skill of SKILLS) {
+      const levels = [
+        ...TASKS.filter((t) => t.skill === skill.id).map((t) => t.levelReq),
+        ...(skill.id === "hydroponics" ? CROPS.map((c) => c.levelReq) : []),
+      ].sort((a, b) => a - b);
+      for (let i = 1; i < levels.length; i++)
+        expect(levels[i] - levels[i - 1], `${skill.id} at ${levels[i]}`).toBeLessThanOrEqual(12);
+      expect(levels.at(-1), skill.id).toBeGreaterThanOrEqual(88);
+    }
   });
 });

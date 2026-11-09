@@ -131,7 +131,9 @@ export function Tasks(props: {
 
   return (
     <List.Section title={SKILL_BY_ID[skill].name} subtitle={`Level ${level}`}>
-      {TASKS.filter((t) => t.skill === skill).map(item)}
+      {TASKS.filter((t) => t.skill === skill)
+        .sort((a, b) => a.levelReq - b.levelReq)
+        .map(item)}
     </List.Section>
   );
 }
