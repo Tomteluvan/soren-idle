@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { areaKills, areaOf, bossLockReason, counterTo, matchup } from "./areas";
 import { AREAS, ITEMS, TASK_BY_ID, TASKS } from "./data";
-import { advance, damageAgainst, equip, fightDamage, hitDamage, newGame, startTask, xpForLevel } from "./engine";
+import { advance, damageAgainst, equip, fightDamage, hitDamage, maxHp, newGame, startTask, xpForLevel } from "./engine";
 import { GameState, ItemId } from "./types";
 
 const MINUTE = 60_000;
@@ -111,7 +111,7 @@ describe("bosses", () => {
 
 describe("fight costs", () => {
   it("use up the hunt's materials every fight, and stop the hunt when they run out", () => {
-    const base = withItems({ sweetroot: 7 }, strong(60));
+    const base = withItems({ sweetroot: 7, ration: 50 }, strong(60));
     const { state } = advance(startTask(base, "fight_hulk").state, 10 * MINUTE);
     expect(state.stats.hunts.fight_hulk).toBe(2);
     expect(state.inventory.sweetroot).toBe(1);
@@ -125,6 +125,25 @@ describe("fight costs", () => {
     const { state } = advance(startTask(base, "fight_hulk").state, 10 * MINUTE);
     expect(state.inventory.rail_slug).toBe(0);
     expect(damageAgainst(state, task)).toBe(unarmed);
+  });
+});
+
+describe("defeat", () => {
+  it("can happen to a wounded survivor, and costs a share of the creature's drops", () => {
+    const task = TASK_BY_ID.fight_hulk;
+    const outcomes = Array.from({ length: 40 }, (_, rng) => {
+      const probe = withItems({ chitin_shard: 100, sweetroot: 3 }, { ...strong(46), rng });
+      const base = { ...probe, hp: Math.min(fightDamage(probe, task) + 1, maxHp(probe)) };
+      return advance(startTask(base, "fight_hulk", 1).state, MINUTE);
+    });
+    const defeats = outcomes.filter((o) => o.report.stoppedReason?.startsWith("Defeated by Mire Hulk"));
+    expect(defeats.length).toBeGreaterThan(0);
+    expect(defeats.length).toBeLessThan(outcomes.length);
+    for (const { state } of defeats) {
+      expect(state.hp).toBe(1);
+      expect(state.inventory.chitin_shard).toBe(90);
+      expect(state.activeTask).toBeNull();
+    }
   });
 });
 
