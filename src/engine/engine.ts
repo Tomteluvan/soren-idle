@@ -346,13 +346,32 @@ export function hitDamage(s: GameState, task: TaskDef, at = s.lastTick): number 
 export function fightDamage(s: GameState, task: TaskDef, at = s.lastTick): number {
   const m = task.monster;
   if (!m) return 0;
-  const rounds = Math.ceil((m.hp * riftScale(s)) / damageAgainst(s, task, at));
-  return Math.ceil(rounds * hitDamage(s, task, at) * 0.4);
+  const rounds = Math.ceil((m.hp * riftScale(s)) / damageAgainst(s, task, at)) / playerHitChance(s, at);
+  return Math.ceil(rounds * enemyHitChance(s, task, at) * hitDamage(s, task, at));
 }
 
-/** Chance each side's swing lands. The enemy's is set so the average fight still costs what `fightDamage` says. */
-const PLAYER_HIT = 0.9;
-const ENEMY_HIT = 0.36;
+/** Your swing lands 85% of the time with no weapon bonus, and a better weapon pushes that towards the cap. */
+const PLAYER_HIT_BASE = 0.85;
+const PLAYER_HIT_PER_DAMAGE = 0.008;
+const PLAYER_HIT_MAX = 0.95;
+/** A creature hits 35% of the time against no armor. Armor equal to half its damage cuts that to under a fifth. */
+const ENEMY_HIT_BASE = 0.35;
+const ARMOR_WEIGHT = 2;
+/** Even the weakest creature gets a swing in now and then. */
+const ENEMY_HIT_MIN = 0.05;
+
+/** Chance each of your swings lands, from your weapon, companion and buffs. */
+export const playerHitChance = (s: GameState, at = s.lastTick) =>
+  Math.min(PLAYER_HIT_MAX, PLAYER_HIT_BASE + PLAYER_HIT_PER_DAMAGE * modifiers(s, at).damage);
+
+/** Chance each of this creature's swings lands: armor weighs against how hard it hits, and never reaches zero. */
+export function enemyHitChance(s: GameState, task: TaskDef, at = s.lastTick): number {
+  const m = task.monster;
+  if (!m) return 0;
+  const power = m.damage * riftScale(s);
+  return Math.max(ENEMY_HIT_MIN, (ENEMY_HIT_BASE * power) / (power + ARMOR_WEIGHT * playerArmor(s, at)));
+}
+
 /** A hit lands for between 75% and 125% of its usual damage. */
 const spread = (s: GameState) => 0.75 + 0.5 * nextRandom(s);
 /** Share of the creature's drops you are carrying that you lose when it beats you. */
@@ -365,10 +384,12 @@ const DEFEAT_LOSS = 0.1;
 function rollFight(s: GameState, task: TaskDef, at: number): boolean {
   const dealt = damageAgainst(s, task, at);
   const hit = hitDamage(s, task, at);
+  const mine = playerHitChance(s, at);
+  const theirs = enemyHitChance(s, task, at);
   let foe = task.monster!.hp * riftScale(s);
   while (foe > 0) {
-    if (nextRandom(s) < PLAYER_HIT) foe -= dealt * spread(s);
-    if (foe <= 0 || nextRandom(s) >= ENEMY_HIT) continue;
+    if (nextRandom(s) < mine) foe -= dealt * spread(s);
+    if (foe <= 0 || nextRandom(s) >= theirs) continue;
     const blow = Math.max(1, Math.round(hit * spread(s)));
     for (let food = foodOwned(s); !task.boss && food && s.hp <= blow && s.hp < maxHp(s); food = foodOwned(s)) {
       s.inventory[food] = count(s, food) - 1;

@@ -586,8 +586,11 @@ export const TASKS: TaskDef[] = [
     levelReq: 58,
     durationMs: 9000,
     xp: 170,
-    monster: { name: "Rift Wraith", type: "energy", hp: 200, damage: 14, drops: { xeno_core: 1 } },
-    rareDrops: [{ item: "void_pearl", chance: 0.004 }],
+    monster: { name: "Rift Wraith", type: "energy", hp: 200, damage: 14, drops: { chitin_shard: 3 } },
+    rareDrops: [
+      { item: "xeno_core", chance: 0.3 },
+      { item: "void_pearl", chance: 0.004 },
+    ],
   },
   {
     id: "fight_burrower",
@@ -1911,9 +1914,12 @@ export const TASKS: TaskDef[] = [
       type: "energy",
       hp: 280,
       damage: 16,
-      drops: { xeno_core: 1, chitin_shard: 5 },
+      drops: { chitin_shard: 5 },
     },
-    rareDrops: [{ item: "void_pearl", chance: 0.004 }],
+    rareDrops: [
+      { item: "xeno_core", chance: 0.3 },
+      { item: "void_pearl", chance: 0.004 },
+    ],
   },
   {
     id: "fight_behemoth",

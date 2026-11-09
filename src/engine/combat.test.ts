@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { areaKills, areaOf, bossLockReason, counterTo, matchup } from "./areas";
 import { AREAS, ITEMS, TASK_BY_ID, TASKS } from "./data";
-import { advance, damageAgainst, equip, fightDamage, hitDamage, maxHp, newGame, startTask, xpForLevel } from "./engine";
+import { advance, damageAgainst, enemyHitChance, equip, fightDamage, hitDamage, maxHp, newGame, playerHitChance, startTask, xpForLevel } from "./engine";
 import { GameState, ItemId } from "./types";
 
 const MINUTE = 60_000;
@@ -125,6 +125,20 @@ describe("fight costs", () => {
     const { state } = advance(startTask(base, "fight_hulk").state, 10 * MINUTE);
     expect(state.inventory.rail_slug).toBe(0);
     expect(damageAgainst(state, task)).toBe(unarmed);
+  });
+});
+
+describe("hit chances", () => {
+  it("improve with a better weapon and armor, but a creature always has some chance", () => {
+    const bare = withItems({}, strong(60));
+    const geared = (id: ItemId) => equip(withItems({ [id]: 1 }, strong(90)), id).state;
+    expect(playerHitChance(geared("fang_blade"))).toBeGreaterThan(playerHitChance(bare));
+    const task = TASK_BY_ID.fight_herald;
+    expect(enemyHitChance(geared("sovereign_mail"), task)).toBeLessThan(enemyHitChance(bare, task));
+    for (const t of TASKS.filter((x) => x.monster)) {
+      const best = equip(withItems({ sovereign_mail: 1 }, strong(99)), "sovereign_mail").state;
+      expect(enemyHitChance(best, t), t.id).toBeGreaterThan(0);
+    }
   });
 });
 

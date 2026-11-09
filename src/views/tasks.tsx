@@ -4,6 +4,8 @@ import { AREAS, ITEMS, SKILL_BY_ID, TASK_BY_ID, TASKS } from "../engine/data";
 import {
   count,
   damageAgainst,
+  enemyHitChance,
+  playerHitChance,
   fightDamage,
   hitDamage,
   levelOf,
@@ -222,6 +224,7 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
       `- **Kill time:** ${formatDuration(taskDurationMs(state, task))} (${rounds} round${rounds === 1 ? "" : "s"}), then the next one steps up`,
       `- **Enemy:** ${m.name}, ${m.type} (${hp} HP, ${Math.round(m.damage * riftScale(state))} dmg per hit)`,
       `- **Your damage:** ${dealt} per round${matchupNote(mods.weaponType, m.type, "deal")}`,
+      `- **Hit chance:** you ${Math.round(playerHitChance(state) * 100)}%, it ${Math.round(enemyHitChance(state, task) * 100)}%`,
       `- **Armor:** ${playerArmor(state)}, hit for ${hitDamage(state, task)}${matchupNote(m.type, mods.armorType, "take")}`,
       `- **Best against it:** ${counterTo(m.type)} weapon and armor`,
       `- **Expected HP loss:** ~${fightDamage(state, task)}`,
