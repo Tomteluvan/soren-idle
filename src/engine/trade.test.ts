@@ -178,3 +178,11 @@ describe("local food", () => {
     expect(ITEMS.honey_ration.heal).toBeGreaterThan(ITEMS.ration.heal ?? 0);
   });
 });
+
+describe("companions", () => {
+  it("cannot be sold, so crafting them is not a way to make credits", () => {
+    const companions = Object.values(ITEMS).filter((i) => i.slot === "companion");
+    expect(companions.length).toBeGreaterThan(0);
+    for (const item of companions) expect(item.unsellable, item.id).toBe(true);
+  });
+});

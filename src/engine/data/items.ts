@@ -612,6 +612,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 90,
     tool: { skill: "salvaging", speed: 0.85 },
     slot: "companion",
+    unsellable: true,
     tier: 1,
   },
   spark_wisp: {
@@ -621,6 +622,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 300,
     weaponDamage: 3,
     slot: "companion",
+    unsellable: true,
     tier: 2,
   },
   lantern_moth: {
@@ -630,6 +632,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 650,
     rareBonus: 1.25,
     slot: "companion",
+    unsellable: true,
     tier: 3,
   },
   ward_drone: {
@@ -639,6 +642,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 1400,
     armor: 3,
     slot: "companion",
+    unsellable: true,
     tier: 5,
   },
   star_familiar: {
@@ -648,6 +652,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 3200,
     weaponDamage: 6,
     slot: "companion",
+    unsellable: true,
     tier: 7,
   },
   star_dust: {
@@ -1092,6 +1097,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 374,
     armor: 2,
     slot: "companion",
+    unsellable: true,
     tier: 4,
   },
   tide_skimmer: {
@@ -1101,6 +1107,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 1599,
     tool: { skill: "xenofishing", speed: 0.8 },
     slot: "companion",
+    unsellable: true,
     tier: 6,
   },
   vault_mantis: {
@@ -1110,6 +1117,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 8392,
     rareBonus: 1.5,
     slot: "companion",
+    unsellable: true,
     tier: 8,
   },
   iron_colossus: {
@@ -1119,6 +1127,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 12668,
     armor: 6,
     slot: "companion",
+    unsellable: true,
     tier: 9,
   },
   rift_hawk: {
@@ -1128,6 +1137,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 23587,
     weaponDamage: 10,
     slot: "companion",
+    unsellable: true,
     tier: 10,
   },
   aether_dragon: {
@@ -1137,6 +1147,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 46614,
     weaponDamage: 12,
     slot: "companion",
+    unsellable: true,
     tier: 11,
   },
   ironblood_serum: {
