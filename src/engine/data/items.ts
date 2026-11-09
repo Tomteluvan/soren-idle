@@ -440,7 +440,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     id: "matriarch_chitin",
     name: "Matriarch Chitin",
     description: "A plate of the Hive Matriarch's shell. Dense, warm and very much not yours.",
-    value: 300,
+    value: 120,
   },
   broodking_fang: {
     id: "broodking_fang",

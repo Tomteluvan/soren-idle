@@ -1948,7 +1948,7 @@ export const TASKS: TaskDef[] = [
       damage: 28,
       drops: { xeno_core: 3, chitin_shard: 8 },
     },
-    inputs: { servo_unit: 2 },
+    inputs: { servo_unit: 1 },
     rareDrops: [{ item: "void_pearl", chance: 0.004 }],
   },
   {
