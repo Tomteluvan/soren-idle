@@ -70,11 +70,11 @@ describe("launch", () => {
 
 describe("perks", () => {
   it("are bought with Starlight, one level at a time", () => {
-    const s = { ...newGame(0), starlight: 20 };
+    const s = { ...newGame(0), starlight: 7 };
     expect(buyPerk(s, "nope").error).toBeDefined();
     const one = buyPerk(s, "xp").state;
     expect(one.perks.xp).toBe(1);
-    expect(one.starlight).toBe(20 - PERK_BY_ID.xp.cost);
+    expect(one.starlight).toBe(7 - PERK_BY_ID.xp.cost);
     expect(buyPerk(one, "xp").error).toMatch(/Needs/);
     expect(buyPerk({ ...one, starlight: 9999, perks: { xp: 10 } }, "xp").error).toMatch(/max/);
   });

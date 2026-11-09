@@ -195,7 +195,7 @@ export const BUILDINGS: BuildingDef[] = [
     baseCost: {},
     costGrowth: 1,
     levelCosts: [{ singularity_core: 1, quantum_processor: 1, fusion_cell: 2, xeno_alloy: 5 }],
-    levelCredits: [250_000],
+    levelCredits: [2_000_000],
     levelNotes: ["Ready to launch. Each launch earns Starlight for permanent perks."],
     requires: { skill: "engineering", level: 95 },
     requiresContact: true,

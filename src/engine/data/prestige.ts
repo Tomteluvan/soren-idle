@@ -12,16 +12,16 @@ export interface PerkDef {
 
 /** What Starlight buys. Each perk is bought in levels and survives every launch. */
 export const PERKS: PerkDef[] = [
-  { id: "xp", name: "Veteran Instincts", description: "+3% XP in every skill.", maxLevel: 10, cost: 15 },
-  { id: "speed", name: "Quick Hands", description: "Tasks take 2% less time.", maxLevel: 10, cost: 15 },
+  { id: "xp", name: "Veteran Instincts", description: "+3% XP in every skill.", maxLevel: 10, cost: 5 },
+  { id: "speed", name: "Quick Hands", description: "Tasks take 2% less time.", maxLevel: 10, cost: 5 },
   {
     id: "keep",
     name: "Muscle Memory",
     description: "Keep 10% of every task's mastery and each skill's mastery pool after a launch.",
     maxLevel: 5,
-    cost: 25,
+    cost: 10,
   },
-  { id: "fund", name: "Salvage Fund", description: "Start each run with 1,000 more Credits.", maxLevel: 10, cost: 8 },
+  { id: "fund", name: "Salvage Fund", description: "Start each run with 1,000 more Credits.", maxLevel: 10, cost: 2 },
 ];
 
 export const PERK_BY_ID: Record<string, PerkDef> = Object.fromEntries(PERKS.map((p) => [p.id, p]));

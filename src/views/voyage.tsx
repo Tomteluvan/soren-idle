@@ -20,7 +20,7 @@ export function Voyage(props: { state: GameState; onLaunch: () => void; onBuy: (
                 "# Leave Soren",
                 ready
                   ? "The ship is ready. Launching starts the whole game over, and what you keep is listed below."
-                  : `Build the ${BUILDING_BY_ID.rescue_ship.name} in Base first. It needs Engineering 95 and a lot of credits.`,
+                  : `Build the ${BUILDING_BY_ID.rescue_ship.name} in Base first. It needs Engineering 95 and 2,000,000 credits.`,
                 "",
                 `**This launch earns ${gain} Starlight:** one for every 15 skill levels, two for every boss beaten, and five for getting out.`,
                 "",
