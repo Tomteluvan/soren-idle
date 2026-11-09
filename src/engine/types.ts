@@ -4,6 +4,7 @@ export type SkillId =
   | "foraging"
   | "cooking"
   | "engineering"
+  | "fabrication"
   | "combat"
   | "hydroponics"
   | "xenochemistry"
@@ -157,6 +158,20 @@ export type ItemId =
   | "song_glass"
   | "dark_alloy"
   | "starfall_ingot"
+  | "cable_spool"
+  | "sensor_array"
+  | "gyro_stabiliser"
+  | "plasma_conduit"
+  | "rivet_pack"
+  | "hull_plating"
+  | "spring_coil"
+  | "armor_lattice"
+  | "optic_lens"
+  | "shock_plate"
+  | "power_housing"
+  | "reactive_tile"
+  | "resonant_frame"
+  | "void_plating"
   | "signal_key"
   | "cipher_engine"
   | "sentinel_mind"
@@ -433,6 +448,8 @@ export interface GameState {
   settings: Settings;
   /** Mastery XP per task id. */
   mastery: Record<string, number>;
+  /** Mastery XP banked per skill: a quarter of what its tasks earn. Gives skill-wide bonuses and can be spent. */
+  masteryPool: Partial<Record<SkillId, number>>;
   /** Resource nodes that have been hit: health left, and when a spent one comes back. */
   nodes: Record<string, { hp: number; respawnAt?: number }>;
   /** One entry per hydroponic plot; null is an empty plot. */

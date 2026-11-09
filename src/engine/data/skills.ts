@@ -20,7 +20,12 @@ export const SKILLS: SkillDef[] = [
   {
     id: "engineering",
     name: "Engineering",
-    blurb: "Turn raw materials into tools and gear.",
+    blurb: "Build the parts and machines everything else runs on, and the Workshop that speeds them up.",
+  },
+  {
+    id: "fabrication",
+    name: "Fabrication",
+    blurb: "Shape plates, springs and lenses, then fit them into tools, weapons and armour.",
   },
   {
     id: "combat",

@@ -4,6 +4,7 @@ import { ReadyGame, useGame } from "./hooks/use-game";
 import { abandonBounty, acceptBounty, rerollBoard } from "./engine/bounty";
 import { CROP_BY_ID, ITEMS, SKILL_BY_ID } from "./engine/data";
 import { drink, eat, equip, startTask, stopTask, unequip, build } from "./engine/engine";
+import { spendPool } from "./engine/mastery";
 import { formatBundle, formatCredits, formatMarks } from "./engine/format";
 import { harvest, harvestAll, plant } from "./engine/hydroponics";
 import { buyFromShop } from "./engine/shop";
@@ -37,6 +38,7 @@ export const tasksView = (g: ReadyGame, skill: SkillId) => (
     frame={g.frame}
     onStart={(id, runs) => g.act((s) => startTask(s, id, runs))}
     onStop={() => g.sync(stopTask)}
+    onSpend={(id) => g.act((s) => spendPool(s, id))}
   />
 );
 

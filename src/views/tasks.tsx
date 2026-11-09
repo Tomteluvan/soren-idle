@@ -25,6 +25,11 @@ import {
   nodeHp,
   nodeMaxHp,
   nodeRespawnMs,
+  POOL_CHECKPOINTS,
+  poolMax,
+  poolShare,
+  poolXp,
+  spendCost,
 } from "../engine/mastery";
 import { areaKills, areaOf, bossLockReason, counterTo, huntsOf, matchup } from "../engine/areas";
 import { GameState, DamageType, ItemId, SkillId, TaskDef } from "../engine/types";
@@ -56,6 +61,7 @@ export function Tasks(props: {
   frame: number;
   onStart: (id: string, runs?: number) => void;
   onStop: () => void;
+  onSpend: (id: string) => void;
 }) {
   const { state, skill } = props;
   const level = levelOf(state, skill);
@@ -111,6 +117,13 @@ export function Tasks(props: {
                 ))}
               </ActionPanel.Submenu>
             )}
+            {spendCost(state, task) !== null && (
+              <Action
+                title={`Spend Mastery Pool (${spendCost(state, task)?.toLocaleString("en-US")} XP)`}
+                icon={Icon.ArrowUpCircle}
+                onAction={() => props.onSpend(task.id)}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -156,7 +169,13 @@ function masteryLines(state: GameState, task: TaskDef): string[] {
     ...(masterySpeed(level) < 1 ? [`${Math.round((1 - masterySpeed(level)) * 1000) / 10}% faster`] : []),
     ...(masteryYield(level) > 0 ? [`${Math.round(masteryYield(level) * 100)}% bonus yield`] : []),
   ];
+  const share = poolShare(state, task.skill);
+  const checkpoints = POOL_CHECKPOINTS.map((c) => {
+    const gives = [c.speed && `${c.speed * 100}% faster`, c.yield && `${c.yield * 100}% yield`].filter(Boolean);
+    return `${share >= c.at ? "✓" : "○"} ${c.at * 100}%: ${gives.join(", ")}`;
+  });
   return [
+    `- **Mastery pool:** ${Math.floor(poolXp(state, task.skill)).toLocaleString("en-US")} / ${Math.round(poolMax(task.skill)).toLocaleString("en-US")} XP across ${SKILL_BY_ID[task.skill].name} (${checkpoints.join(" · ")})`,
     `- **Mastery ${level}:** ${level >= MASTERY_MAX ? "maxed" : `${Math.floor(xp - floor).toLocaleString("en-US")} / ${(next - floor).toLocaleString("en-US")} XP`}${bonuses.length ? ` (${bonuses.join(", ")})` : ""}`,
   ];
 }

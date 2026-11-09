@@ -121,7 +121,7 @@ describe("advance: crafting", () => {
   it("one-off crafts stop after a single cycle", () => {
     const state = withItems(
       { alloy_plate: 10, circuit_scrap: 10 },
-      { xp: { ...newGame().xp, engineering: xpForLevel(13) } },
+      { xp: { ...newGame().xp, fabrication: xpForLevel(13) } },
     );
     const { state: after } = run(state, "craft_torch", 10 * MINUTE);
     expect(count(after, "cutting_torch")).toBe(1);
@@ -145,7 +145,7 @@ describe("startTask", () => {
     expect(startTask(newGame(0), "craft_ration").error).toMatch(/materials/);
     const owner = withItems(
       { cutting_torch: 1, alloy_plate: 9, circuit_scrap: 9 },
-      { xp: { ...newGame().xp, engineering: xpForLevel(13) } },
+      { xp: { ...newGame().xp, fabrication: xpForLevel(13) } },
     );
     expect(startTask(owner, "craft_torch").error).toMatch(/already own/);
   });

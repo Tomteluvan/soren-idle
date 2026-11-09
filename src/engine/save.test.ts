@@ -90,3 +90,15 @@ describe("hints", () => {
     expect(new Set(HINTS.map((h) => h.id)).size).toBe(HINTS.length);
   });
 });
+
+describe("fabrication split", () => {
+  it("gives an older save the Engineering level in Fabrication, so no gear is locked", () => {
+    const old = {
+      ...newGame(0),
+      version: 3,
+      xp: { ...newGame(0).xp, engineering: xpForLevel(40) },
+    } as Partial<GameState>;
+    delete (old.xp as Partial<GameState["xp"]>).fabrication;
+    expect(migrateSave(old).xp.fabrication).toBe(xpForLevel(40));
+  });
+});

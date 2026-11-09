@@ -7,7 +7,7 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
 
 ## Features
 
-- **Fourteen skills, level 1 to 99:** Salvaging, Mining, Foraging, Cooking, Engineering, Combat,
+- **Fifteen skills, level 1 to 99:** Salvaging, Mining, Foraging, Cooking, Engineering, Fabrication, Combat,
   Hydroponics, Xenochemistry, Xenofishing, Smelting, Hacking, Exploration, Companions and
   Stargazing, on a RuneScape-style XP curve.
 - **Resource nodes and mastery:** gathering works a node that runs out and respawns, and every

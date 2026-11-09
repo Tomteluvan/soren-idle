@@ -18,6 +18,8 @@ import { levelFromXp, xpForLevel } from "./levels";
 import {
   averageCycleMs,
   masteryLevel,
+  poolBonus,
+  POOL_SHARE,
   masterySpeed,
   masteryXpPerCycle,
   masteryYield,
@@ -69,6 +71,7 @@ export function newGame(now = Date.now()): GameState {
     keep: {},
     settings: { eatBelow: 0, foodPriority: "weakest" },
     mastery: {},
+    masteryPool: {},
     nodes: {},
     plots: [],
     hints: [],
@@ -304,7 +307,7 @@ export function taskDurationMs(s: GameState, task: TaskDef, at = s.lastTick): nu
   let mult = modifiers(s, at).speed(task.skill);
   if (task.skill === "engineering") mult *= 1 - 0.08 * buildingLevel(s, "workshop");
   if (GATHERING.includes(task.skill)) mult *= 1 - EXPLORATION_SPEED_PER_LEVEL * (levelOf(s, "exploration") - 1);
-  if (hasMastery(task)) mult *= masterySpeed(masteryLevel(s, task));
+  if (hasMastery(task)) mult *= masterySpeed(masteryLevel(s, task)) * (1 - poolBonus(s, task.skill).speed);
   return Math.max(1000, Math.round(task.durationMs * mult));
 }
 
@@ -490,7 +493,9 @@ function runCycle(s: GameState, task: TaskDef, report: Report, at: number): stri
 }
 
 function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): string | undefined {
-  const yieldMult = task.once ? 1 : modifiers(s, at).yield + masteryYield(masteryLevel(s, task));
+  const yieldMult = task.once
+    ? 1
+    : modifiers(s, at).yield + masteryYield(masteryLevel(s, task)) + poolBonus(s, task.skill).yield;
   if (task.monster) {
     const damage = fightDamage(s, task, at);
     const wantsFood = () => s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);
@@ -523,7 +528,11 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
   rollRareDrops(s, task, report, at);
   gainXp(s, task.skill, task.xp, report);
   hitNode(s, task, at + taskDurationMs(s, task, at));
-  if (hasMastery(task)) s.mastery[task.id] = (s.mastery[task.id] ?? 0) + masteryXpPerCycle(task);
+  if (hasMastery(task)) {
+    const gain = masteryXpPerCycle(task);
+    s.mastery[task.id] = (s.mastery[task.id] ?? 0) + gain;
+    s.masteryPool[task.skill] = (s.masteryPool[task.skill] ?? 0) + gain * POOL_SHARE;
+  }
   s.stats.cycles++;
   report.cycles++;
   return undefined;

@@ -25,11 +25,11 @@ const withItems = (items: Partial<Record<ItemId, number>>, patch: Partial<GameSt
 
 /** Levels given as tiers (1, 10, 20): the real level is three times that, less two. */
 const tier = (n: number) => (n <= 1 ? n : 3 * n - 2);
-const levelled = (combat: number, engineering = 0) => ({
+const levelled = (combat: number, fabrication = 0) => ({
   xp: {
     ...newGame(0).xp,
     combat: xpForLevel(tier(combat)),
-    engineering: xpForLevel(tier(engineering)),
+    fabrication: xpForLevel(tier(fabrication)),
   },
 });
 

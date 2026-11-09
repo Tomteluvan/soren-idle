@@ -1174,6 +1174,90 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     value: 6079,
     potion: { kind: "speed", power: 0.5, durationMs: 60 * 60_000 },
   },
+  sensor_array: {
+    id: "sensor_array",
+    name: "Sensor Array",
+    description: "A dish, a board and a lot of patience.",
+    value: 212,
+  },
+  gyro_stabiliser: {
+    id: "gyro_stabiliser",
+    name: "Gyro Stabiliser",
+    description: "Three rings that spin until the world agrees with them.",
+    value: 572,
+  },
+  plasma_conduit: {
+    id: "plasma_conduit",
+    name: "Plasma Conduit",
+    description: "Rated for a temperature you should not ask about.",
+    value: 2418,
+  },
+  rivet_pack: {
+    id: "rivet_pack",
+    name: "Rivet Pack",
+    description: "Small, ugly and holding your whole base together.",
+    value: 10,
+  },
+  hull_plating: {
+    id: "hull_plating",
+    name: "Hull Plating",
+    description: "Flat, heavy and proud of it.",
+    value: 60,
+  },
+  spring_coil: {
+    id: "spring_coil",
+    name: "Spring Coil",
+    description: "It pushes back. You respect that.",
+    value: 91,
+  },
+  armor_lattice: {
+    id: "armor_lattice",
+    name: "Armor Lattice",
+    description: "Light, stiff, and nearly impossible to bend by hand.",
+    value: 179,
+  },
+  optic_lens: {
+    id: "optic_lens",
+    name: "Optic Lens",
+    description: "It sees a little further than you do.",
+    value: 257,
+  },
+  shock_plate: {
+    id: "shock_plate",
+    name: "Shock Plate",
+    description: "Hit it and the whole plate answers.",
+    value: 390,
+  },
+  power_housing: {
+    id: "power_housing",
+    name: "Power Housing",
+    description: "A box with strong opinions about heat.",
+    value: 975,
+  },
+  reactive_tile: {
+    id: "reactive_tile",
+    name: "Reactive Tile",
+    description: "Strike it and it strikes first.",
+    value: 2722,
+  },
+  resonant_frame: {
+    id: "resonant_frame",
+    name: "Resonant Frame",
+    description: "It rings when anything near it moves.",
+    value: 3038,
+  },
+  void_plating: {
+    id: "void_plating",
+    name: "Void Plating",
+    description: "The darkest thing you have ever held.",
+    value: 8048,
+  },
+  cable_spool: {
+    id: "cable_spool",
+    name: "Cable Spool",
+    description: "Wire enough to wire a whole base, if you are patient.",
+    value: 20,
+  },
 };
 
 /** What the Bounty Shop sells: things nobody can craft or trade for. */

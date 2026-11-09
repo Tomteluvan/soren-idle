@@ -11,6 +11,10 @@ import {
   nodeHp,
   nodeMaxHp,
   nodeRespawnMs,
+  poolBonus,
+  poolMax,
+  spendCost,
+  spendPool,
 } from "./mastery";
 import { migrateSave } from "./migrate";
 import { GameState } from "./types";
@@ -137,5 +141,42 @@ describe("mastery", () => {
     const migrated = migrateSave(old);
     expect(migrated.mastery).toEqual({});
     expect(migrated.nodes).toEqual({});
+  });
+});
+
+describe("mastery pool", () => {
+  it("takes a quarter of the mastery XP a cycle earns", () => {
+    const task = TASK_BY_ID.salvage_hull;
+    const started = startTask(newGame(0), task.id).state;
+    const { state } = advance(started, started.lastTick + 60 * SECOND);
+    expect(state.mastery[task.id]).toBeGreaterThan(0);
+    expect(state.masteryPool.salvaging).toBeCloseTo(state.mastery[task.id] * 0.25);
+  });
+
+  it("gives skill-wide bonuses at its checkpoints and loses them when spent", () => {
+    const s = newGame(0);
+    expect(poolBonus(s, "mining")).toEqual({ speed: 0, yield: 0 });
+    s.masteryPool.mining = poolMax("mining") * 0.3;
+    expect(poolBonus(s, "mining")).toEqual({ speed: 0.03, yield: 0.03 });
+    const task = TASK_BY_ID.mine_ferrite;
+    expect(taskDurationMs(s, task)).toBeLessThan(taskDurationMs(newGame(0), task));
+    s.masteryPool.mining = poolMax("mining") * 0.05;
+    expect(poolBonus(s, "mining")).toEqual({ speed: 0, yield: 0 });
+  });
+
+  it("is spent to raise a task one mastery level", () => {
+    const s = newGame(0);
+    const cost = spendCost(s, ferrite) ?? 0;
+    expect(spendPool(s, ferrite.id).error).toMatch(/Needs/);
+    s.masteryPool.mining = cost + 5;
+    const { state, error } = spendPool(s, ferrite.id);
+    expect(error).toBeUndefined();
+    expect(masteryLevel(state, ferrite)).toBe(2);
+    expect(state.masteryPool.mining).toBeCloseTo(5);
+  });
+
+  it("has nothing to raise on one-off crafts", () => {
+    expect(spendCost(newGame(0), TASK_BY_ID.craft_torch)).toBeNull();
+    expect(spendPool(newGame(0), "craft_torch").error).toBeDefined();
   });
 });

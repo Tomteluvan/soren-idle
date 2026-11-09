@@ -16,6 +16,7 @@ export const SKILL_ICON: Record<SkillId, Icon> = {
   foraging: Icon.Leaf,
   cooking: Icon.MugSteam,
   engineering: Icon.Gear,
+  fabrication: Icon.WrenchScrewdriver,
   combat: Icon.Shield,
   hydroponics: Icon.Raindrop,
   xenochemistry: Icon.Pill,
