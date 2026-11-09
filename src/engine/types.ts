@@ -76,6 +76,14 @@ export type ItemId =
   | "matriarch_chitin"
   | "broodking_fang"
   | "sovereign_shard"
+  | "venom_sac"
+  | "glow_gland"
+  | "void_pearl"
+  | "venom_spitter"
+  | "glow_lantern"
+  | "voidpearl_cloak"
+  | "rail_slug"
+  | "rail_carbine"
   | "lake_minnow"
   | "spark_eel"
   | "glow_ray"
@@ -227,6 +235,8 @@ export interface ItemDef {
   tool?: { skill: SkillId; speed: number };
   /** Equipped, this adds this much damage per combat round. */
   weaponDamage?: number;
+  /** A weapon that uses up one of these every fight. With none left it does nothing. */
+  ammo?: ItemId;
   /** Equipped, this reduces damage taken per round. */
   armor?: number;
   /** Equipped, this multiplies the chance of rare drops by this much. */

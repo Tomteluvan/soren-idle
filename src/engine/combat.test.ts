@@ -109,6 +109,25 @@ describe("bosses", () => {
   });
 });
 
+describe("fight costs", () => {
+  it("use up the hunt's materials every fight, and stop the hunt when they run out", () => {
+    const base = withItems({ sweetroot: 7 }, strong(60));
+    const { state } = advance(startTask(base, "fight_hulk").state, 10 * MINUTE);
+    expect(state.stats.hunts.fight_hulk).toBe(2);
+    expect(state.inventory.sweetroot).toBe(1);
+  });
+
+  it("burn one round of ammo per fight, and a dry weapon does nothing", () => {
+    const base = equip(withItems({ rail_carbine: 1, rail_slug: 2, sweetroot: 20 }, strong(60)), "rail_carbine").state;
+    const task = TASK_BY_ID.fight_hulk;
+    const unarmed = damageAgainst(withItems({}, strong(60)), task);
+    expect(damageAgainst(base, task)).toBeGreaterThan(unarmed);
+    const { state } = advance(startTask(base, "fight_hulk").state, 10 * MINUTE);
+    expect(state.inventory.rail_slug).toBe(0);
+    expect(damageAgainst(state, task)).toBe(unarmed);
+  });
+});
+
 describe("the combat triangle", () => {
   it("is a cycle: each type beats one and loses to one", () => {
     expect(matchup("kinetic", "bio")).toBe(1.25);

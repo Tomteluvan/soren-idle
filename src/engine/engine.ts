@@ -282,6 +282,9 @@ export const activeBuff = (s: GameState, kind: BuffKind, at = s.lastTick) => {
  */
 export function modifiers(s: GameState, at = s.lastTick) {
   const owned = equippedItems(s);
+  // A weapon that is out of ammo does nothing: no damage, and no damage type for the triangle.
+  const weapon = s.equipped.weapon && count(s, s.equipped.weapon) > 0 ? ITEMS[s.equipped.weapon] : undefined;
+  const dry = weapon?.ammo !== undefined && count(s, weapon.ammo) < 1;
   const sky = (Object.values(ITEMS) as ItemDef[]).filter((i) => i.constellation && count(s, i.id) > 0);
   const toolSpeed = (skill: SkillId) =>
     Math.min(1, ...owned.filter((i) => i.tool?.skill === skill).map((i) => i.tool?.speed ?? 1));
@@ -291,13 +294,14 @@ export function modifiers(s: GameState, at = s.lastTick) {
       toolSpeed(skill) *
       sky.reduce((m, i) => m * (i.constellation?.speed ?? 1), 1),
     damage:
-      owned.reduce((sum, i) => sum + (i.weaponDamage ?? 0), 0) +
+      owned.reduce((sum, i) => sum + (i === weapon && dry ? 0 : (i.weaponDamage ?? 0)), 0) +
       sky.reduce((sum, i) => sum + (i.constellation?.damage ?? 0), 0) +
       (activeBuff(s, "damage", at)?.power ?? 0),
     armor:
       owned.reduce((sum, i) => sum + (i.armor ?? 0), 0) +
       sky.reduce((sum, i) => sum + (i.constellation?.armor ?? 0), 0),
-    weaponType: s.equipped.weapon && count(s, s.equipped.weapon) > 0 ? ITEMS[s.equipped.weapon].damageType : undefined,
+    ammo: dry ? undefined : weapon?.ammo,
+    weaponType: dry ? undefined : weapon?.damageType,
     armorType: s.equipped.body && count(s, s.equipped.body) > 0 ? ITEMS[s.equipped.body].damageType : undefined,
     yield: (activeBuff(s, "yield", at)?.power ?? 1) * sky.reduce((m, i) => m * (i.constellation?.yield ?? 1), 1),
     rare: owned.reduce((m, i) => m * (i.rareBonus ?? 1), 1) * sky.reduce((m, i) => m * (i.constellation?.rare ?? 1), 1),
@@ -515,6 +519,7 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
       s.inventory[food] = count(s, food) - 1;
       s.hp = Math.min(maxHp(s), s.hp + (ITEMS[food].heal ?? 0));
     }
+    if (!canAfford(s, task.inputs)) return `Out of materials for ${task.name}`;
     if (s.hp <= damage) {
       s.stats.retreats++;
       return `Retreated from ${task.monster.name}: too wounded and out of rations`;
@@ -523,6 +528,9 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
     const full = overflowing(s, drops);
     if (full) return `Storage full: ${ITEMS[full].name}. Sell or use some to continue`;
     s.hp -= damage;
+    addItems(s, task.inputs, -1);
+    const ammo = modifiers(s, at).ammo;
+    if (ammo) s.inventory[ammo] = count(s, ammo) - 1;
     s.stats.kills++;
     s.stats.hunts[task.id] = (s.stats.hunts[task.id] ?? 0) + 1;
     addItems(s, drops, 1, report);

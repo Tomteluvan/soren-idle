@@ -461,6 +461,65 @@ export const TASKS: TaskDef[] = [
     once: true,
   },
   {
+    id: "craft_venom_spitter",
+    skill: "fabrication",
+    name: "Venom Spitter",
+    description: "A canyon gland, a pressure line and a very optimistic nozzle.",
+    levelReq: 26,
+    durationMs: 9000,
+    xp: 80,
+    inputs: { alloy_plate: 6, venom_sac: 3 },
+    outputs: { venom_spitter: 1 },
+    once: true,
+  },
+  {
+    id: "craft_glow_lantern",
+    skill: "fabrication",
+    name: "Glow Lantern",
+    description: "Cave gland in a cage of alloy. Things that hide in the dark can no longer hide from you.",
+    levelReq: 48,
+    durationMs: 11000,
+    xp: 150,
+    inputs: { alloy_plate: 6, glow_gland: 3, lumina_crystal: 4 },
+    outputs: { glow_lantern: 1 },
+    once: true,
+  },
+  {
+    id: "craft_voidpearl_cloak",
+    skill: "fabrication",
+    name: "Voidpearl Cloak",
+    description: "Skyweave sewn around three pearls. The hems do not quite stay where you left them.",
+    levelReq: 72,
+    durationMs: 14000,
+    xp: 300,
+    inputs: { alloy_plate: 10, void_pearl: 3, skyweave_thread: 6 },
+    outputs: { voidpearl_cloak: 1 },
+    once: true,
+  },
+  {
+    id: "craft_rail_carbine",
+    skill: "fabrication",
+    name: "Rail Carbine",
+    description: "Hits like a maul, from across the canyon. Eats ammunition like it is paid by the round.",
+    levelReq: 66,
+    durationMs: 12000,
+    xp: 190,
+    inputs: { alloy_plate: 8, circuit_board: 4, chitin_shard: 8 },
+    outputs: { rail_carbine: 1 },
+    once: true,
+  },
+  {
+    id: "fab_rail_slugs",
+    skill: "fabrication",
+    name: "Rail Slugs",
+    description: "Alloy slivers cut to length. A carbine fires through a lot of them.",
+    levelReq: 66,
+    durationMs: 4000,
+    xp: 30,
+    inputs: { alloy_plate: 1, chitin_shard: 2 },
+    outputs: { rail_slug: 10 },
+  },
+  {
     id: "craft_chitin_crown",
     skill: "fabrication",
     name: "Chitin Crown",
@@ -494,7 +553,10 @@ export const TASKS: TaskDef[] = [
     durationMs: 4000,
     xp: 9,
     monster: { name: "Dust Skitter", type: "bio", hp: 20, damage: 3, drops: { chitin_shard: 1 } },
-    rareDrops: [{ item: "xeno_core", chance: 0.002 }],
+    rareDrops: [
+      { item: "xeno_core", chance: 0.002 },
+      { item: "venom_sac", chance: 0.004 },
+    ],
   },
   {
     id: "fight_stalker",
@@ -511,7 +573,10 @@ export const TASKS: TaskDef[] = [
       damage: 7,
       drops: { chitin_shard: 2 },
     },
-    rareDrops: [{ item: "xeno_core", chance: 0.01 }],
+    rareDrops: [
+      { item: "xeno_core", chance: 0.01 },
+      { item: "glow_gland", chance: 0.004 },
+    ],
   },
   {
     id: "fight_wraith",
@@ -522,6 +587,7 @@ export const TASKS: TaskDef[] = [
     durationMs: 9000,
     xp: 170,
     monster: { name: "Rift Wraith", type: "energy", hp: 200, damage: 14, drops: { xeno_core: 1 } },
+    rareDrops: [{ item: "void_pearl", chance: 0.004 }],
   },
   {
     id: "fight_burrower",
@@ -538,6 +604,7 @@ export const TASKS: TaskDef[] = [
       damage: 5,
       drops: { chitin_shard: 1 },
     },
+    rareDrops: [{ item: "venom_sac", chance: 0.004 }],
   },
   {
     id: "fight_matriarch",
@@ -571,6 +638,7 @@ export const TASKS: TaskDef[] = [
       damage: 10,
       drops: { chitin_shard: 3 },
     },
+    rareDrops: [{ item: "glow_gland", chance: 0.004 }],
   },
   {
     id: "fight_broodking",
@@ -588,6 +656,7 @@ export const TASKS: TaskDef[] = [
       damage: 15,
       drops: { broodking_fang: 1, chitin_shard: 10 },
     },
+    inputs: { servo_unit: 1 },
   },
   {
     id: "fight_hound",
@@ -604,6 +673,8 @@ export const TASKS: TaskDef[] = [
       damage: 18,
       drops: { xeno_core: 1, chitin_shard: 4 },
     },
+    inputs: { lumina_crystal: 2 },
+    rareDrops: [{ item: "void_pearl", chance: 0.004 }],
   },
   {
     id: "fight_sovereign",
@@ -621,6 +692,7 @@ export const TASKS: TaskDef[] = [
       damage: 26,
       drops: { sovereign_shard: 1, xeno_core: 2 },
     },
+    inputs: { power_core: 1 },
   },
   // Xenofishing
   {
@@ -1806,6 +1878,7 @@ export const TASKS: TaskDef[] = [
       damage: 6,
       drops: { chitin_shard: 2 },
     },
+    rareDrops: [{ item: "venom_sac", chance: 0.004 }],
   },
   {
     id: "fight_hulk",
@@ -1822,6 +1895,8 @@ export const TASKS: TaskDef[] = [
       damage: 12,
       drops: { chitin_shard: 6 },
     },
+    inputs: { sweetroot: 3 },
+    rareDrops: [{ item: "glow_gland", chance: 0.004 }],
   },
   {
     id: "fight_voidstalker",
@@ -1838,6 +1913,7 @@ export const TASKS: TaskDef[] = [
       damage: 16,
       drops: { xeno_core: 1, chitin_shard: 5 },
     },
+    rareDrops: [{ item: "void_pearl", chance: 0.004 }],
   },
   {
     id: "fight_behemoth",
@@ -1854,6 +1930,8 @@ export const TASKS: TaskDef[] = [
       damage: 22,
       drops: { xeno_core: 2, chitin_shard: 6 },
     },
+    inputs: { servo_unit: 1 },
+    rareDrops: [{ item: "void_pearl", chance: 0.004 }],
   },
   {
     id: "fight_herald",
@@ -1870,6 +1948,8 @@ export const TASKS: TaskDef[] = [
       damage: 28,
       drops: { xeno_core: 3, chitin_shard: 8 },
     },
+    inputs: { servo_unit: 2 },
+    rareDrops: [{ item: "void_pearl", chance: 0.004 }],
   },
   {
     id: "brew_ironblood",

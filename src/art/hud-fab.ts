@@ -195,6 +195,8 @@ const PIECES: Record<string, [string, (f: number) => string]> = {
   ],
 };
 
+PIECES.fab_rail_slugs = ["RAIL SLUGS", PIECES.fab_rivets[1]];
+
 export const FAB_SCENES: Record<string, Scene> = Object.fromEntries(
   Object.entries(PIECES).map(([id, [label, draw]]) => [
     id,
