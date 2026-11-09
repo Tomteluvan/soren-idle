@@ -86,6 +86,13 @@ describe("hints", () => {
     expect(dismissHint(s, "first_cycle")).toBe(s);
   });
 
+  it("walks a new player from salvage to mining to their first craft", () => {
+    let s: GameState = { ...newGame(0), hints: ["welcome", "first_cycle"], inventory: { scrap_metal: 3 } };
+    expect(nextHint(s)?.id).toBe("first_ore");
+    s = { ...s, hints: [...s.hints, "first_ore"], inventory: { scrap_metal: 3, ferrite_ore: 1 } };
+    expect(nextHint(s)?.id).toBe("first_craft");
+  });
+
   it("has unique ids", () => {
     expect(new Set(HINTS.map((h) => h.id)).size).toBe(HINTS.length);
   });

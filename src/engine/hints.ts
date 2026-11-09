@@ -24,6 +24,17 @@ export const HINTS: Hint[] = [
     when: (s) => s.stats.cycles >= 1,
   },
   {
+    id: "first_ore",
+    text: "Alloy Plate needs 3 scrap and 1 ore. Open Mining and start Ferrite.",
+    when: (s) => levelOf(s, "engineering") < 2 && (s.inventory.scrap_metal ?? 0) >= 3 && !s.inventory.ferrite_ore,
+  },
+  {
+    id: "first_craft",
+    text: "You have what you need. Open Engineering and craft an Alloy Plate.",
+    when: (s) =>
+      levelOf(s, "engineering") < 2 && (s.inventory.scrap_metal ?? 0) >= 3 && (s.inventory.ferrite_ore ?? 0) >= 1,
+  },
+  {
     id: "first_level",
     text: "Higher levels unlock new tasks. Locked ones show the level they need.",
     when: (s) => anyLevel(s, 2),
