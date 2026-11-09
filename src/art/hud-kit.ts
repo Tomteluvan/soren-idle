@@ -1,4 +1,4 @@
-import { BLUE, circle, line, P, path, poly, Pt, reticle } from "./hud";
+import { BLUE, circle, line, P, path, poly, Pt } from "./hud";
 import { callout } from "./hud-scenes";
 import { hash } from "./util";
 
@@ -12,9 +12,9 @@ export const at = (x: number, y: number, s: number, deg: number, inner: string) 
 
 export type Scene = (f: number) => string;
 
-/** A subject, its reticle and a callout, the way every task card is composed. */
+/** A subject with a callout naming it, the way every task card is composed. */
 export function card(subject: string, label: string, focus: Pt, f: number, r = 70, tag: Pt = [430, 322]): string {
-  return subject + reticle(focus, r + (f % 2) * 2, f) + callout([focus[0] + r * 0.7, focus[1] + r * 0.5], tag, label);
+  return subject + callout([focus[0] + r * 0.7, focus[1] + r * 0.5], tag, label);
 }
 
 export const glow = (c: Pt, r: number, o = 0.4) => circle(c, r, BLUE.pale, 0, "url(#flare)", `opacity="${o}"`);
