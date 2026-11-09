@@ -30,7 +30,7 @@ describe("rare drops", () => {
   });
 
   it("roll once per cycle at the stated rate, over many cycles", () => {
-    // 20,000 cycles of Mine Ferrite at 0.4% is 80 on average, with a standard deviation of about 9
+    // 20,000 cycles of Ferrite at 0.4% is 80 on average, with a standard deviation of about 9
     const { state, report } = runCycles("mine_ferrite", 20_000, roomy);
     expect(report.cycles).toBe(20_000);
     const found = state.inventory.prism_geode ?? 0;

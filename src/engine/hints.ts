@@ -15,7 +15,7 @@ const anyLevel = (s: GameState, level: number) =>
 export const HINTS: Hint[] = [
   {
     id: "welcome",
-    text: "Start with Salvaging: open Salvaging below and start Scavenge Hull Scrap.",
+    text: "Start with Salvaging: open Salvaging below and start Hull Scrap.",
     when: () => true,
   },
   {

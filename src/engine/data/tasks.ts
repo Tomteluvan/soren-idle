@@ -5,7 +5,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "salvage_hull",
     skill: "salvaging",
-    name: "Scavenge Hull Scrap",
+    name: "Hull Scrap",
     description: "Rip loose plating off the crash site.",
     levelReq: 1,
     durationMs: 3000,
@@ -16,7 +16,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "salvage_wiring",
     skill: "salvaging",
-    name: "Strip Wiring",
+    name: "Wiring",
     description: "Pull boards and cables out of the dead consoles.",
     levelReq: 13,
     durationMs: 4000,
@@ -28,7 +28,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "salvage_cargo",
     skill: "salvaging",
-    name: "Breach Cargo Pod",
+    name: "Cargo Pods",
     description: "The pod survived the crash. Its contents partly did.",
     levelReq: 34,
     durationMs: 6000,
@@ -41,7 +41,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "mine_ferrite",
     skill: "mining",
-    name: "Mine Ferrite",
+    name: "Ferrite",
     description: "Chip dark ore out of the canyon wall.",
     levelReq: 1,
     durationMs: 3500,
@@ -53,7 +53,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "mine_lumina",
     skill: "mining",
-    name: "Harvest Lumina Crystal",
+    name: "Lumina Crystal",
     description: "Carefully. Very carefully.",
     levelReq: 22,
     durationMs: 5000,
@@ -66,7 +66,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "forage_glowcap",
     skill: "foraging",
-    name: "Gather Glowcap",
+    name: "Glowcap",
     description: "Pick glowing mushrooms from the cave mouth.",
     levelReq: 1,
     durationMs: 3000,
@@ -78,7 +78,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "forage_sweetroot",
     skill: "foraging",
-    name: "Dig Sweetroot",
+    name: "Sweetroot",
     description: "Dig up tubers while something watches from the ridge.",
     levelReq: 16,
     durationMs: 4500,
@@ -91,7 +91,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_ration",
     skill: "cooking",
-    name: "Cook Glowcap Ration",
+    name: "Glowcap Ration",
     description: "Two glowcaps, one improvised stove.",
     levelReq: 1,
     durationMs: 3000,
@@ -102,7 +102,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_honey_ration",
     skill: "cooking",
-    name: "Cook Honey Ration",
+    name: "Honey Ration",
     description: "Star Honey from the Sorenians makes this the best meal on Soren.",
     levelReq: 13,
     durationMs: 4000,
@@ -114,7 +114,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_alloy",
     skill: "engineering",
-    name: "Smelt Alloy Plate",
+    name: "Alloy Plate",
     description: "Melt scrap and ore into something useful.",
     levelReq: 1,
     durationMs: 4000,
@@ -125,7 +125,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_circuit_board",
     skill: "engineering",
-    name: "Reflow Circuit Board",
+    name: "Circuit Board",
     description: "Rebuild dead boards into one live one.",
     levelReq: 16,
     durationMs: 6000,
@@ -136,7 +136,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_servo",
     skill: "engineering",
-    name: "Assemble Servo Unit",
+    name: "Servo Unit",
     description: "Motors, gears and a board to tell them what to do.",
     levelReq: 31,
     durationMs: 8000,
@@ -147,7 +147,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_power_core",
     skill: "engineering",
-    name: "Wind Power Core",
+    name: "Power Core",
     description: "Coil crystal around servos until it hums.",
     levelReq: 52,
     durationMs: 10000,
@@ -158,7 +158,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_fusion_cell",
     skill: "engineering",
-    name: "Contain Fusion Cell",
+    name: "Fusion Cell",
     description: "Two cores, a lot of plating, and steady hands.",
     levelReq: 73,
     durationMs: 14000,
@@ -169,7 +169,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_torch",
     skill: "engineering",
-    name: "Build Cutting Torch",
+    name: "Cutting Torch",
     description: "A proper tool for salvaging.",
     levelReq: 10,
     durationMs: 6000,
@@ -181,7 +181,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_harvest_kit",
     skill: "engineering",
-    name: "Build Harvest Kit",
+    name: "Harvest Kit",
     description: "Blades, sample jars and a scanner for foraging.",
     levelReq: 16,
     durationMs: 6000,
@@ -193,7 +193,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_drill",
     skill: "engineering",
-    name: "Build Plasma Drill",
+    name: "Plasma Drill",
     description: "Burns through rock like it owes you money.",
     levelReq: 25,
     durationMs: 8000,
@@ -205,7 +205,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_blade",
     skill: "engineering",
-    name: "Forge Pulse Blade",
+    name: "Pulse Blade",
     description: "A vibrating blade powered by a Lumina crystal.",
     levelReq: 22,
     durationMs: 8000,
@@ -217,7 +217,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_armor",
     skill: "engineering",
-    name: "Assemble Composite Armor",
+    name: "Composite Armor",
     description: "Alloy plates bonded to chitin.",
     levelReq: 28,
     durationMs: 9000,
@@ -229,7 +229,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_skyweave",
     skill: "engineering",
-    name: "Weave Skyweave Suit",
+    name: "Skyweave Suit",
     description: "Alloy plates and chitin over a base of the locals' thread.",
     levelReq: 46,
     durationMs: 10000,
@@ -242,7 +242,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "brew_swift",
     skill: "xenochemistry",
-    name: "Brew Swift Tonic",
+    name: "Swift Tonic",
     description: "Ore dust and glowcap, simmered until it stops arguing.",
     levelReq: 1,
     durationMs: 5000,
@@ -253,7 +253,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "brew_fortune",
     skill: "xenochemistry",
-    name: "Brew Fortune Draught",
+    name: "Fortune Draught",
     description: "Sweetroot mash cut with glowcap juice. Smells like a good day.",
     levelReq: 7,
     durationMs: 6000,
@@ -264,7 +264,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "brew_fury",
     skill: "xenochemistry",
-    name: "Brew Fury Serum",
+    name: "Fury Serum",
     description: "Ground chitin in a base of glowcap. It is meant to be injected.",
     levelReq: 13,
     durationMs: 6000,
@@ -275,7 +275,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "brew_quicksilver",
     skill: "xenochemistry",
-    name: "Brew Quicksilver Tonic",
+    name: "Quicksilver Tonic",
     description: "Lumina dust and a little Star Honey to keep it from boiling over.",
     levelReq: 34,
     durationMs: 8000,
@@ -286,7 +286,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "brew_windfall",
     skill: "xenochemistry",
-    name: "Brew Windfall Elixir",
+    name: "Windfall Elixir",
     description: "A Golden Spore dissolved into Star Honey. The room gets warmer.",
     levelReq: 43,
     durationMs: 9000,
@@ -297,7 +297,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "brew_berserker",
     skill: "xenochemistry",
-    name: "Brew Berserker Extract",
+    name: "Berserker Extract",
     description: "A Xeno Core, pressed. Do not ask what is in the other jar.",
     levelReq: 52,
     durationMs: 10000,
@@ -308,7 +308,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_scout_visor",
     skill: "engineering",
-    name: "Assemble Scout Visor",
+    name: "Scout Visor",
     description: "A salvaged display in a bent alloy frame.",
     levelReq: 16,
     durationMs: 6000,
@@ -320,7 +320,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_arc_saber",
     skill: "engineering",
-    name: "Forge Arc Saber",
+    name: "Arc Saber",
     description: "A pulse blade rebuilt around a resonance coil.",
     levelReq: 58,
     durationMs: 10000,
@@ -332,7 +332,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_prism_visor",
     skill: "engineering",
-    name: "Cut Prism Visor",
+    name: "Prism Visor",
     description: "Prism Geode lenses over a Scout Visor frame.",
     levelReq: 46,
     durationMs: 9000,
@@ -344,7 +344,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_deep_harvester",
     skill: "engineering",
-    name: "Build Deep Harvester",
+    name: "Deep Harvester",
     description: "Skyweave filters and a Golden Spore sensor in a Harvest Kit chassis.",
     levelReq: 58,
     durationMs: 10000,
@@ -356,7 +356,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_arc_torch",
     skill: "engineering",
-    name: "Build Arc Torch",
+    name: "Arc Torch",
     description: "A cutting torch with a resonance coil where the flame used to be.",
     levelReq: 52,
     durationMs: 10000,
@@ -368,7 +368,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_ward_plate",
     skill: "engineering",
-    name: "Assemble Ward Plate",
+    name: "Ward Plate",
     description: "Chitin layered over alloy, with a Star Sapphire set in the chest.",
     levelReq: 70,
     durationMs: 12000,
@@ -380,7 +380,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_quantum_drill",
     skill: "engineering",
-    name: "Build Quantum Drill",
+    name: "Quantum Drill",
     description: "A Plasma Drill that has been taught about the rock before it arrives.",
     levelReq: 64,
     durationMs: 12000,
@@ -392,7 +392,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_shard_cleaver",
     skill: "engineering",
-    name: "Forge Shard Cleaver",
+    name: "Shard Cleaver",
     description: "Chitin shards riveted to an alloy spine. Heavy, simple, effective.",
     levelReq: 25,
     durationMs: 8000,
@@ -404,7 +404,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_spore_lance",
     skill: "engineering",
-    name: "Grow Spore Lance",
+    name: "Spore Lance",
     description: "A lance fed by a cultured glowcap that does not appreciate being carried.",
     levelReq: 28,
     durationMs: 8000,
@@ -416,7 +416,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_siege_maul",
     skill: "engineering",
-    name: "Forge Siege Maul",
+    name: "Siege Maul",
     description: "A cleaver scaled up until it needed a counterweight.",
     levelReq: 61,
     durationMs: 11000,
@@ -428,7 +428,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_thorn_lance",
     skill: "engineering",
-    name: "Grow Thorn Lance",
+    name: "Thorn Lance",
     description: "The spore lance, after a lot of fertiliser and a bad decision.",
     levelReq: 61,
     durationMs: 11000,
@@ -440,7 +440,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_fang_blade",
     skill: "engineering",
-    name: "Forge Fang Blade",
+    name: "Fang Blade",
     description: "A Broodking's fang, mounted on an alloy grip and a lot of nerve.",
     levelReq: 76,
     durationMs: 14000,
@@ -452,7 +452,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_chitin_crown",
     skill: "engineering",
-    name: "Set Chitin Crown",
+    name: "Chitin Crown",
     description: "Matriarch plate, cut to fit a head that has to keep thinking.",
     levelReq: 64,
     durationMs: 12000,
@@ -464,7 +464,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_sovereign_mail",
     skill: "engineering",
-    name: "Weave Sovereign Mail",
+    name: "Sovereign Mail",
     description: "Skyweave over three Sovereign Shards. It hums when you lie.",
     levelReq: 88,
     durationMs: 16000,
@@ -477,7 +477,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_skitter",
     skill: "combat",
-    name: "Hunt Dust Skitter",
+    name: "Dust Skitter",
     description: "Six legs, bad attitude.",
     levelReq: 1,
     durationMs: 4000,
@@ -488,7 +488,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_stalker",
     skill: "combat",
-    name: "Hunt Cave Stalker",
+    name: "Cave Stalker",
     description: "Hunts by heat. You are warm.",
     levelReq: 22,
     durationMs: 6000,
@@ -505,7 +505,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_wraith",
     skill: "combat",
-    name: "Hunt Rift Wraith",
+    name: "Rift Wraith",
     description: "It's not clear what it is made of. It is clear what it wants.",
     levelReq: 58,
     durationMs: 9000,
@@ -515,7 +515,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_burrower",
     skill: "combat",
-    name: "Hunt Sand Burrower",
+    name: "Sand Burrower",
     description: "You only see it when it is already under you.",
     levelReq: 10,
     durationMs: 5000,
@@ -531,7 +531,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_matriarch",
     skill: "combat",
-    name: "Face the Hive Matriarch",
+    name: "Hive Matriarch",
     description: "She is the reason there are so many of them. No eating mid-fight.",
     levelReq: 28,
     durationMs: 20000,
@@ -548,7 +548,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_leech",
     skill: "combat",
-    name: "Hunt Glow Leech",
+    name: "Glow Leech",
     description: "It lights the way and bleeds you while you follow.",
     levelReq: 37,
     durationMs: 7000,
@@ -564,7 +564,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_broodking",
     skill: "combat",
-    name: "Face the Broodking",
+    name: "Broodking",
     description: "The cave's oldest resident, and the largest. No eating mid-fight.",
     levelReq: 52,
     durationMs: 30000,
@@ -581,7 +581,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_hound",
     skill: "combat",
-    name: "Hunt Rift Hound",
+    name: "Rift Hound",
     description: "It was something else before the Rift got to it.",
     levelReq: 73,
     durationMs: 10000,
@@ -597,7 +597,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fight_sovereign",
     skill: "combat",
-    name: "Face the Hollow Sovereign",
+    name: "Hollow Sovereign",
     description: "The Rift's centre looks back. No eating mid-fight.",
     levelReq: 88,
     durationMs: 45000,
@@ -615,7 +615,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fish_minnow",
     skill: "xenofishing",
-    name: "Fish the Shallows",
+    name: "Lake Minnows",
     description: "Lake minnows by the hundred, if you stay patient.",
     levelReq: 1,
     durationMs: 3000,
@@ -627,7 +627,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fish_eel",
     skill: "xenofishing",
-    name: "Net Spark Eels",
+    name: "Spark Eels",
     description: "Insulated gloves recommended. Insulated everything, really.",
     levelReq: 10,
     durationMs: 4000,
@@ -639,7 +639,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fish_ray",
     skill: "xenofishing",
-    name: "Lure Glow Rays",
+    name: "Glow Rays",
     description: "They rise toward any light. So does everything that eats them.",
     levelReq: 20,
     durationMs: 5000,
@@ -651,7 +651,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fish_lurker",
     skill: "xenofishing",
-    name: "Hook a Mire Lurker",
+    name: "Mire Lurkers",
     description: "Heavy line, light conscience.",
     levelReq: 35,
     durationMs: 7000,
@@ -663,7 +663,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "fish_leviathan",
     skill: "xenofishing",
-    name: "Bait the Tide Leviathan",
+    name: "Tide Leviathan",
     description: "You will not land it. You will, with luck, keep a scale.",
     levelReq: 50,
     durationMs: 9000,
@@ -676,7 +676,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_fish_ration",
     skill: "cooking",
-    name: "Fry Fish Ration",
+    name: "Fish Ration",
     description: "Two minnows, one hot plate.",
     levelReq: 5,
     durationMs: 3500,
@@ -687,7 +687,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_eel_skewer",
     skill: "cooking",
-    name: "Grill Eel Skewer",
+    name: "Eel Skewer",
     description: "Let the sparks die down first.",
     levelReq: 25,
     durationMs: 5000,
@@ -698,7 +698,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "craft_ray_stew",
     skill: "cooking",
-    name: "Simmer Ray Stew",
+    name: "Ray Stew",
     description: "Star Honey takes the edge off the fish.",
     levelReq: 45,
     durationMs: 7000,
@@ -710,7 +710,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "smelt_ferrite",
     skill: "smelting",
-    name: "Cast Ferrite Ingot",
+    name: "Ferrite Ingot",
     description: "Two lumps of ore, one clean bar.",
     levelReq: 1,
     durationMs: 3000,
@@ -721,7 +721,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "smelt_steel",
     skill: "smelting",
-    name: "Temper Carbon Steel",
+    name: "Carbon Steel",
     description: "Burn a glowcap into the melt and quench it.",
     levelReq: 10,
     durationMs: 4000,
@@ -732,7 +732,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "smelt_glass",
     skill: "smelting",
-    name: "Melt Lumina Glass",
+    name: "Lumina Glass",
     description: "Keep the crystal humming and the crucible steady.",
     levelReq: 20,
     durationMs: 5000,
@@ -743,7 +743,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "smelt_chitin",
     skill: "smelting",
-    name: "Fuse Chitin Alloy",
+    name: "Chitin Alloy",
     description: "Grind the shell fine, then fold it into steel.",
     levelReq: 35,
     durationMs: 7000,
@@ -754,7 +754,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "smelt_xeno",
     skill: "smelting",
-    name: "Forge Xeno Alloy",
+    name: "Xeno Alloy",
     description: "A core from beyond the rift, in a furnace built for scrap.",
     levelReq: 50,
     durationMs: 9000,
@@ -766,8 +766,9 @@ export const TASKS: TaskDef[] = [
   {
     id: "hack_cache",
     skill: "hacking",
-    name: "Crack a Relic Cache",
-    description: "A sealed box with a lock that has not been updated in ages.",
+    name: "Relic Caches",
+    description:
+      "Sealed boxes left behind by whoever lived here. The locks are ancient, and the logic behind them is still simple.",
     levelReq: 1,
     durationMs: 3000,
     node: { hp: 30, respawnMs: 10000 },
@@ -777,8 +778,8 @@ export const TASKS: TaskDef[] = [
   {
     id: "hack_door",
     skill: "hacking",
-    name: "Bypass a Vault Door",
-    description: "Try every cipher you have. One of them is old enough.",
+    name: "Vault Doors",
+    description: "Feed ciphers into the door's handshake until one of them is old enough to be trusted.",
     levelReq: 10,
     durationMs: 4000,
     node: { hp: 25, respawnMs: 10000 },
@@ -789,8 +790,8 @@ export const TASKS: TaskDef[] = [
   {
     id: "hack_archive",
     skill: "hacking",
-    name: "Raid the Archive",
-    description: "Copy what you can before the lights come back on.",
+    name: "Archive Terminals",
+    description: "Copy the records before the archive notices and wipes itself.",
     levelReq: 20,
     durationMs: 5000,
     node: { hp: 20, respawnMs: 12000 },
@@ -801,8 +802,8 @@ export const TASKS: TaskDef[] = [
   {
     id: "hack_warden",
     skill: "hacking",
-    name: "Turn a Warden",
-    description: "Its mind is wide open. So is yours, which is the problem.",
+    name: "Warden Cores",
+    description: "Turn the vault's guardian against its own defences, one subroutine at a time.",
     levelReq: 35,
     durationMs: 7000,
     node: { hp: 15, respawnMs: 15000 },
@@ -813,8 +814,8 @@ export const TASKS: TaskDef[] = [
   {
     id: "hack_heart",
     skill: "hacking",
-    name: "Open the Heart Vault",
-    description: "Everything else was practice.",
+    name: "Heart Vault",
+    description: "The deepest lock on Soren, and the one all the others were built to protect.",
     levelReq: 50,
     durationMs: 9000,
     node: { hp: 10, respawnMs: 20000 },
@@ -829,7 +830,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "explore_ridge",
     skill: "exploration",
-    name: "Walk the Ridge",
+    name: "The Ridge",
     description: "High ground, long views and a lot of note-taking.",
     levelReq: 1,
     durationMs: 3000,
@@ -839,7 +840,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "explore_canyon",
     skill: "exploration",
-    name: "Survey the Canyon",
+    name: "The Canyon",
     description: "Rope, patience and a very honest altimeter.",
     levelReq: 10,
     durationMs: 4000,
@@ -849,7 +850,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "explore_caves",
     skill: "exploration",
-    name: "Map the Caves",
+    name: "The Caves",
     description: "Chalk the walls. They will change anyway.",
     levelReq: 20,
     durationMs: 5000,
@@ -859,7 +860,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "explore_lakes",
     skill: "exploration",
-    name: "Sound the Lakes",
+    name: "The Lakes",
     description: "Drop a line, count the fathoms, write down what looked back.",
     levelReq: 35,
     durationMs: 7000,
@@ -869,7 +870,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "explore_deep",
     skill: "exploration",
-    name: "Cross the Deep Wild",
+    name: "The Deep Wild",
     description: "Weeks of country in one long walk. The locals make room on the wall.",
     levelReq: 50,
     durationMs: 9000,
@@ -880,7 +881,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "build_hound",
     skill: "companions",
-    name: "Assemble Scrap Hound",
+    name: "Scrap Hound",
     description: "Four legs, one good nose and a lot of hull plating.",
     levelReq: 1,
     durationMs: 4000,
@@ -891,7 +892,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "build_wisp",
     skill: "companions",
-    name: "Wind a Spark Wisp",
+    name: "Spark Wisp",
     description: "A coil, a cage and something to keep it from leaving.",
     levelReq: 10,
     durationMs: 5000,
@@ -902,7 +903,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "build_moth",
     skill: "companions",
-    name: "Build a Lantern Moth",
+    name: "Lantern Moth",
     description: "Delicate wings, patient hands.",
     levelReq: 20,
     durationMs: 6000,
@@ -913,7 +914,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "build_ward",
     skill: "companions",
-    name: "Raise a Ward Drone",
+    name: "Ward Drone",
     description: "Armoured, loyal and slightly smug.",
     levelReq: 35,
     durationMs: 8000,
@@ -924,7 +925,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "build_familiar",
     skill: "companions",
-    name: "Awaken a Star Familiar",
+    name: "Star Familiar",
     description: "It will not tell you what it saw out there.",
     levelReq: 50,
     durationMs: 10000,
@@ -936,7 +937,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "watch_stars",
     skill: "stargazing",
-    name: "Sweep Star Dust",
+    name: "Star Dust",
     description: "Clear nights, long exposures and a soft brush.",
     levelReq: 1,
     durationMs: 3000,
@@ -946,7 +947,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "chart_hunter",
     skill: "stargazing",
-    name: "Chart the Hunter",
+    name: "The Hunter",
     description: "Three bright stars in a row, and something that seems to follow them.",
     levelReq: 10,
     durationMs: 8000,
@@ -958,7 +959,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "watch_comets",
     skill: "stargazing",
-    name: "Catch Comet Ice",
+    name: "Comet Ice",
     description: "Wait for the pass, then be quick.",
     levelReq: 20,
     durationMs: 5000,
@@ -968,7 +969,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "chart_loom",
     skill: "stargazing",
-    name: "Chart the Loom",
+    name: "The Loom",
     description: "Threads of faint stars, crossing and recrossing.",
     levelReq: 25,
     durationMs: 10000,
@@ -980,7 +981,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "watch_nebula",
     skill: "stargazing",
-    name: "Bottle Nebula Gas",
+    name: "Nebula Gas",
     description: "The colours do not survive the trip home, but the gas does.",
     levelReq: 40,
     durationMs: 7000,
@@ -990,7 +991,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "chart_crown",
     skill: "stargazing",
-    name: "Chart the Crown",
+    name: "The Crown",
     description: "A ring of stars that no night shows twice.",
     levelReq: 45,
     durationMs: 12000,
@@ -1002,7 +1003,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "watch_pulsar",
     skill: "stargazing",
-    name: "Count Pulsar Dust",
+    name: "Pulsar Dust",
     description: "Tick, tick, tick. Do not lose your place.",
     levelReq: 65,
     durationMs: 9000,
@@ -1012,7 +1013,7 @@ export const TASKS: TaskDef[] = [
   {
     id: "chart_ferryman",
     skill: "stargazing",
-    name: "Chart the Ferryman",
+    name: "The Ferryman",
     description: "One bright star, alone, always crossing.",
     levelReq: 70,
     durationMs: 14000,

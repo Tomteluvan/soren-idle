@@ -72,7 +72,7 @@ describe("hints", () => {
   it("starts a new game on the welcome hint pointing at the first task", () => {
     const hint = nextHint(newGame(0));
     expect(hint?.id).toBe("welcome");
-    expect(hint?.text).toMatch(/Scavenge Hull Scrap/);
+    expect(hint?.text).toMatch(/Hull Scrap/);
   });
 
   it("shows each hint once, in order", () => {

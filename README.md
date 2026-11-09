@@ -28,7 +28,7 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
 ## Getting started
 
 1. Open **Play Soren Idle** in Raycast.
-2. Pick **Salvaging**, then *Scavenge Hull Scrap*. Levels unlock new tasks.
+2. Pick **Salvaging**, then *Hull Scrap*. Levels unlock new tasks.
 3. Use Engineering to build your Base, and the Signal Beacon to call the Sorenians.
 4. Optional: enable **Soren Idle Ticker** so the game keeps ticking in the menu bar.
 
