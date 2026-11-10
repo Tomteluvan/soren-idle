@@ -50,7 +50,7 @@ export function showReport(report: Report) {
         : found
           ? "Rare find!"
           : report.notices.length
-            ? "Contact"
+            ? "News"
             : report.completed;
   if (!title) return;
   const message = lines.join(" · ") || undefined;

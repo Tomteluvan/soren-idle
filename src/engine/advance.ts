@@ -1,4 +1,5 @@
-import { BUILDINGS, yieldBonus, RIFT_YIELD, TASK_BY_ID, xpBonus, ITEMS } from "./data";
+import { BUILDINGS, yieldBonus, RIFT_YIELD, TASK_BY_ID, xpBonus, petBonus, ITEMS } from "./data";
+import { checkAchievements, rollPet } from "./collection";
 import { onKill, refreshBoardIfDue } from "./bounty";
 import { levelFromXp } from "./levels";
 import { masteryLevel, poolBonus, POOL_SHARE, masteryXpPerCycle, masteryYield, hasMastery, nodeMaxHp } from "./mastery";
@@ -41,7 +42,7 @@ function boostYield(s: GameState, bundle: Bundle = {}, mult: number): Bundle {
 
 export function gainXp(s: GameState, skill: SkillId, amount: number, report: Report) {
   const before = levelFromXp(s.xp[skill]);
-  amount *= xpBonus(s);
+  amount *= xpBonus(s) * petBonus(s, skill);
   s.xp[skill] += amount;
   report.xp[skill] = (report.xp[skill] ?? 0) + amount;
   const after = levelFromXp(s.xp[skill]);
@@ -141,6 +142,7 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
     for (const id of Object.keys(outputs) as ItemId[]) autoEquip(s, id);
   }
   rollRareDrops(s, task, report, at);
+  rollPet(s, task.skill, report);
   gainXp(s, task.skill, task.xp, report);
   hitNode(s, task, at + taskDurationMs(s, task, at));
   if (hasMastery(task)) {
@@ -251,5 +253,6 @@ function finish(s: GameState, report: Report): { state: GameState; report: Repor
   for (const kind of Object.keys(s.buffs) as BuffKind[]) if (!activeBuff(s, kind, cycleStart)) delete s.buffs[kind];
   for (const [id, n] of Object.entries(report.items) as [ItemId, number][])
     s.stats.produced[id] = (s.stats.produced[id] ?? 0) + n;
+  checkAchievements(s, report);
   return { state: s, report };
 }

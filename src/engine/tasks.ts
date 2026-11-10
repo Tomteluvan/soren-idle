@@ -1,4 +1,4 @@
-import { MAX_LEVEL, TASK_BY_ID, xpBonus } from "./data";
+import { MAX_LEVEL, petBonus, TASK_BY_ID, xpBonus } from "./data";
 import { bossLockReason } from "./areas";
 import { xpForLevel } from "./levels";
 import { averageCycleMs } from "./mastery";
@@ -26,7 +26,7 @@ export function taskRates(s: GameState, task: TaskDef): TaskRates {
   const perHour = 3_600_000 / averageCycleMs(s, task, taskDurationMs(s, task));
   const ammo = modifiers(s).ammo;
   const level = levelOf(s, task.skill);
-  const xpPerHour = task.xp * xpBonus(s) * perHour;
+  const xpPerHour = task.xp * xpBonus(s) * petBonus(s, task.skill) * perHour;
   return {
     xpPerHour,
     itemsPerHour: scaleBundle(task.monster ? task.monster.drops : task.outputs, perHour),

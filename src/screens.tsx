@@ -17,6 +17,7 @@ import { SkillId } from "./engine/types";
 import { Base } from "./views/base";
 import { Bounties } from "./views/bounties";
 import { Place } from "./views/constants";
+import { Collection } from "./views/collection";
 import { Equipment } from "./views/equipment";
 import { Hydroponics } from "./views/hydroponics";
 import { Inventory } from "./views/inventory";
@@ -165,6 +166,7 @@ const placeView: Record<Place, (g: ReadyGame) => Children> = {
   base: baseView,
   inventory: inventoryView,
   stats: (g) => <Stats state={g.state} />,
+  collection: (g) => <Collection state={g.state} />,
   settings: (g) => (
     <Settings
       state={g.state}

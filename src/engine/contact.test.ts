@@ -12,6 +12,9 @@ function readyToBuild(): GameState {
   };
 }
 
+// Achievements also announce themselves as notices; these tests are about the story beat.
+const story = (notices: string[]) => notices.filter((n) => !n.startsWith("Achievement"));
+
 describe("first contact", () => {
   it("has no contact before a beacon exists", () => {
     const s = newGame(0);
@@ -32,11 +35,11 @@ describe("first contact", () => {
   it("announces contact exactly once, even across a long offline gap", () => {
     const { state } = build(readyToBuild(), "beacon");
     const early = advance(state, 1000 + CONTACT_DELAY_MS - 1);
-    expect(early.report.notices).toEqual([]);
+    expect(story(early.report.notices)).toEqual([]);
     expect(firstContact(early.state)).toBe(false);
 
     const arrive = advance(early.state, 1000 + CONTACT_DELAY_MS + 5 * 60 * 60 * 1000);
-    expect(arrive.report.notices).toHaveLength(1);
+    expect(story(arrive.report.notices)).toHaveLength(1);
     expect(firstContact(arrive.state)).toBe(true);
     expect(contactRemainingMs(arrive.state)).toBeNull();
 
