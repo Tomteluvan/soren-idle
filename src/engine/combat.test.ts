@@ -57,7 +57,7 @@ describe("areas", () => {
   });
 
   it("counts a retreat when the survivor is too wounded to keep fighting", () => {
-    const { state, report } = advance(startTask(withItems({}, strong(28)), "fight_skitter").state, MINUTE);
+    const { state, report } = advance(startTask(withItems({ ration: 50 }, strong(28)), "fight_skitter").state, MINUTE);
     expect(state.stats.retreats).toBe(0);
     const hurt = { ...startTask(withItems({}, { hp: 1 }), "fight_skitter").state };
     const after = advance(hurt, 10 * MINUTE);
@@ -89,11 +89,11 @@ describe("bosses", () => {
     const base = withItems(
       { ration: 50 },
       {
-        ...strong(34),
+        ...strong(44),
         stats: { ...newGame(0).stats, hunts: { fight_skitter: 99 } },
       },
     );
-    base.hp = 85;
+    base.hp = 105;
     const started = startTask(base, boss.id);
     expect(started.error).toBeUndefined();
     const { state, report } = advance(started.state, 30 * 60 * 1000);
@@ -158,7 +158,7 @@ describe("defeat", () => {
   it("can happen to a wounded survivor, and costs a share of the creature's drops", () => {
     const task = TASK_BY_ID.fight_hulk;
     const outcomes = Array.from({ length: 40 }, (_, rng) => {
-      const probe = withItems({ chitin_shard: 100, sweetroot: 3 }, { ...strong(46), rng });
+      const probe = withItems({ chitin_shard: 100, sweetroot: 3 }, { ...strong(56), rng });
       const base = { ...probe, hp: Math.min(fightDamage(probe, task) + 1, maxHp(probe)) };
       return advance(startTask(base, "fight_hulk", 1).state, MINUTE);
     });

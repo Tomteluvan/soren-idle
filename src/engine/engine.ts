@@ -350,12 +350,12 @@ export function fightDamage(s: GameState, task: TaskDef, at = s.lastTick): numbe
   return Math.ceil(rounds * enemyHitChance(s, task, at) * hitDamage(s, task, at));
 }
 
-/** Your swing lands 85% of the time with no weapon bonus, and a better weapon pushes that towards the cap. */
-const PLAYER_HIT_BASE = 0.85;
-const PLAYER_HIT_PER_DAMAGE = 0.008;
+/** Your swing lands 50% of the time with no weapon bonus, and a better weapon pushes that towards the cap. */
+const PLAYER_HIT_BASE = 0.5;
+const PLAYER_HIT_PER_DAMAGE = 0.015;
 const PLAYER_HIT_MAX = 0.95;
-/** A creature hits 35% of the time against no armor. Armor equal to half its damage cuts that to under a fifth. */
-const ENEMY_HIT_BASE = 0.35;
+/** A creature hits 50% of the time against no armor. Armor equal to half its damage cuts that to under a fifth. */
+const ENEMY_HIT_BASE = 0.5;
 const ARMOR_WEIGHT = 2;
 /** Even the weakest creature gets a swing in now and then. */
 const ENEMY_HIT_MIN = 0.05;

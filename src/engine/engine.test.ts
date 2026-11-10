@@ -161,9 +161,9 @@ describe("startTask", () => {
 describe("combat", () => {
   it("costs hp, counts kills and drops loot", () => {
     const { state, report } = run(newGame(0), "fight_skitter", 8 * SECOND);
-    expect(report.cycles).toBe(2);
-    expect(state.stats.kills).toBe(2);
-    expect(count(state, "chitin_shard")).toBe(2);
+    expect(report.cycles).toBe(1);
+    expect(state.stats.kills).toBe(1);
+    expect(count(state, "chitin_shard")).toBe(1);
     expect(state.hp).toBeLessThan(maxHp(state));
   });
 

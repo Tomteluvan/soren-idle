@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advance, count, maxHp, newGame, startTask, storageCap } from "./engine";
+import { advance, count, maxHp, newGame, startTask, storageCap, xpForLevel } from "./engine";
 import { GameState } from "./types";
 
 const MINUTE = 60_000;
@@ -28,7 +28,9 @@ describe("a long absence matches the same time played in short ticks", () => {
   });
 
   it("heals between fights, not all at once before the first", () => {
+    // level 20 so each fight is survivable and healing in between decides how long the hunt lasts
     const base = { ...newGame(0), buildings: { shelter: 5 } } as GameState;
+    base.xp.combat = xpForLevel(20);
     const s = startTask({ ...base, hp: maxHp(base), inventory: { ration: 0 } }, "fight_skitter").state;
     const once = play(s, 2 * HOUR);
     // a cycle is a few seconds, so this is as close as an open window gets to continuous play
