@@ -33,7 +33,6 @@ export function launch(s: GameState): { state: GameState; gain?: number; error?:
     starlight: s.starlight + gain,
     perks: { ...s.perks },
     achievements: [...s.achievements],
-    pets: [...s.pets],
     launches: s.launches + 1,
     settings: { ...s.settings },
     hints: [...s.hints],

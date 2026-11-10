@@ -472,9 +472,9 @@ export interface GameState {
   starlight: number;
   perks: Record<string, number>;
   launches: number;
-  /** Achievements earned. They, the pets and the log survive a launch. */
+  /** Achievements earned. They survive a launch. */
   achievements: string[];
-  /** Skills whose pet has been found. */
+  /** Skills whose pet has been found on this run. A launch sends them home. */
   pets: SkillId[];
   /** Run modifiers in force on this run, chosen before the launch that began it. */
   mods: string[];

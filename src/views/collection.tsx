@@ -1,4 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
+import { petMarkdown } from "../art";
 import { ACHIEVEMENTS, loggedItems } from "../engine/collection";
 import { BUILDINGS, ITEMS, PETS, SKILL_BY_ID, TASKS } from "../engine/data";
 import { formatNumber } from "../engine/format";
@@ -8,7 +9,7 @@ const found = <T,>(done: boolean, hit: T, miss: T) => (done ? hit : miss);
 const check = (done: boolean): List.Item.Props["icon"] =>
   done ? Icon.CheckCircle : { source: Icon.Circle, tintColor: Color.SecondaryText };
 
-export function Collection({ state }: { state: GameState }) {
+export function Collection({ state, frame }: { state: GameState; frame: number }) {
   const logged = new Set(loggedItems(state));
   const items = Object.keys(ITEMS) as ItemId[];
   const creatures = TASKS.filter((t) => t.monster);
@@ -39,6 +40,15 @@ export function Collection({ state }: { state: GameState }) {
               subtitle={found(done, PETS[skill]!.blurb, `A rare find while ${SKILL_BY_ID[skill].name.toLowerCase()}`)}
               icon={check(done)}
               accessories={[{ text: SKILL_BY_ID[skill].name }, ...(done ? [{ tag: "+3% XP" }] : [])]}
+              detail={
+                <List.Item.Detail
+                  markdown={
+                    done
+                      ? `${petMarkdown(skill, frame, true)}\n\n# ${PETS[skill]!.name}\n${PETS[skill]!.blurb}\n\n+3% ${SKILL_BY_ID[skill].name} XP while it stays with you. A launch sends it home.`
+                      : `# ???\nA pet turns up now and then while you work in ${SKILL_BY_ID[skill].name}. About one task in ten thousand.`
+                  }
+                />
+              }
             />
           );
         })}

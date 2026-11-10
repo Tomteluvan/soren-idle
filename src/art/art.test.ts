@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { BUILDINGS, TASKS } from "../engine/data";
+import { BUILDINGS, PETS, TASKS } from "../engine/data";
+import { PET_ART } from "./hud-petdex";
 import { BUILDING_ART_IDS, buildingSvg } from "./hud-base";
 import { SCENE_IDS, sceneFor } from "./scenes";
 
@@ -41,6 +42,19 @@ describe("terminal art", () => {
         expect(svg).not.toMatch(/NaN|undefined|Infinity/);
         expect(svg.length).toBeLessThan(60_000);
       }
+    }
+  });
+
+  it("draws every pet, in every frame", () => {
+    expect(Object.keys(PET_ART).sort()).toEqual(Object.keys(PETS).sort());
+    for (const [skill, draw] of Object.entries(PET_ART)) {
+      for (let frame = 0; frame < 4; frame++) {
+        const svg = draw(frame);
+        expect(svg.startsWith("<svg"), skill).toBe(true);
+        expect(svg).not.toMatch(/NaN|undefined|Infinity/);
+        expect(svg.length).toBeLessThan(60_000);
+      }
+      expect(draw(0), skill).not.toBe(draw(2));
     }
   });
 });

@@ -166,7 +166,7 @@ const placeView: Record<Place, (g: ReadyGame) => Children> = {
   base: baseView,
   inventory: inventoryView,
   stats: (g) => <Stats state={g.state} />,
-  collection: (g) => <Collection state={g.state} />,
+  collection: (g) => <Collection state={g.state} frame={g.frame} />,
   settings: (g) => (
     <Settings
       state={g.state}

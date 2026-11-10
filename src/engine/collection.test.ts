@@ -66,11 +66,11 @@ describe("collection log", () => {
     expect(loggedItems(s).sort()).toEqual(["ration", "scrap_metal"]);
   });
 
-  it("survives a launch and a save", () => {
+  it("keeps achievements through a launch but not pets, and both through a save", () => {
     const s: GameState = { ...newGame(0), buildings: { rescue_ship: 1 }, achievements: ["boss"], pets: ["mining"] };
     const { state } = launch(s);
     expect(state.achievements).toEqual(["boss"]);
-    expect(state.pets).toEqual(["mining"]);
-    expect(importSave(exportSave(state)).state?.pets).toEqual(["mining"]);
+    expect(state.pets).toEqual([]);
+    expect(importSave(exportSave(s)).state?.pets).toEqual(["mining"]);
   });
 });
