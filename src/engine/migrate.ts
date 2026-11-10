@@ -31,6 +31,7 @@ export function migrateSave(saved: Partial<GameState>): GameState {
     xp: { ...base.xp, ...saved.xp },
     masteryPool: { ...saved.masteryPool },
     perks: { ...saved.perks },
+    recentTasks: [...(saved.recentTasks ?? [])],
     achievements: [...(saved.achievements ?? [])],
     pets: [...(saved.pets ?? [])],
     mods: [...(saved.mods ?? [])],

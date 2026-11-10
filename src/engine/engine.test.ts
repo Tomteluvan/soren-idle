@@ -271,3 +271,14 @@ describe("drone power", () => {
     expect(advance(drones(0), hour).state.inventory.scrap_metal).toBeUndefined();
   });
 });
+
+describe("recent tasks", () => {
+  it("remembers the last few started tasks, newest first, without repeats", () => {
+    let s: GameState = { ...newGame(0), buildings: { storage: 5 } };
+    for (const id of ["salvage_hull", "mine_ferrite", "salvage_hull"]) {
+      s = startTask({ ...s, xp: { ...s.xp, mining: xpForLevel(5) } }, id).state;
+    }
+    expect(s.recentTasks).toEqual(["salvage_hull", "mine_ferrite"]);
+    expect(startTask(s, "no_such_task").state.recentTasks).toEqual(["salvage_hull", "mine_ferrite"]);
+  });
+});

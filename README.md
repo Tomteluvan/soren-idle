@@ -15,22 +15,27 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
 - **A base to build:** Workshop, drones, a Hydroponic Bay and a Signal Beacon that calls the locals.
 - **Trade and Bounties:** the Sorenians buy what you produce and sell what you can't make yourself.
 - **Rescue and Starlight:** build the Rescue Ship, launch off Soren and start over with Starlight
-  for permanent perks. Each run is harder and pays better.
+  for permanent perks. Each run is harder and pays better. Pick run modifiers (Brutal Wilds, Slow
+  Going, Thin Pickings) for a tougher run that pays extra Starlight.
+- **Collection Log:** every item, creature and building you have found, 18 achievements that pay
+  Credits, and one rare pet per skill (about 1 in 10,000 tasks, +3% XP, sent home on each launch).
+- **Away report:** per-skill time, tasks, XP per hour and levels gained while you were gone.
+- **Settings:** compact numbers (12.4K), a notification toggle for each event, and save backup.
 - **Combat:** areas, bosses, a damage triangle and gear that only counts while worn.
-- **Menu bar ticker (macOS):** keeps the game running in the background and notifies you when a task
-  stops.
+- **Menu bar ticker (macOS):** keeps the game running in the background, shows the current task and
+  its progress, lets you switch to a recent task or stop it, and notifies you when something happens.
 
 ## Commands
 
-| Command | Platforms | What it does |
-| --- | --- | --- |
-| **Play Soren Idle** | macOS | The game: pick tasks, craft gear, manage your base, trade and hunt. |
-| **Soren Idle Ticker** | macOS | A menu bar status that keeps the game ticking and notifies you when a task stops. |
+| Command               | Platforms | What it does                                                                                         |
+| --------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| **Play Soren Idle**   | macOS     | The game: pick tasks, craft gear, manage your base, trade and hunt.                                  |
+| **Soren Idle Ticker** | macOS     | A menu bar status that keeps the game ticking, shows task progress, switches tasks and notifies you. |
 
 ## Getting started
 
 1. Open **Play Soren Idle** in Raycast.
-2. Pick **Salvaging**, then *Hull Scrap*. Levels unlock new tasks.
+2. Pick **Salvaging**, then _Hull Scrap_. Levels unlock new tasks.
 3. Use Engineering to build your Base, and the Signal Beacon to call the Sorenians.
 4. Optional: enable **Soren Idle Ticker** so the game keeps ticking in the menu bar.
 
@@ -47,7 +52,7 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
 ## Your save
 
 Progress is stored in Raycast's local storage, on your machine only. Nothing is sent anywhere. Use
-*Copy Save to Clipboard* to back it up.
+_Copy Save to Clipboard_ (in Settings) to back it up, and _Import Save from Clipboard_ to restore it.
 
 ## Development
 
@@ -61,16 +66,16 @@ npm run balance    # time-to-level and time-to-unlock table
 npm run lint
 ```
 
-| Path | What it holds |
-| --- | --- |
-| `src/engine` | The game logic. No Raycast dependencies, so it is fully unit tested. |
-| `src/engine/data` | Game content: items, tasks, buildings, areas, bounties, trade. |
-| `src/play.tsx`, `src/screens.tsx` | The Play command: a main menu and the screens it pushes. |
-| `src/hooks/use-game.ts` | Loads the game and keeps it ticking. |
-| `src/views` | The content of each screen (tasks, inventory, base, equipment, trade, ...). |
-| `src/art` | The blue HUD scene art: one scene per task, a camp, and every Base building. |
-| `src/ticker.tsx` | The menu bar command. |
-| `scripts` | Tooling such as the balance simulation. |
+| Path                              | What it holds                                                                                                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/engine`                      | The game logic. No Raycast dependencies, so it is fully unit tested. `engine.ts` re-exports `core` (state, base, gear), `combat`, `tasks` and `advance` (the simulation). |
+| `src/engine/data`                 | Game content: buildings, areas, bounties, trade, perks. Tasks live in `tasks/` and items in `items/`, one file per skill, so balance edits touch one small file.          |
+| `src/play.tsx`, `src/screens.tsx` | The Play command: a main menu and the screens it pushes.                                                                                                                  |
+| `src/hooks/use-game.ts`           | Loads the game and keeps it ticking.                                                                                                                                      |
+| `src/views`                       | The content of each screen (tasks, inventory, base, equipment, trade, ...).                                                                                               |
+| `src/art`                         | The blue HUD scene art: one scene per task, a camp, every Base building and every pet.                                                                                    |
+| `src/ticker.tsx`                  | The menu bar command.                                                                                                                                                     |
+| `scripts`                         | Tooling such as the balance simulation.                                                                                                                                   |
 
 ## Contributing
 

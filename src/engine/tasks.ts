@@ -6,6 +6,9 @@ import { canAfford, count, levelOf, modifiers, taskDurationMs } from "./core";
 import { fightDamage } from "./combat";
 import { Bundle, GameState, ItemId, TaskDef } from "./types";
 
+/** How many started tasks the menu bar remembers. */
+export const RECENT_TASKS = 5;
+
 export interface TaskRates {
   xpPerHour: number;
   /** What one hour of this task makes (outputs, or monster drops). */
@@ -55,7 +58,8 @@ export function startTask(s: GameState, taskId: string, runs?: number): { state:
   if (task.boss && s.hp <= fightDamage(s, task))
     return { state: s, error: "Too wounded for this fight. Eat first, there is no food mid-fight" };
   const limit = task.once ? 1 : runs && runs > 0 ? Math.floor(runs) : null;
-  return { state: { ...s, activeTask: taskId, taskProgressMs: 0, taskRemaining: limit } };
+  const recentTasks = [taskId, ...s.recentTasks.filter((id) => id !== taskId)].slice(0, RECENT_TASKS);
+  return { state: { ...s, activeTask: taskId, taskProgressMs: 0, taskRemaining: limit, recentTasks } };
 }
 
 export function stopTask(s: GameState): GameState {

@@ -472,6 +472,8 @@ export interface GameState {
   starlight: number;
   perks: Record<string, number>;
   launches: number;
+  /** The last few tasks started, newest first, for the menu bar's quick switch. */
+  recentTasks: string[];
   /** Achievements earned. They survive a launch. */
   achievements: string[];
   /** Skills whose pet has been found on this run. A launch sends them home. */

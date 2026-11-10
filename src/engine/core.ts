@@ -68,6 +68,7 @@ export function newGame(now = Date.now()): GameState {
     starlight: 0,
     perks: {},
     launches: 0,
+    recentTasks: [],
     achievements: [],
     pets: [],
     mods: [],
