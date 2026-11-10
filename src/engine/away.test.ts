@@ -49,10 +49,11 @@ describe("away report", () => {
   it("lists rare finds, level-ups and why a task stopped", () => {
     const { report } = advance(mining(), 12 * HOUR);
     const lines = awayLines(report).join("\n");
-    expect(lines).toMatch(/^Mining 12h 0m · [\d,]+ tasks · \+[\d,]+ XP · [\d,]+× Ferrite Ore/m);
-    expect(lines).toMatch(/Mining reached level/);
+    expect(lines).toMatch(
+      /^Mining 12h 0m · [\d,]+ tasks · \+[\d,]+ XP \([\d,]+\/h\) · level 1 → \d+ · [\d,]+× Ferrite Ore/m,
+    );
     expect(lines).toMatch(/★ Rare finds: .*Prism Geode/);
-    expect(awayMarkdown(report)).toMatch(/# While you were away\n\*\*12h 0m\*\*/);
+    expect(awayMarkdown(report)).toMatch(/# While you were away\n\*\*12h 0m\*\* · \+[\d,]+ XP \([\d,]+\/h\)/);
   });
 });
 
