@@ -15,7 +15,7 @@ import {
   taskRates,
   taskDurationMs,
 } from "../engine/engine";
-import { bar, formatBundle, formatDuration, formatRates } from "../engine/format";
+import { bar, formatBundle, formatDuration, formatNumber, formatRates } from "../engine/format";
 import {
   hasMastery,
   masteryLevel,
@@ -122,7 +122,7 @@ export function Tasks(props: {
             )}
             {spendCost(state, task) !== null && (
               <Action
-                title={`Spend Mastery Pool (${spendCost(state, task)?.toLocaleString("en-US")} XP)`}
+                title={`Spend Mastery Pool (${formatNumber(spendCost(state, task) ?? 0)} XP)`}
                 icon={Icon.ArrowUpCircle}
                 onAction={() => props.onSpend(task.id)}
               />
@@ -178,8 +178,8 @@ function masteryLines(state: GameState, task: TaskDef): string[] {
     return `${share >= c.at ? "✓" : "○"} ${c.at * 100}%: ${gives.join(", ")}`;
   });
   return [
-    `- **Mastery pool:** ${Math.floor(poolXp(state, task.skill)).toLocaleString("en-US")} / ${Math.round(poolMax(task.skill)).toLocaleString("en-US")} XP across ${SKILL_BY_ID[task.skill].name} (${checkpoints.join(" · ")})`,
-    `- **Mastery ${level}:** ${level >= MASTERY_MAX ? "maxed" : `${Math.floor(xp - floor).toLocaleString("en-US")} / ${(next - floor).toLocaleString("en-US")} XP`}${bonuses.length ? ` (${bonuses.join(", ")})` : ""}`,
+    `- **Mastery pool:** ${formatNumber(Math.floor(poolXp(state, task.skill)))} / ${formatNumber(Math.round(poolMax(task.skill)))} XP across ${SKILL_BY_ID[task.skill].name} (${checkpoints.join(" · ")})`,
+    `- **Mastery ${level}:** ${level >= MASTERY_MAX ? "maxed" : `${formatNumber(Math.floor(xp - floor))} / ${formatNumber(next - floor)} XP`}${bonuses.length ? ` (${bonuses.join(", ")})` : ""}`,
   ];
 }
 
@@ -188,9 +188,7 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
   if (active) lines.push(taskProgress(state, task), "");
   lines.push(`- **Time:** ${formatDuration(taskDurationMs(state, task))}`, `- **XP:** ${task.xp}`);
   const rates = taskRates(state, task);
-  lines.push(
-    `- **Per hour:** ${formatRates(rates.itemsPerHour)} · ${Math.round(rates.xpPerHour).toLocaleString("en-US")} XP`,
-  );
+  lines.push(`- **Per hour:** ${formatRates(rates.itemsPerHour)} · ${formatNumber(Math.round(rates.xpPerHour))} XP`);
   if (task.monster) lines.push(`- **HP lost per hour:** ~${Math.round(rates.hpLossPerHour)}`);
   if (Object.keys(rates.inputsPerHour).length) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
   if (rates.nextLevelMs !== null) lines.push(`- **Next level in:** ${formatDuration(rates.nextLevelMs)} nonstop`);

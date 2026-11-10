@@ -415,6 +415,13 @@ export interface Settings {
   /** Eat when HP drops below this share of max HP. 0 means only when the next fight needs it. */
   eatBelow: number;
   foodPriority: FoodPriority;
+  /** Show 12.4K instead of 12,400. */
+  compactNumbers: boolean;
+  /** Which events get a macOS notification from the menu bar ticker. */
+  notifyStopped: boolean;
+  notifyFinished: boolean;
+  notifyBounty: boolean;
+  notifyRare: boolean;
 }
 
 export interface StockItem {
@@ -465,6 +472,10 @@ export interface GameState {
   starlight: number;
   perks: Record<string, number>;
   launches: number;
+  /** Run modifiers in force on this run, chosen before the launch that began it. */
+  mods: string[];
+  /** Run modifiers picked for the next launch. */
+  nextMods: string[];
   /** Resource nodes that have been hit: health left, and when a spent one comes back. */
   nodes: Record<string, { hp: number; respawnAt?: number }>;
   /** One entry per hydroponic plot; null is an empty plot. */

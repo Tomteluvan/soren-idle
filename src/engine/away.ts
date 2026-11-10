@@ -1,5 +1,5 @@
 import { ITEMS, SKILL_BY_ID } from "./data";
-import { formatBundle, formatDuration } from "./format";
+import { formatBundle, formatDuration, formatNumber as num } from "./format";
 import { emptyReport, isQuiet, mergeReports } from "./report";
 import { GameState, ItemId, Report, SkillId } from "./types";
 
@@ -10,8 +10,6 @@ export function recordAway(s: GameState, report: Report): GameState {
 }
 
 export const clearAway = (s: GameState): GameState => (s.unseen ? { ...s, unseen: null } : s);
-
-const num = (n: number) => Math.round(n).toLocaleString("en-US");
 
 const HOUR_MS = 3_600_000;
 const perHour = (xp: number, ms: number) => (ms > 0 ? ` (${num((xp * HOUR_MS) / ms)}/h)` : "");

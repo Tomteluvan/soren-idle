@@ -1,4 +1,4 @@
-import { BUILDINGS, RIFT_YIELD, TASK_BY_ID, xpBonus, ITEMS } from "./data";
+import { BUILDINGS, yieldBonus, RIFT_YIELD, TASK_BY_ID, xpBonus, ITEMS } from "./data";
 import { onKill, refreshBoardIfDue } from "./bounty";
 import { levelFromXp } from "./levels";
 import { masteryLevel, poolBonus, POOL_SHARE, masteryXpPerCycle, masteryYield, hasMastery, nodeMaxHp } from "./mastery";
@@ -100,7 +100,8 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
     : modifiers(s, at).yield +
       masteryYield(masteryLevel(s, task)) +
       poolBonus(s, task.skill).yield +
-      RIFT_YIELD * s.launches;
+      RIFT_YIELD * s.launches +
+      yieldBonus(s);
   if (task.monster) {
     const damage = fightDamage(s, task, at);
     const wantsFood = () => s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);

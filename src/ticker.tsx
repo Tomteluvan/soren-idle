@@ -4,22 +4,18 @@ import { awayLines, recordAway } from "./engine/away";
 import { bountyTarget } from "./engine/bounty";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
 import { contactRemainingMs, count, levelOf, maxHp, stopTask } from "./engine/engine";
-import { formatBuffs, formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
+import { formatBuffs, formatCredits, formatDuration, formatReport, setCompactNumbers } from "./engine/format";
 import { ripeCount } from "./engine/hydroponics";
+import { notificationFor } from "./engine/notifications";
 import { update } from "./engine/storage";
 import { notify } from "./notify";
 
 export default function Command() {
   const { data, isLoading, revalidate } = usePromise(async () => {
     const result = await update(recordAway);
-    const { stoppedReason, completed, bounties } = result.report;
-    const bounty = bounties.length
-      ? `Bounty complete: +${bounties[0].marks} Marks`
-      : Object.keys(result.report.rare).length
-        ? `Rare find: ${formatBundle(result.report.rare)}`
-        : undefined;
-    if ((stoppedReason || completed || bounty) && getPreferenceValues<Preferences.Ticker>().notifications)
-      notify("Soren Idle", stoppedReason ?? completed ?? bounty ?? "");
+    setCompactNumbers(result.state.settings.compactNumbers);
+    const message = notificationFor(result.report, result.state.settings);
+    if (message && getPreferenceValues<Preferences.Ticker>().notifications) notify("Soren Idle", message);
     return result;
   });
 

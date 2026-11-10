@@ -1,9 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { BUILDING_BY_ID, PERKS, perkCost, perkLevel } from "../engine/data";
+import { BUILDING_BY_ID, PERKS, perkCost, perkLevel, RUN_MODS } from "../engine/data";
 import { canLaunch, starlightGain } from "../engine/prestige";
 import { GameState } from "../engine/types";
 
-export function Voyage(props: { state: GameState; onLaunch: () => void; onBuy: (id: string) => void }) {
+export function Voyage(props: {
+  state: GameState;
+  onLaunch: () => void;
+  onBuy: (id: string) => void;
+  onToggleMod: (id: string) => void;
+}) {
   const { state } = props;
   const ready = canLaunch(state);
   const gain = starlightGain(state);
@@ -22,10 +27,10 @@ export function Voyage(props: { state: GameState; onLaunch: () => void; onBuy: (
                   ? "The ship is ready. Launching starts the whole game over, and what you keep is listed below."
                   : `Build the ${BUILDING_BY_ID.rescue_ship.name} in Base first. It needs Engineering 95 and 2,000,000 credits.`,
                 "",
-                `**This launch earns ${gain} Starlight:** one for every 15 skill levels, two for every boss beaten, and five for getting out.`,
+                `**This launch earns ${gain} Starlight:** one for every 15 skill levels, two for every boss beaten, and five for getting out${state.mods.length ? `, and more for the modifiers on this run` : ""}.`,
                 "",
                 "**Reset:** skills, items, Base, gear, credits, Marks, bounties and Hydroponics.",
-                "**Kept:** Starlight, perks, lifetime stats and your settings, and a share of mastery with Muscle Memory.",
+                "**Kept:** Starlight, perks, lifetime stats and your settings, and a share of mastery with Muscle Memory. Modifiers picked below are in force on the next run.",
                 "",
                 `**Next run:** creatures are ${Math.round((state.launches + 1) * 10)}% stronger and every haul is ${(state.launches + 1) * 5}% bigger.`,
                 "",
@@ -41,6 +46,41 @@ export function Voyage(props: { state: GameState; onLaunch: () => void; onBuy: (
             </ActionPanel>
           }
         />
+      </List.Section>
+      <List.Section title="Next Run Modifiers" subtitle="Harder for more Starlight when you launch from it">
+        {RUN_MODS.map((mod) => {
+          const picked = state.nextMods.includes(mod.id);
+          return (
+            <List.Item
+              key={mod.id}
+              title={mod.name}
+              icon={picked ? Icon.CheckCircle : Icon.Circle}
+              accessories={[
+                {
+                  tag: {
+                    value: `+${Math.round(mod.bonus * 100)}% Starlight`,
+                    color: picked ? Color.Orange : Color.SecondaryText,
+                  },
+                },
+                ...(state.mods.includes(mod.id) ? [{ tag: "On now" }] : []),
+              ]}
+              detail={
+                <List.Item.Detail
+                  markdown={`# ${mod.name}\n${mod.description}\n\nWhen you launch from a run with this on, that launch earns ${Math.round(mod.bonus * 100)}% more Starlight. Picking it now starts your next run with it on.`}
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={picked ? "Drop for Next Run" : "Take for Next Run"}
+                    icon={Icon.Switch}
+                    onAction={() => props.onToggleMod(mod.id)}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
       <List.Section title="Perks" subtitle={`${state.starlight} Starlight`}>
         {PERKS.map((perk) => {

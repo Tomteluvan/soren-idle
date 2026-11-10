@@ -28,7 +28,8 @@ export const SKILL_ICON: Record<SkillId, Icon> = {
   stargazing: Icon.Stars,
 };
 
-export type Place = "base" | "equipment" | "trade" | "bounties" | "shop" | "inventory" | "voyage" | "stats";
+export type Place =
+  "base" | "equipment" | "trade" | "bounties" | "shop" | "inventory" | "voyage" | "stats" | "settings";
 
 /** The screens besides the skills, as they are listed on the main menu. */
 export const PLACES: { id: Place; title: string; icon: Icon; blurb: string }[] = [
@@ -60,4 +61,10 @@ export const PLACES: { id: Place; title: string; icon: Icon; blurb: string }[] =
     blurb: "Launch the Rescue Ship and spend Starlight on perks.",
   },
   { id: "stats", title: "Stats", icon: Icon.BarChart, blurb: "Lifetime numbers." },
+  {
+    id: "settings",
+    title: "Settings",
+    icon: Icon.Gear,
+    blurb: "Number format, notifications and save backup.",
+  },
 ];

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { PERK_BY_ID, riftScale, SAVE_VERSION, TASK_BY_ID } from "./data";
-import { advance, build, newGame, startTask, taskDurationMs, xpForLevel } from "./engine";
+import { advance, build, maxHp, modifiers, newGame, startTask, taskDurationMs, xpForLevel } from "./engine";
 import { migrateSave } from "./migrate";
-import { buyPerk, canLaunch, launch, starlightGain } from "./prestige";
+import { buyPerk, canLaunch, launch, starlightGain, toggleMod } from "./prestige";
 import { GameState } from "./types";
 
 const ready = (patch: Partial<GameState> = {}): GameState => ({
@@ -31,7 +31,7 @@ describe("launch", () => {
       xp: { ...newGame(0).xp, mining: xpForLevel(30) },
       perks: { xp: 2 },
       starlight: 7,
-      settings: { eatBelow: 0.5, foodPriority: "strongest" },
+      settings: { ...newGame(0).settings, eatBelow: 0.5, foodPriority: "strongest" },
     });
     s.stats.kills = 12;
     const { state, gain } = launch(s);
@@ -86,6 +86,52 @@ describe("perks", () => {
     expect(taskDurationMs(perked, task)).toBeLessThan(taskDurationMs(plain, task));
     const run = (s: GameState) => advance(startTask(s, task.id).state, 60_000).state.xp.salvaging as number;
     expect(run(perked)).toBeGreaterThan(run(plain));
+  });
+});
+
+describe("more perks", () => {
+  it("add HP, rare drop chance and bigger hauls", () => {
+    const plain = newGame(0);
+    const perked = { ...newGame(0), perks: { hp: 4, rare: 2, yield: 5 } };
+    expect(maxHp(perked)).toBe(maxHp(plain) + 20);
+    expect(modifiers(perked).rare).toBeCloseTo(1.1);
+    const run = (s: GameState) => advance(startTask(s, "salvage_hull").state, 600_000).state.inventory.scrap_metal ?? 0;
+    expect(run({ ...perked, buildings: { storage: 5 } })).toBeGreaterThan(run({ ...plain, buildings: { storage: 5 } }));
+  });
+
+  it("start a run with rations", () => {
+    expect(launch(ready({ perks: { rations: 2 } })).state.inventory).toEqual({ ration: 20 });
+  });
+});
+
+describe("run modifiers", () => {
+  it("are picked for the next run and dropped again", () => {
+    const one = toggleMod(newGame(0), "brutal").state;
+    expect(one.nextMods).toEqual(["brutal"]);
+    expect(one.mods).toEqual([]);
+    expect(toggleMod(one, "brutal").state.nextMods).toEqual([]);
+    expect(toggleMod(one, "nope").error).toBeDefined();
+  });
+
+  it("come into force on launch and stay picked", () => {
+    const { state } = launch(ready({ nextMods: ["brutal", "slow"] }));
+    expect(state.mods).toEqual(["brutal", "slow"]);
+    expect(state.nextMods).toEqual(["brutal", "slow"]);
+  });
+
+  it("make creatures stronger, tasks slower and rare drops scarcer", () => {
+    const hard = { ...newGame(0), mods: ["brutal", "slow", "thin"] };
+    expect(riftScale(hard)).toBeCloseTo(1.25);
+    const task = TASK_BY_ID.salvage_hull;
+    expect(taskDurationMs(hard, task)).toBe(Math.round(task.durationMs * 1.25));
+    expect(modifiers(hard).rare).toBe(0.5);
+  });
+
+  it("pay Starlight for the run they were on", () => {
+    const base = starlightGain(ready());
+    const hard = starlightGain(ready({ mods: ["brutal", "slow"] }));
+    expect(hard).toBe(Math.floor(base * 1.5));
+    expect(hard).toBeGreaterThan(base);
   });
 });
 

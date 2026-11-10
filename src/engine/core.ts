@@ -7,6 +7,9 @@ import {
   MAX_OFFLINE_MS,
   OFFLINE_BONUS_HOURS,
   speedBonus,
+  perkLevel,
+  rareBonus,
+  HP_PER_PERK,
   STORAGE_CAPS,
   SAVE_VERSION,
   SKILLS,
@@ -51,12 +54,22 @@ export function newGame(now = Date.now()): GameState {
     buildings: {},
     passive: {},
     keep: {},
-    settings: { eatBelow: 0, foodPriority: "weakest" },
+    settings: {
+      eatBelow: 0,
+      foodPriority: "weakest",
+      compactNumbers: false,
+      notifyStopped: true,
+      notifyFinished: true,
+      notifyBounty: true,
+      notifyRare: true,
+    },
     mastery: {},
     masteryPool: {},
     starlight: 0,
     perks: {},
     launches: 0,
+    mods: [],
+    nextMods: [],
     nodes: {},
     plots: [],
     hints: [],
@@ -88,7 +101,8 @@ export function maxHpFor(combatXp: number): number {
   return 30 + 5 * combatTier(levelFromXp(combatXp));
 }
 
-export const maxHp = (s: GameState) => maxHpFor(s.xp.combat) + 10 * buildingLevel(s, "shelter");
+export const maxHp = (s: GameState) =>
+  maxHpFor(s.xp.combat) + 10 * buildingLevel(s, "shelter") + HP_PER_PERK * perkLevel(s, "hp");
 
 // --- inventory --------------------------------------------------------------
 
@@ -282,7 +296,10 @@ export function modifiers(s: GameState, at = s.lastTick) {
     weaponType: dry ? undefined : weapon?.damageType,
     armorType: s.equipped.body && count(s, s.equipped.body) > 0 ? ITEMS[s.equipped.body].damageType : undefined,
     yield: (activeBuff(s, "yield", at)?.power ?? 1) * sky.reduce((m, i) => m * (i.constellation?.yield ?? 1), 1),
-    rare: owned.reduce((m, i) => m * (i.rareBonus ?? 1), 1) * sky.reduce((m, i) => m * (i.constellation?.rare ?? 1), 1),
+    rare:
+      rareBonus(s) *
+      owned.reduce((m, i) => m * (i.rareBonus ?? 1), 1) *
+      sky.reduce((m, i) => m * (i.constellation?.rare ?? 1), 1),
   };
 }
 

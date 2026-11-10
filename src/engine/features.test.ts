@@ -143,7 +143,10 @@ describe("lifetime totals", () => {
 describe("auto-eat settings", () => {
   const fighting = (hp: number, eatBelow: number) =>
     startTask(
-      withItems({ ration: 5, honey_ration: 5 }, { hp, settings: { eatBelow, foodPriority: "weakest" } }),
+      withItems(
+        { ration: 5, honey_ration: 5 },
+        { hp, settings: { ...newGame(0).settings, eatBelow, foodPriority: "weakest" } },
+      ),
       "fight_skitter",
     ).state;
 
